@@ -1,0 +1,16 @@
+[
+{
+  "modid" : "guncus",
+  "name" : "Gun Customization",
+  "url" : "http://www.minecraftforum.net/topic/1595719-",
+  "authors": [
+    "Stuuupiiid"
+  ],
+  "description": "Gun Customization (GunCus) allows you to create your own guns and to customize them with attatchments.",
+  "logoFile" : "/gc.png",
+  "updateUrl" : "http://www.minecraftforum.net/topic/1595719-",
+  "parent" : "",
+  "screenshots": [
+  ]
+}
+]
