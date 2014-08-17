@@ -106,7 +106,6 @@
 /* 101 */               world.playSoundAtEntity(entityPlayer, gun.soundN, 5.0F * (float)gun.soundModify, 1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
 /*    */             }
 /*    */             GunCusItemBullet bullet2;
-/*    */             GunCusItemBullet bullet2;
 /* 106 */             if (gun.magId != -1)
 /*    */             {
 /* 108 */               GunCusItemMag mag2 = (GunCusItemMag)Item.itemsList[gun.magId];

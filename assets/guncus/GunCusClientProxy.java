@@ -49,7 +49,6 @@
 /* 54 */           scope = scope2.sight;
 /*    */         }
 /*    */         String path;
-/*    */         String path;
 /* 59 */         if (gun.isOfficial)
 /*    */         {
 /* 61 */           path = "guncus:textures/sights/" + scope;

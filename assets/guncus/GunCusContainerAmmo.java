@@ -36,9 +36,9 @@
 /*  40 */         addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
 /*     */       }
 /*     */     }
-/*  43 */     for (var6 = 0; var6 < 9; var6++)
+/*  43 */     for (int var8 = 0; var8 < 9; var8++)
 /*     */     {
-/*  45 */       addSlotToContainer(new Slot(par1InventoryPlayer, var6, 8 + var6 * 18, 142));
+/*  45 */       addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
 /*     */     }
 /*  47 */     onCraftMatrixChanged(this.craftMatrix);
 /*     */   }
@@ -74,7 +74,8 @@
 /*  78 */       if ((bulletType == bullet.bulletType) && (pack.equals(bullet.pack)))
 /*     */       {
 /*  80 */         int damage = mag.getItemDamage();
-/*  81 */         for (int size = ammo.stackSize; 
+				int size = ammo.stackSize;
+/*  81 */         for (; 
 /*  82 */           (size > 0) && (damage > 0); size--)
 /*     */         {
 /*  84 */           damage--;

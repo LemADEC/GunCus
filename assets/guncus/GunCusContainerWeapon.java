@@ -27,7 +27,7 @@
 /*  31 */     this.actualItemID = 0;
 /*  32 */     if (GunCusItemGun.gunList.size() > 0)
 /*     */     {
-/*  34 */       this.actualItemID = ((GunCusItemGun)GunCusItemGun.gunList.get(0)).itemID;
+/*  34 */       this.actualItemID = GunCusItemGun.gunList.get(0).itemID;
 /*     */     }
 /*     */ 
 /*  37 */     this.worldObj = par2World;
@@ -46,9 +46,9 @@
 /*  51 */         addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
 /*     */       }
 /*     */     }
-/*  54 */     for (var6 = 0; var6 < 9; var6++)
+/*  54 */     for (int var8 = 0; var8 < 9; var8++)
 /*     */     {
-/*  56 */       addSlotToContainer(new Slot(par1InventoryPlayer, var6, 8 + var6 * 18, 142));
+/*  56 */       addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
 /*     */     }
 /*  58 */     onCraftMatrixChanged(this.craftMatrix);
 /*     */   }

@@ -21,7 +21,7 @@
 /*    */     }
 /*    */ 
 /* 26 */     par5++;
-/* 27 */     Block block = GunCusExplosives.mine;
+/* 27 */     Block block = GunCusExplosives.mineBlock;
 /*    */ 
 /* 29 */     if ((par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)) && (par2EntityPlayer.canPlayerEdit(par4, par5 + 1, par6, par7, par1ItemStack)))
 /*    */     {
@@ -30,7 +30,7 @@
 /* 33 */         return false;
 /*    */       }
 /*    */ 
-/* 37 */       par3World.setBlock(par4, par5, par6, GunCusExplosives.mine.blockID);
+/* 37 */       par3World.setBlock(par4, par5, par6, GunCusExplosives.mineBlock.blockID);
 /* 38 */       par1ItemStack.stackSize -= 1;
 /* 39 */       return true;
 /*    */     }

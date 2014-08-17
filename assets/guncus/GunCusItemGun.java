@@ -261,7 +261,6 @@
 /*     */ 
 /* 276 */         shoot(entityPlayer);
 /*     */         GunCusItemBullet bullet2;
-/*     */         GunCusItemBullet bullet2;
 /* 279 */         if (this.magId != -1)
 /*     */         {
 /* 281 */           GunCusItemMag mag2 = (GunCusItemMag)Item.itemsList[this.magId];
@@ -431,13 +430,23 @@
 /*     */ 
 /* 446 */     if (scoping)
 /*     */     {
-/*     */       EntityPlayer tmp97_96 = entityPlayer; tmp97_96.rotationPitch = ((float)(tmp97_96.rotationPitch - this.recModify * tmp97_96));
-/*     */       EntityPlayer tmp116_115 = entityPlayer; tmp116_115.rotationYaw = ((float)(tmp116_115.rotationYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 / 2.0F)));
+				// FIXME: decompiler failed badly here...
+/*     */       // EntityPlayer tmp97_96 = entityPlayer; tmp97_96.rotationPitch = ((float)(tmp97_96.rotationPitch - this.recModify * tmp97_96));
+/*     */       // EntityPlayer tmp116_115 = entityPlayer; tmp116_115.rotationYaw = ((float)(tmp116_115.rotationYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 / 2.0F)));
+				float tmpPitch = entityPlayer.rotationPitch;
+				float tmpYaw = entityPlayer.rotationYaw;
+/*     */       entityPlayer.rotationPitch = (float)(tmpPitch - this.recModify * tmpPitch);
+/*     */       entityPlayer.rotationYaw = (float)(tmpYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmpPitch / 2.0F : - tmpPitch / 2.0F));
 /*     */     }
 /*     */     else
 /*     */     {
-/*     */       EntityPlayer tmp159_158 = entityPlayer; tmp159_158.rotationPitch = ((float)(tmp159_158.rotationPitch - this.recModify * tmp97_96));
-/*     */       EntityPlayer tmp178_177 = entityPlayer; tmp178_177.rotationYaw = ((float)(tmp178_177.rotationYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 / 2.0F)));
+				// FIXME: decompiler failed badly here...
+/*     */       // EntityPlayer tmp159_158 = entityPlayer; tmp159_158.rotationPitch = ((float)(tmp159_158.rotationPitch - this.recModify * tmp97_96));
+/*     */       // EntityPlayer tmp178_177 = entityPlayer; tmp178_177.rotationYaw = ((float)(tmp178_177.rotationYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 / 2.0F)));
+				float tmpPitch = entityPlayer.rotationPitch;
+				float tmpYaw = entityPlayer.rotationYaw;
+/*     */       entityPlayer.rotationPitch = (float)(tmpPitch - this.recModify * tmpPitch);
+/*     */       entityPlayer.rotationYaw = (float)(tmpYaw - this.recModify * (Item.itemRand.nextBoolean() ? tmpPitch / 2.0F : - tmpPitch / 2.0F));
 /*     */     }
 /*     */   }
 /*     */ 

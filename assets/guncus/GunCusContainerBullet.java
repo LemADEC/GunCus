@@ -39,9 +39,9 @@
 /*  43 */         addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
 /*     */       }
 /*     */     }
-/*  46 */     for (var6 = 0; var6 < 9; var6++)
+/*  46 */     for (int var8 = 0; var8 < 9; var8++)
 /*     */     {
-/*  48 */       addSlotToContainer(new Slot(par1InventoryPlayer, var6, 8 + var6 * 18, 142));
+/*  48 */       addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
 /*     */     }
 /*  50 */     onCraftMatrixChanged(this.craftMatrix);
 /*     */   }
