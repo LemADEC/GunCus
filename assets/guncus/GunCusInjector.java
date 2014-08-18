@@ -1,36 +1,25 @@
-/*    */ package assets.guncus;
-/*    */ 
-/*    */ import java.io.File;
-/*    */ import java.lang.reflect.Method;
-/*    */ import java.net.URI;
-/*    */ 
-/*    */ public class GunCusInjector
-/*    */ {
-/*    */   public ClassLoader classloader;
-/*    */   public Method method;
-/*    */ 
-/*    */   public GunCusInjector(ClassLoader classloader, Method method)
-/*    */   {
-/* 21 */     this.classloader = classloader;
-/* 22 */     this.method = method;
-/*    */   }
-/*    */ 
-/*    */   public void addToClassPath(File file)
-/*    */   {
-/*    */     try
-/*    */     {
-/* 29 */       this.method.invoke(this.classloader, new Object[] { file.toURI().toURL() });
-/*    */     }
-/*    */     catch (NullPointerException e) {
-/*    */     }
-/*    */     catch (Exception e) {
-/* 34 */       GunCus.log("Failed to add some textures to class path");
-/* 35 */       e.printStackTrace();
-/*    */     }
-/*    */   }
-/*    */ }
+package assets.guncus;
 
-/* Location:           C:\Users\Nate\Desktop\Mod\GunCusClass.zip
- * Qualified Name:     assets.guncus.GunCusInjector
- * JD-Core Version:    0.6.2
- */
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URI;
+
+public class GunCusInjector {
+	public ClassLoader classloader;
+	public Method method;
+
+	public GunCusInjector(ClassLoader classloader, Method method) {
+		this.classloader = classloader;
+		this.method = method;
+	}
+
+	public void addToClassPath(File file) {
+		try {
+			this.method.invoke(this.classloader, new Object[] { file.toURI().toURL() });
+		} catch (NullPointerException e) {
+		} catch (Exception e) {
+			GunCus.log("Failed to add some textures to class path");
+			e.printStackTrace();
+		}
+	}
+}
