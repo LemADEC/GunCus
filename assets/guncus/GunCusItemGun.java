@@ -185,174 +185,176 @@ public class GunCusItemGun extends Item {
 	public void doUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		EntityPlayer entityPlayer = client.thePlayer;
-		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
-				&& (entityPlayer.inventory.getCurrentItem().getItem() == this)) {
-			ItemStack mag = null;
+		if (entityPlayer == null || entityPlayer.getHeldItem() == null || !entityPlayer.getHeldItem().isItemEqual(itemStack)) {
+			return;
+		}
+		ItemStack mag = null;
 
-			if (this.magId != -1) {
+		if (this.magId != -1) {
+			// search for a damaged magazine first
+			for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
+				mag = entityPlayer.inventory.getStackInSlot(v1);
+				if ((mag != null)
+						&& (mag.getItem().itemID == this.magId)
+						&& (mag.isItemDamaged())
+						&& (mag.getItemDamage() < mag.getMaxDamage())) {
+					break;
+				}
+				mag = null;
+			}
+
+			if (mag == null) {
+				// search for a full magazine
 				for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
-					if ((entityPlayer.inventory.getStackInSlot(v1) != null)
-							&& (entityPlayer.inventory.getStackInSlot(v1).getItem().itemID == this.magId)
-							&& (entityPlayer.inventory.getStackInSlot(v1).isItemDamaged())
-							&& (entityPlayer.inventory.getStackInSlot(v1).getItemDamage() < entityPlayer.inventory
-									.getStackInSlot(v1).getMaxDamage())) {
-						mag = entityPlayer.inventory.getStackInSlot(v1);
+					mag = entityPlayer.inventory.getStackInSlot(v1);
+					if ((mag != null)
+							&& (mag.getItem().itemID == this.magId)
+							&& (!mag.isItemDamaged())) {
 						break;
 					}
-				}
-
-				if (mag == null) {
-					for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
-						if ((entityPlayer.inventory.getStackInSlot(v1) != null)
-								&& (entityPlayer.inventory.getStackInSlot(v1).getItem().itemID == this.magId)
-								&& (!entityPlayer.inventory.getStackInSlot(v1).isItemDamaged())) {
-							mag = entityPlayer.inventory.getStackInSlot(v1);
-							break;
-						}
-					}
+					mag = null;
 				}
 			}
+		}
 
-			if ((GunCus.shootTime <= 0)
-					&& (Mouse.isButtonDown(0))
-					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-					&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320.itemID)) || (entityPlayer.capabilities.isCreativeMode))
-					&& (this.tubing)) {
-				GunCus.shootTime += 95;
-				tube(entityPlayer);
-				recoilTube(entityPlayer);
-				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload_tube", 1.0F, 1.0F);
-			}
-			if ((GunCus.shootTime <= 0)
-					&& (Mouse.isButtonDown(0))
-					&& (!this.shot)
-					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-					&& ((mag != null) || (entityPlayer.capabilities.isCreativeMode) || ((this.bullets != null) && (entityPlayer.inventory
-							.hasItem(((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
-									.get(this.bullets[this.actualBullet])).itemID)))) && (!this.tubing)) {
-				GunCus.shootTime += this.delay;
-				this.reloadBurst = 0;
+		if ((GunCus.shootTime <= 0)
+				&& (Mouse.isButtonDown(0))
+				&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+				&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320.itemID)) || (entityPlayer.capabilities.isCreativeMode))
+				&& (this.tubing)) {
+			GunCus.shootTime += 95;
+			tube(entityPlayer);
+			recoilTube(entityPlayer);
+			Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload_tube", 1.0F, 1.0F);
+		}
+		if ((GunCus.shootTime <= 0)
+				&& (Mouse.isButtonDown(0))
+				&& (!this.shot)
+				&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+				&& ( (mag != null) || (entityPlayer.capabilities.isCreativeMode)
+				  || ((this.bullets != null)
+					&& (entityPlayer.inventory.hasItem( (GunCusItemBullet.bulletsList.get(this.pack)).get(this.bullets[this.actualBullet]).itemID ))))
+				&& (!this.tubing)) {
+			GunCus.shootTime += this.delay;
+			this.reloadBurst = 0;
 
-				if (this.actualType == 0) {
-					this.shot = true;
-				} else if (this.actualType == 1) {
-					if (this.burstCounter < 2) {
-						this.burstCounter += 1;
-					} else {
-						this.burstCounter = 0;
-						this.shot = true;
-					}
-				}
-
-				shoot(entityPlayer);
-				GunCusItemBullet bullet2;
-				if (this.magId != -1) {
-					GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[this.magId];
-					bullet2 = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
-							.get(mag2.bulletType);
+			if (this.actualType == 0) {
+				this.shot = true;
+			} else if (this.actualType == 1) {
+				if (this.burstCounter < 2) {
+					this.burstCounter += 1;
 				} else {
-					bullet2 = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
-							.get(this.bullets[this.actualBullet]);
-				}
-
-				float damage1 = this.damage * bullet2.damage;
-
-				double newAcc = damage1;
-				if (Mouse.isButtonDown(1)) {
-					newAcc *= 0.9D;
-				} else if (hasLaserPointer(itemStack.getItemDamage())) {
-					newAcc *= 0.9D;
-				}
-
-				if (hasRifledBarrel(itemStack.getItemDamage())) {
-					newAcc *= 0.8D;
-				}
-
-				if ((hasBipod(itemStack.getItemDamage())) && (canUseBipod(entityPlayer))) {
-					newAcc *= 0.65D;
-				}
-
-				if (GunCus.accuracy > newAcc) {
-					GunCus.accuracy -= newAcc;
-				}
-
-				recoil(entityPlayer, itemStack.getItemDamage(), Mouse.isButtonDown(1), damage1);
-			}
-
-			if ((this.shot) && (!Mouse.isButtonDown(0))) {
-				this.shot = false;
-			}
-
-			if (!hasM320(itemStack.getItemDamage())) {
-				this.tubing = false;
-			}
-
-			if ((this.burstCounter > 0) && (!Mouse.isButtonDown(0))) {
-				this.reloadBurst += 1;
-				if (this.reloadBurst >= this.delay * 3) {
 					this.burstCounter = 0;
-					this.reloadBurst = 0;
+					this.shot = true;
 				}
 			}
 
-			if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(47))
-					&& (GunCus.switchTime <= 0) && (!canHaveStraightPullBolt())) {
-				switch (this.shootType) {
+			shoot(entityPlayer);
+			GunCusItemBullet bullet2;
+			if (this.magId != -1) {
+				GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[this.magId];
+				bullet2 = GunCusItemBullet.bulletsList.get(this.pack).get(mag2.bulletType);
+			} else {
+				bullet2 = GunCusItemBullet.bulletsList.get(this.pack).get(this.bullets[this.actualBullet]);
+			}
+
+			float damage1 = this.damage * bullet2.damage;
+
+			double newAcc = damage1;
+			if (Mouse.isButtonDown(1)) {
+				newAcc *= 0.9D;
+			} else if (hasLaserPointer(itemStack.getItemDamage())) {
+				newAcc *= 0.9D;
+			}
+
+			if (hasRifledBarrel(itemStack.getItemDamage())) {
+				newAcc *= 0.8D;
+			}
+
+			if ((hasBipod(itemStack.getItemDamage())) && (canUseBipod(entityPlayer))) {
+				newAcc *= 0.65D;
+			}
+
+			if (GunCus.accuracy > newAcc) {
+				GunCus.accuracy -= newAcc;
+			}
+
+			recoil(entityPlayer, itemStack.getItemDamage(), Mouse.isButtonDown(1), damage1);
+		}
+
+		if ((this.shot) && (!Mouse.isButtonDown(0))) {
+			this.shot = false;
+		}
+
+		if (!hasM320(itemStack.getItemDamage())) {
+			this.tubing = false;
+		}
+
+		if ((this.burstCounter > 0) && (!Mouse.isButtonDown(0))) {
+			this.reloadBurst += 1;
+			if (this.reloadBurst >= this.delay * 3) {
+				this.burstCounter = 0;
+				this.reloadBurst = 0;
+			}
+		}
+
+		if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(47))
+				&& (GunCus.switchTime <= 0) && (!canHaveStraightPullBolt())) {
+			switch (this.shootType) {
+			case 0:
+				entityPlayer.addChatMessage("The Fire Mode Of This Gun Can Not Be Changed!");
+				break;
+			case 1:
+				switch (this.actualType) {
 				case 0:
-					entityPlayer.addChatMessage("The Fire Mode Of This Gun Can Not Be Changed!");
+					entityPlayer.addChatMessage("Switched To Burst Mode!");
+					this.actualType = 1;
 					break;
 				case 1:
-					switch (this.actualType) {
-					case 0:
-						entityPlayer.addChatMessage("Switched To Burst Mode!");
-						this.actualType = 1;
-						break;
-					case 1:
-						entityPlayer.addChatMessage("Switched To Single Mode!");
-						this.actualType = 0;
-					}
+					entityPlayer.addChatMessage("Switched To Single Mode!");
+					this.actualType = 0;
+				}
 
+				break;
+			case 2:
+				switch (this.actualType) {
+				case 0:
+					entityPlayer.addChatMessage("Switched To Burst Mode!");
+					this.actualType = 1;
+					break;
+				case 1:
+					entityPlayer.addChatMessage("Switched To Auto Mode!");
+					this.actualType = 2;
 					break;
 				case 2:
-					switch (this.actualType) {
-					case 0:
-						entityPlayer.addChatMessage("Switched To Burst Mode!");
-						this.actualType = 1;
-						break;
-					case 1:
-						entityPlayer.addChatMessage("Switched To Auto Mode!");
-						this.actualType = 2;
-						break;
-					case 2:
-						entityPlayer.addChatMessage("Switched To Single Mode!");
-						this.actualType = 0;
-					}
-
-					break;
+					entityPlayer.addChatMessage("Switched To Single Mode!");
+					this.actualType = 0;
 				}
 
-				GunCus.switchTime = 20;
-			} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(46))
-					&& (GunCus.switchTime <= 0) && (hasM320(itemStack.getItemDamage()))) {
-				GunCus.switchTime = 20;
-				if (this.tubing) {
-					entityPlayer.addChatMessage("You are no longer using the M320!");
-					this.tubing = false;
-				} else {
-					entityPlayer.addChatMessage("You are now using the M320!");
-					this.tubing = true;
-				}
-			} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(34))
-					&& (GunCus.switchTime <= 0) && (this.bullets != null) && (this.bullets.length > 1)) {
-				GunCus.switchTime = 20;
-				this.actualBullet += 1;
-				if (this.actualBullet >= this.bullets.length) {
-					this.actualBullet = 0;
-				}
-				entityPlayer.addChatMessage("You are now using \""
-						+ ((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
-								.get(this.bullets[this.actualBullet])).name + "\" ammunition!");
+				break;
 			}
+
+			GunCus.switchTime = 20;
+		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(46))
+				&& (GunCus.switchTime <= 0) && (hasM320(itemStack.getItemDamage()))) {
+			GunCus.switchTime = 20;
+			if (this.tubing) {
+				entityPlayer.addChatMessage("You are no longer using the M320!");
+				this.tubing = false;
+			} else {
+				entityPlayer.addChatMessage("You are now using the M320!");
+				this.tubing = true;
+			}
+		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(34))
+				&& (GunCus.switchTime <= 0) && (this.bullets != null) && (this.bullets.length > 1)) {
+			GunCus.switchTime = 20;
+			this.actualBullet += 1;
+			if (this.actualBullet >= this.bullets.length) {
+				this.actualBullet = 0;
+			}
+			entityPlayer.addChatMessage("You are now using \""
+					+ ((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
+							.get(this.bullets[this.actualBullet])).name + "\" ammunition!");
 		}
 	}
 
@@ -377,7 +379,7 @@ public class GunCusItemGun extends Item {
 		// FIXME grip should have an effect...
 		float strength = (float) (damage1 / 6.0F * this.recModify);
 
-		if ((hasBipod(metadata)) && (canUseBipod(entityPlayer))) {
+		if (hasBipod(metadata) && canUseBipod(entityPlayer)) {
 			strength /= 3.0F;
 		} else if (hasGrip(metadata)) {
 			strength *= 0.8F;
@@ -386,8 +388,12 @@ public class GunCusItemGun extends Item {
 		}
 
 		// scoping has no effect
-		entityPlayer.rotationPitch = entityPlayer.rotationPitch - strength * (0.8F + 0.4F * entityPlayer.rand.nextFloat());
-		entityPlayer.rotationYaw = entityPlayer.rotationYaw - strength * (entityPlayer.rand.nextBoolean() ? -0.5F : +0.5F) * (0.8F + 0.4F * entityPlayer.rand.nextFloat());
+		entityPlayer.addChatMessage("hasBipod " + hasBipod(metadata) + ", canUseBipod " + canUseBipod(entityPlayer)
+				+ ", hasGrip " + hasGrip(metadata)
+				+ ", hasImprovedGrip " + hasImprovedGrip(metadata) + ", canHaveImprovedGrip" + canHaveImprovedGrip()
+				+ ", damage is " + damage1 + " => strength is " + strength);
+		entityPlayer.rotationPitch = entityPlayer.rotationPitch - strength * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
+		entityPlayer.rotationYaw = entityPlayer.rotationYaw - strength * (entityPlayer.worldObj.rand.nextBoolean() ? -0.5F : +0.5F) * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
 	}
 
 	private void recoilTube(EntityPlayer entityPlayer) {
@@ -464,12 +470,12 @@ public class GunCusItemGun extends Item {
 		return testForBarrelId(4, metadata);
 	}
 
-	public boolean testForAttachId(int attach1, int metadata) {
-		for (int v1 = 0; v1 < this.attach.length; v1++) {
-			if (this.attach[v1] == attach1) {
-				for (int v2 = (this.scopes.length + 1) * (v1 + 1); v2 < (this.scopes.length + 1) * (v1 + 2); v2++) {
-					for (int v3 = 0; v3 <= this.barrel.length; v3++) {
-						if (metadata == v2 + v3 * this.factor) {
+	public boolean testForAttachId(int attachToTest, int metadata) {
+		for (int attachIndex = 0; attachIndex < this.attach.length; attachIndex++) {
+			if (this.attach[attachIndex] == attachToTest) {
+				for (int scopeIndex = (this.scopes.length + 1) * (attachIndex + 1); scopeIndex < (this.scopes.length + 1) * (attachIndex + 2); scopeIndex++) {
+					for (int barrelIndex = 0; barrelIndex <= this.barrel.length; barrelIndex++) {
+						if (metadata == scopeIndex + barrelIndex * this.factor) {
 							return true;
 						}
 					}
