@@ -45,7 +45,7 @@ import org.lwjgl.input.Keyboard;
 @NetworkMod(channels = { "guncus" }, clientSideRequired = true, serverSideRequired = false, packetHandler = GunCusPacketHandler.class)
 public class GunCus {
 
-	@SidedProxy(clientSide = "assets.guncus.GunCusClientProxy", serverSide = "assets.guncus.GunCusCommonProxy")
+	@SidedProxy(clientSide = "stuuupiiid.guncus.GunCusClientProxy", serverSide = "stuuupiiid.guncus.GunCusCommonProxy")
 	public static GunCusCommonProxy commonProxy = new GunCusCommonProxy();
 	public static Configuration config;
 	public static boolean blockDamage;

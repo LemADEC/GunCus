@@ -59,10 +59,8 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 				if (GunCus.zoomLevel > newZoom) {
 					GunCus.zoomLevel = newZoom;
 				}
-				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer,
-						Float.valueOf(GunCus.zoomLevel), new String[] { "cameraZoom", GunCus.cameraZoom });
-				ScaledResolution scale = new ScaledResolution(client.gameSettings, client.displayWidth,
-						client.displayHeight);
+				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
+				ScaledResolution scale = new ScaledResolution(client.gameSettings, client.displayWidth,	client.displayHeight);
 				int xCenter = scale.getScaledWidth() / 2;
 				int offset = scale.getScaledHeight() * 2;
 				client.getTextureManager().bindTexture(
@@ -75,14 +73,13 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 				tessellator.addVertexWithUV(xCenter - offset, 0.0D, -100.0D, 0.0D, 0.0D);
 				tessellator.draw();
 			} else {
-				if (GunCus.zoomLevel > 1.0D) {
-					GunCus.zoomLevel = (float) (GunCus.zoomLevel - 2.5D);
+				if (GunCus.zoomLevel > 1.0F) {
+					GunCus.zoomLevel = GunCus.zoomLevel - 2.5F;
 				}
-				if (GunCus.zoomLevel < 1.0D) {
+				if (GunCus.zoomLevel < 1.0F) {
 					GunCus.zoomLevel = 1.0F;
 				}
-				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer,
-						Float.valueOf(GunCus.zoomLevel), new String[] { "cameraZoom", GunCus.cameraZoom });
+				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
 			}
 
 			if ((entityPlayer.inventory.getCurrentItem() != null)
