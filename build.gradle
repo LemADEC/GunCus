@@ -23,20 +23,20 @@ configFile.withReader {
     ext.config = new ConfigSlurper().parse prop
 }
 
-group = "address"
+group = "stuuupiiid"
 version = config.mod_version
-archivesBaseName = "Title"
+archivesBaseName = "GunCustomization-TDK"
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
     assetDir = "run/assets"
 
     replaceIn "lib/Reference.java"
-    if (project.hasProperty("abriv_signature"))
-        replace "@FINGERPRINT@", project.abriv_signature
+    if (project.hasProperty("guncus_signature"))
+        replace "@FINGERPRINT@", project.guncus_signature
 }
 
-version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?: BNum}"
+version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?: 10}"
 
 processResources {
     // replace stuff in the files we want.
@@ -62,21 +62,21 @@ processResources {
 if (!project.hasProperty("keystore_location")) // keystore stuff
     ext.keystore_location = "."
 
-if (!project.hasProperty("abriv_keystore_alias")) // keystore stuff
-    ext.abriv_keystore_alias = ""
+if (!project.hasProperty("guncus_keystore_alias")) // keystore stuff
+    ext.guncus_keystore_alias = ""
 
 if (!project.hasProperty("keystore_password")) // keystore stuff
     ext.keystore_password = ""
 
-if (!project.hasProperty("abriv_release_loc")) // release loc
-    ext.abriv_release_loc = "."
+if (!project.hasProperty("guncus_release_loc")) // release loc
+    ext.guncus_release_loc = "."
 else
-    ext.abriv_release_loc = abriv_release_loc.replace('{MC}', minecraft.version).replace('{MODVER}', config.mod_version).replace('{BUILD}', "${System.getenv().BUILD_NUMBER}")
+    ext.guncus_release_loc = guncus_release_loc.replace('{MC}', minecraft.version).replace('{MODVER}', config.mod_version).replace('{BUILD}', "${System.getenv().BUILD_NUMBER}")
 
 task signJar(dependsOn: "reobf") {
     inputs.file jar.getArchivePath()
     inputs.file keystore_location
-    inputs.property "abriv_keystore_alias", abriv_keystore_alias
+    inputs.property "guncus_keystore_alias", guncus_keystore_alias
     inputs.property "keystore_password", keystore_password
     outputs.file jar.getArchivePath()
 
@@ -91,7 +91,7 @@ task signJar(dependsOn: "reobf") {
                 destDir: jar.destinationDir,
                 jar: jar.getArchivePath(),
                 keystore: keystore_location,
-                alias: abriv_keystore_alias,
+                alias: guncus_keystore_alias,
                 storepass: keystore_password
         )
     }
@@ -101,7 +101,7 @@ task release(type: Copy) {
     dependsOn "signJar"
 
     from project.tasks.jar.destinationDir
-    into project.file(project.abriv_release_loc)
+    into project.file(project.guncus_release_loc)
 
     eachFile { file ->
         logger.info "copying ${file}"
@@ -109,6 +109,6 @@ task release(type: Copy) {
 
     // only if the release location isn't empty.
     onlyIf {
-        return project.abriv_release_loc != "."
+        return project.guncus_release_loc != "."
     }
 }

@@ -66,8 +66,7 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 				int xCenter = scale.getScaledWidth() / 2;
 				int offset = scale.getScaledHeight() * 2;
 				client.getTextureManager().bindTexture(
-						new ResourceLocation((!gun.usingDefault ? path : "guncus:textures/items/gun_default/sight")
-								+ ".png"));
+						new ResourceLocation((!gun.usingDefault ? path : "guncus:textures/sights/default") + ".png"));
 				Tessellator tessellator = Tessellator.instance;
 				tessellator.startDrawingQuads();
 				tessellator.addVertexWithUV(xCenter - offset, scale.getScaledHeight(), -100.0D, 0.0D, 1.0D);
