@@ -15,14 +15,13 @@ import net.minecraft.server.MinecraftServer;
 public class GunCusConnectionHandler implements IConnectionHandler {
 	@Override
 	public void playerLoggedIn(Player player, NetHandler netHandler, INetworkManager manager) {
-		for (int v1 = 0; v1 < GunCus.instance.guns.length; v1++) {
-			if (GunCus.instance.guns[v1] == 1) {
-				int id = v1;
-				int shootType = GunCus.instance.gunShoots[v1];
-				int delay = GunCus.instance.gunDelays[v1];
-				int magId = GunCus.instance.gunMags[v1];
-				int bullets = GunCus.instance.gunBullets[v1];
-				int rec = GunCus.instance.gunRecoils[v1];
+		for (int id = 0; id < GunCus.instance.guns.length; id++) {
+			if (GunCus.instance.guns[id] == 1) {
+				int shootType = GunCus.instance.gunShoots[id];
+				int delay = GunCus.instance.gunDelays[id];
+				int magId = GunCus.instance.gunMags[id];
+				int bullets = GunCus.instance.gunBullets[id];
+				int rec = GunCus.instance.gunRecoils[id];
 
 				ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 				bytes.writeShort(14);

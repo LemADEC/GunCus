@@ -69,9 +69,6 @@ public class GunCusContainerGun extends Container {
 
 		if ((mid != null) && (mid.getItem() != null) && ((mid.getItem() instanceof GunCusItemGun))) {
 			gun = (GunCusItemGun) mid.getItem();
-		}
-
-		if (gun != null) {
 			int metadata = mid.getItemDamage();
 
 			int scope1 = 0;
@@ -184,16 +181,12 @@ public class GunCusContainerGun extends Container {
 		int extra = 0;
 		GunCusItemGun gun = null;
 
-		if (mid != null) {
-			if ((mid.getItem() != null) && ((mid.getItem() instanceof GunCusItemGun))) {
-				gun = (GunCusItemGun) mid.getItem();
+		if (mid != null && (mid.getItem() != null) && (mid.getItem() instanceof GunCusItemGun)) {
+			gun = (GunCusItemGun) mid.getItem();
 
-				extra = gun.attachAsMetadataFactor(extra1);
-				bar = gun.barrelAsMetadataFactor(bar1);
-			}
-		}
+			extra = gun.attachAsMetadataFactor(extra1);
+			bar = gun.barrelAsMetadataFactor(bar1);
 
-		if (gun != null) {
 			int metadata = mid.getItemDamage();
 
 			if ((scope > 0) && (gun.getZoom(metadata) <= 0) && (gun.testIfCanHaveScope(scope))) {

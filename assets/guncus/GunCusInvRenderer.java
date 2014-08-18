@@ -23,7 +23,7 @@ public class GunCusInvRenderer implements IItemRenderer {
 	}
 
 	@Override
-	public void renderItem(IItemRenderer.ItemRenderType type, ItemStack itemStack, Object[] data) {	// FIXME
+	public void renderItem(IItemRenderer.ItemRenderType type, ItemStack itemStack, Object... data) {
 		GunCusItemGun gun = (GunCusItemGun) itemStack.getItem();
 		Icon icon = itemStack.getIconIndex();
 		renderItem.renderIcon(0, 0, icon, 16, 16);

@@ -58,7 +58,7 @@ public class GunCusExplosives {
 		rpg = new GunCusExplosivesRPG(rpgID, "guncusexplosives:rpg", "GC RPG-7V2", "gcrpg", rpgm.itemID);
 		smaw = new GunCusExplosivesRPG(smawID, "guncusexplosives:smaw", "GC SMAW", "gcsmaw", smawm.itemID);
 
-		GameRegistry.registerBlock(mineBlock);
+		GameRegistry.registerBlock(mineBlock, mineBlock.getUnlocalizedName());
 	}
 
 	@Mod.EventHandler

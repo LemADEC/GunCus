@@ -375,46 +375,19 @@ public class GunCusItemGun extends Item {
 
 	private void recoil(EntityPlayer entityPlayer, int metadata, boolean scoping, double damage1) {
 		// FIXME grip should have an effect...
-		float strength = (float) damage1 / 6.0F;
+		float strength = (float) (damage1 / 6.0F * this.recModify);
 
 		if ((hasBipod(metadata)) && (canUseBipod(entityPlayer))) {
 			strength /= 3.0F;
 		} else if (hasGrip(metadata)) {
-			strength /= 5.0F;
-			strength *= 4.0F;
+			strength *= 0.8F;
 		} else if ((!hasImprovedGrip(metadata)) && (canHaveImprovedGrip())) {
-			strength *= 3.0F;
-			strength /= 2.0F;
+			strength *= 1.5F;
 		}
 
-		if (scoping) {
-			// FIXME: decompiler failed badly here...
-			// EntityPlayer tmp97_96 = entityPlayer; tmp97_96.rotationPitch =
-			// ((float)(tmp97_96.rotationPitch - this.recModify * tmp97_96));
-			// EntityPlayer tmp116_115 = entityPlayer; tmp116_115.rotationYaw =
-			// ((float)(tmp116_115.rotationYaw - this.recModify *
-			// (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 /
-			// 2.0F)));
-			float tmpPitch = entityPlayer.rotationPitch;
-			float tmpYaw = entityPlayer.rotationYaw;
-			entityPlayer.rotationPitch = (float) (tmpPitch - this.recModify * tmpPitch);
-			entityPlayer.rotationYaw = (float) (tmpYaw - this.recModify
-					* (Item.itemRand.nextBoolean() ? tmpPitch / 2.0F : -tmpPitch / 2.0F));
-		} else {
-			// FIXME: decompiler failed badly here...
-			// EntityPlayer tmp159_158 = entityPlayer; tmp159_158.rotationPitch
-			// = ((float)(tmp159_158.rotationPitch - this.recModify *
-			// tmp97_96));
-			// EntityPlayer tmp178_177 = entityPlayer; tmp178_177.rotationYaw =
-			// ((float)(tmp178_177.rotationYaw - this.recModify *
-			// (Item.itemRand.nextBoolean() ? tmp97_96 / 2.0F : -tmp97_96 /
-			// 2.0F)));
-			float tmpPitch = entityPlayer.rotationPitch;
-			float tmpYaw = entityPlayer.rotationYaw;
-			entityPlayer.rotationPitch = (float) (tmpPitch - this.recModify * tmpPitch);
-			entityPlayer.rotationYaw = (float) (tmpYaw - this.recModify
-					* (Item.itemRand.nextBoolean() ? tmpPitch / 2.0F : -tmpPitch / 2.0F));
-		}
+		// scoping has no effect
+		entityPlayer.rotationPitch = entityPlayer.rotationPitch - strength * (0.8F + 0.4F * entityPlayer.rand.nextFloat());
+		entityPlayer.rotationYaw = entityPlayer.rotationYaw - strength * (entityPlayer.rand.nextBoolean() ? -0.5F : +0.5F) * (0.8F + 0.4F * entityPlayer.rand.nextFloat());
 	}
 
 	private void recoilTube(EntityPlayer entityPlayer) {
