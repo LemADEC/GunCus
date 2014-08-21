@@ -2,16 +2,19 @@ package stuuupiiid.guncus;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -27,6 +30,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -376,7 +380,6 @@ public class GunCusItemGun extends Item {
 	}
 
 	private void recoil(EntityPlayer entityPlayer, int metadata, boolean scoping, double damage1) {
-		// FIXME grip should have an effect...
 		float strength = (float) (damage1 / 6.0F * this.recModify);
 
 		if (hasBipod(metadata) && canUseBipod(entityPlayer)) {
@@ -388,10 +391,6 @@ public class GunCusItemGun extends Item {
 		}
 
 		// scoping has no effect
-		entityPlayer.addChatMessage("hasBipod " + hasBipod(metadata) + ", canUseBipod " + canUseBipod(entityPlayer)
-				+ ", hasGrip " + hasGrip(metadata)
-				+ ", hasImprovedGrip " + hasImprovedGrip(metadata) + ", canHaveImprovedGrip" + canHaveImprovedGrip()
-				+ ", damage is " + damage1 + " => strength is " + strength);
 		entityPlayer.rotationPitch = entityPlayer.rotationPitch - strength * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
 		entityPlayer.rotationYaw = entityPlayer.rotationYaw - strength * (entityPlayer.worldObj.rand.nextBoolean() ? -0.5F : +0.5F) * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
 	}

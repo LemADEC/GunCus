@@ -39,18 +39,17 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 					&& (client.currentScreen == null) && (client.gameSettings.thirdPersonView == 0)) {
 				GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 				int scopeId = gun.getZoom(entityPlayer.inventory.getCurrentItem().getItemDamage());
-				String scope = "";
+
+				String path;
 				float newZoom = gun.zoom + 0.1F;
 				if (scopeId > 0) {
-					GunCusScope scope2 = (GunCusScope) GunCus.scope.metadatas[(scopeId - 1)];
-					newZoom = scope2.zoom + 0.1F;
-					scope = scope2.sight;
-				}
-				String path;
-				if (gun.isOfficial) {
-					path = "guncus:textures/sights/" + scope;
+					GunCusScope scope = (GunCusScope) GunCus.scope.metadatas[(scopeId - 1)];
+					newZoom = scope.zoom + 0.1F;
+					path = "guncus:textures/sights/" + scope.sight + ".png";
+				} else if (gun.usingDefault) {
+						path = "guncus:textures/sights/default.png";
 				} else {
-					path = "guncus:textures/sights/" + scope;
+					path = gun.iconName.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
 				}
 
 				if (GunCus.zoomLevel < newZoom) {
@@ -63,8 +62,7 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 				ScaledResolution scale = new ScaledResolution(client.gameSettings, client.displayWidth,	client.displayHeight);
 				int xCenter = scale.getScaledWidth() / 2;
 				int offset = scale.getScaledHeight() * 2;
-				client.getTextureManager().bindTexture(
-						new ResourceLocation((!gun.usingDefault ? path : "guncus:textures/sights/default") + ".png"));
+				client.getTextureManager().bindTexture(new ResourceLocation(path));
 				Tessellator tessellator = Tessellator.instance;
 				tessellator.startDrawingQuads();
 				tessellator.addVertexWithUV(xCenter - offset, scale.getScaledHeight(), -100.0D, 0.0D, 1.0D);
