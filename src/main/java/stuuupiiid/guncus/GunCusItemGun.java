@@ -53,7 +53,6 @@ public class GunCusItemGun extends Item {
 	public int ingotsMag;
 	public int ingots;
 	public int field_77767_aC;
-	public String sightTexture;
 	protected double recModify;
 	public double soundModify;
 	public boolean isOfficial;

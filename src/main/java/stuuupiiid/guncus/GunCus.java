@@ -62,8 +62,8 @@ public class GunCus {
 	public static boolean startedBreathing;
 	public static boolean breathing = false;
 	public static int breathCounter = 0;
-	public static int reloading = 0;
-	public static int hitmarker;
+	// public static int reloading = 0;
+	public static int hitmarker = 0;
 	public static String cameraZoom = "Y";
 	public static int actualItemID = 0;
 	public static int actual = 0;

@@ -44,7 +44,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 			int packetType = data.readInt();
 			int acc = data.readInt();
 
-			if (packetType == 1) {
+			if (packetType == 1) {// ItemGun shoot(accuracy)
 				if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
 						&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun))) {
 					GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
@@ -129,20 +129,19 @@ public class GunCusPacketHandler implements IPacketHandler {
 							world.spawnEntityInWorld(bullet);
 						}
 
-						if ((!entityPlayer.capabilities.isCreativeMode) && (mag != null)
-								&& (mag.getItemDamage() >= mag.getMaxDamage())) {
+						if ((!entityPlayer.capabilities.isCreativeMode) && (mag != null) && (mag.getItemDamage() >= mag.getMaxDamage())) {
+							// reloading...
 							ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 							bytes.writeInt(2);
 							bytes.writeInt(0);
-							PacketDispatcher.sendPacketToPlayer(
-									new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) entityPlayer);
+							PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) entityPlayer);
 						}
 					}
 				}
-			} else if (packetType == 2) {
+			} else if (packetType == 2) {// Reloading
 				GunCus.shootTime += 90;
 				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload", 1.0F, 1.0F);
-			} else if (packetType == 3) {
+			} else if (packetType == 3) {// GuiGun
 				GunCusContainerGun container = (GunCusContainerGun) entityPlayer.openContainer;
 
 				if (acc == 0) {
@@ -150,7 +149,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				} else if (acc == 1) {
 					container.build();
 				}
-			} else if (packetType == 4) {
+			} else if (packetType == 4) {// GuiAmmo
 				GunCusContainerAmmo container = (GunCusContainerAmmo) entityPlayer.openContainer;
 
 				if (acc == 0) {
@@ -158,7 +157,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				} else if (acc == 1) {
 					container.empty();
 				}
-			} else if (packetType == 5) {
+			} else if (packetType == 5) {// GuiAmmoMan
 				GunCusContainerAmmoMan container = (GunCusContainerAmmoMan) entityPlayer.openContainer;
 
 				if (acc == 0) {
@@ -166,7 +165,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				} else if (acc == 1) {
 					container.empty();
 				}
-			} else if (packetType == 6) {
+			} else if (packetType == 6) {// GuiMag
 				GunCusContainerMag container = (GunCusContainerMag) entityPlayer.openContainer;
 
 				if (acc == 0) {
@@ -177,7 +176,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 						entityPlayer.addChatMessage(container.info()[1]);
 					}
 				}
-			} else if (packetType == 7) {
+			} else if (packetType == 7) {// GuiBullet
 				GunCusContainerBullet container = (GunCusContainerBullet) entityPlayer.openContainer;
 
 				if (acc == 0) {
@@ -188,7 +187,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 						entityPlayer.addChatMessage(container.info()[1]);
 					}
 				}
-			} else if (packetType == 8) {
+			} else if (packetType == 8) {// ItemAttachment (tube accurrency)
 				if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)) {
 					if ((entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun)) {
 						GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
@@ -221,7 +220,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 						}
 					}
 				}
-			} else if (packetType == 9) {
+			} else if (packetType == 9) {// GuiWeapon
 				GunCusContainerWeapon container = (GunCusContainerWeapon) entityPlayer.openContainer;
 
 				if (acc == 1) {
@@ -251,7 +250,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				} else if (acc == 2) {
 					container.create();
 				}
-			} else if (packetType == 10) {
+			} else if (packetType == 10) {// bullet
 				GunCus.hitmarker = 5;
 				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:inground", 1.0F, 1.0F);
 			} else if (packetType == 11) {
@@ -267,7 +266,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				int z = data.readInt();
 
 				world.destroyBlock(x, y, z, true);
-			} else if (packetType == 13) {
+			} else if (packetType == 13) {// doKnife
 				world.playSoundAtEntity(entityPlayer, "guncus:knife", 1.0F, 1.0F);
 				EntityLiving target = null;
 				double acD = 2.0D;
@@ -301,7 +300,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				if ((target != null) && (acD <= 2.0001D)) {
 					target.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), 20.0F);
 				}
-			} else if (packetType == 14) {
+			} else if (packetType == 14) {// playerLoggedIn
 				int packetType2 = data.readShort();
 
 				int var1 = data.readShort();
