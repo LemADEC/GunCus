@@ -2,6 +2,7 @@ package stuuupiiid.guncus;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -19,14 +20,15 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
@@ -39,6 +41,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
+
 import org.lwjgl.input.Keyboard;
 
 @Mod(modid = "GunCus", name = "Gun Customization", version = "1.7.10 BETA v2")
@@ -130,7 +133,7 @@ public class GunCus {
 		int b = config1.get("Gun Customization IDs", "Barrels", 13004).getInt(13004);
 		int a = config1.get("Gun Customization IDs", "Attachments", 13005).getInt(13005);
 
-		int ammo1 = config1.get("Gun Customization IDs", "GC40x46mm SR Frag", 13006).getInt(13006);
+		int ammo1 = config1.get("Gun Customization IDs", "GC 40x46mm SR Frag", 13006).getInt(13006);
 		config1.save();
 
 		blockWeapon = new GunCusBlockWeapon(b1);
