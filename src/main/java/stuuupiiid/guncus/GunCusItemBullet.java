@@ -16,8 +16,8 @@ public class GunCusItemBullet extends GunCusItem {
 	public float damage;
 	public int spray = 100;
 	public int split = 1;
-	public List<Integer> effects = new ArrayList();
 	public HashMap<Integer, Float> effectModifiers = new HashMap();
+	public HashMap<Integer, Integer> effectAmplifiers = new HashMap();
 	public double gravity = 1.0D;
 
 	public static HashMap<String, List<GunCusItemBullet>> bulletsList = new HashMap();
@@ -51,7 +51,7 @@ public class GunCusItemBullet extends GunCusItem {
 	}
 
 	public boolean hasEffects() {
-		return this.effects.size() > 0;
+		return this.effectModifiers.size() > 0;
 	}
 
 	public GunCusItemBullet setSplit(int split) {
@@ -64,19 +64,9 @@ public class GunCusItemBullet extends GunCusItem {
 		return this;
 	}
 
-	public GunCusItemBullet addEffect(int eff, float modify) {
-		addEffect(eff);
-		setEffectModifier(eff, modify);
-		return this;
-	}
-
-	public GunCusItemBullet addEffect(int eff) {
-		this.effects.add(Integer.valueOf(eff));
-		return this;
-	}
-
-	public GunCusItemBullet setEffectModifier(int eff, float modify) {
-		this.effectModifiers.put(Integer.valueOf(eff), Float.valueOf(modify));
+	public GunCusItemBullet addEffect(int effect, float modifier, int amplifier) {
+		this.effectModifiers.put(effect, modifier);
+		this.effectAmplifiers.put(effect, amplifier);
 		return this;
 	}
 

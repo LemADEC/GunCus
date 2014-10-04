@@ -2,14 +2,17 @@ package stuuupiiid.guncus;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.relauncher.Side;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -31,127 +34,118 @@ import net.minecraft.util.Vec3Pool;
 import net.minecraft.world.World;
 
 public class GunCusEntityBullet extends EntityArrow implements IProjectile {
-	private int field_70247_d = -1;
-	private int field_70248_e = -1;
-	private int field_70245_f = -1;
-	private int field_70246_g = 0;
-	private int field_70253_h = 0;
-	private boolean field_70254_i = false;
-	public EntityPlayer field_70250_c;
-	private int field_70252_j;
-	private int field_70257_an = 0;
-	private float field_70255_ao;
-	private int field_70256_ap;
+	private int blockX = -1;
+	private int blockY = -1;
+	private int blockZ = -1;
+	private boolean blockCollision = false;
+	public EntityPlayer playerEntity;
+	private int ticksCount = 0;
+	private float damage;
 	private int liveTime = 300;
 	public int ticks = 0;
-	public boolean gravity = false;
-	public double gravityMod = 1.0D;
-
-	public List<Integer> effects = new ArrayList();
-	public HashMap<Integer, Float> effectModifiers = new HashMap();
+	public boolean hasBarrel = false;
+	double bulletGravity = 1.0D;
+	public HashMap<Integer, Float> bulletEffectModifiers = new HashMap();
+	public HashMap<Integer, Integer> bulletEffectAmplifiers = new HashMap();
 
 	public GunCusEntityBullet(World world) {
 		super(world);
 		setSize(0.5F, 0.5F);
 	}
 
-	public GunCusEntityBullet(World par1World, EntityPlayer par2EntityPlayer, float speed, float damage, int accuracy) {
+	public GunCusEntityBullet(World par1World, EntityPlayer par2EntityPlayer, float speed, float parDamage, int accuracy) {
 		super(par1World);
-		this.renderDistanceWeight = 10.0D;
-		this.field_70250_c = par2EntityPlayer;
+		renderDistanceWeight = 10.0D;
+		playerEntity = par2EntityPlayer;
 		setSize(0.5F, 0.5F);
 		setLocationAndAngles(par2EntityPlayer.posX, par2EntityPlayer.posY + par2EntityPlayer.getEyeHeight(), par2EntityPlayer.posZ, par2EntityPlayer.rotationYaw, par2EntityPlayer.rotationPitch);
-		this.posX -= MathHelper.cos(this.rotationYaw / 180.0F * 3.141593F) * 0.16F;
-		this.posY -= 0.1000000014901161D;
-		this.posZ -= MathHelper.sin(this.rotationYaw / 180.0F * 3.141593F) * 0.16F;
+		posX -= MathHelper.cos(rotationYaw / 180.0F * 3.141593F) * 0.16F;
+		posY -= 0.1000000014901161D;
+		posZ -= MathHelper.sin(rotationYaw / 180.0F * 3.141593F) * 0.16F;
 		setPosition(par2EntityPlayer.posX, par2EntityPlayer.posY + par2EntityPlayer.getEyeHeight(), par2EntityPlayer.posZ);
-		this.yOffset = 0.0F;
-		this.motionX = (-MathHelper.sin(this.rotationYaw / 180.0F * 3.141593F) * MathHelper.cos(this.rotationPitch / 180.0F * 3.141593F));
-		this.motionZ = (MathHelper.cos(this.rotationYaw / 180.0F * 3.141593F) * MathHelper.cos(this.rotationPitch / 180.0F * 3.141593F));
-		this.motionY = (-MathHelper.sin(this.rotationPitch / 180.0F * 3.141593F));
+		yOffset = 0.0F;
+		motionX = (-MathHelper.sin(rotationYaw   / 180.0F * 3.141593F) * MathHelper.cos(rotationPitch / 180.0F * 3.141593F));
+		motionZ = ( MathHelper.cos(rotationYaw   / 180.0F * 3.141593F) * MathHelper.cos(rotationPitch / 180.0F * 3.141593F));
+		motionY = (-MathHelper.sin(rotationPitch / 180.0F * 3.141593F));
 		if (accuracy < 100) {
-			int accX1 = this.rand.nextInt(101 - accuracy);
-			int accY1 = this.rand.nextInt(101 - accuracy);
-			int accZ1 = this.rand.nextInt(101 - accuracy);
-			double accX2 = accX1 - this.rand.nextInt(accX1 + 1) * 2;
-			double accY2 = accY1 - this.rand.nextInt(accY1 + 1) * 2;
-			double accZ2 = accZ1 - this.rand.nextInt(accZ1 + 1) * 2;
-			this.motionX += accX2 / 370.0D;
-			this.motionY += accY2 / 370.0D;
-			this.motionZ += accZ2 / 370.0D;
+			int accX1 = rand.nextInt(101 - accuracy);
+			int accY1 = rand.nextInt(101 - accuracy);
+			int accZ1 = rand.nextInt(101 - accuracy);
+			double accX2 = accX1 - rand.nextInt(accX1 + 1) * 2;
+			double accY2 = accY1 - rand.nextInt(accY1 + 1) * 2;
+			double accZ2 = accZ1 - rand.nextInt(accZ1 + 1) * 2;
+			motionX += accX2 / 370.0D;
+			motionY += accY2 / 370.0D;
+			motionZ += accZ2 / 370.0D;
 		}
-		this.field_70256_ap = 0;
-		this.field_70255_ao = damage;
-		setThrowableHeading(this.motionX, this.motionY, this.motionZ, speed, 1.0F);
+		damage = parDamage;
+		setThrowableHeading(motionX, motionY, motionZ, speed, 1.0F);
 	}
-
-	public GunCusEntityBullet setEffects(List effects, HashMap<Integer, Float> modifies) {
-		this.effects = effects;
-		this.effectModifiers = modifies;
-		return this;
-	}
-
-	public GunCusEntityBullet setGravityMod(double modifier) {
-		this.gravityMod = modifier;
-		return this;
-	}
-
+	
 	public GunCusEntityBullet setLowerGravity(boolean flag) {
-		this.gravity = flag;
+		hasBarrel = flag;
 		return this;
 	}
-
+	
+	public GunCusEntityBullet setBullet(GunCusItemBullet parBullet) {
+		bulletGravity = parBullet.gravity;
+		bulletEffectModifiers = parBullet.effectModifiers;
+		bulletEffectAmplifiers = parBullet.effectAmplifiers;
+		return this;
+	}
+	
 	@Override
 	public void onUpdate() {
 		super.onEntityUpdate();
 
-		this.ticks += 1;
+		ticks += 1;
 
-		this.liveTime -= 1;
+		liveTime -= 1;
 
-		if (this.liveTime <= 0) {
+		if (liveTime <= 0) {
 			setDead();
 		}
 
-		if ((this.prevRotationPitch == 0.0F) && (this.prevRotationYaw == 0.0F)) {
-			float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.prevRotationYaw = (this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / 3.141592653589793D));
-			this.prevRotationPitch = (this.rotationPitch = (float) (Math.atan2(this.motionY, f) * 180.0D / 3.141592653589793D));
+		if ((prevRotationPitch == 0.0F) && (prevRotationYaw == 0.0F)) {
+			float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+			prevRotationYaw = (rotationYaw = (float) (Math.atan2(motionX, motionZ) * 180.0D / Math.PI));
+			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f) * 180.0D / Math.PI));
 		}
 
-		int i = this.worldObj.getBlockId(this.field_70247_d, this.field_70248_e, this.field_70245_f);
+		int blockId = worldObj.getBlockId(blockX, blockY, blockZ);
 
-		if ((i > 0) && (i != 20) && (i != 30) && (i != 89) && (i != 102)) {
-			Block.blocksList[i].setBlockBoundsBasedOnState(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f);
-			AxisAlignedBB axisalignedbb = Block.blocksList[i].getCollisionBoundingBoxFromPool(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f);
+		// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
+		if ((blockId > 0) && (blockId != 20) && (blockId != 30) && (blockId != 89) && (blockId != 102)) {
+			Block.blocksList[blockId].setBlockBoundsBasedOnState(worldObj, blockX, blockY, blockZ);
+			AxisAlignedBB axisalignedbb = Block.blocksList[blockId].getCollisionBoundingBoxFromPool(worldObj, blockX, blockY, blockZ);
 
-			if ((axisalignedbb != null) && (axisalignedbb.isVecInside(this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ)))) {
-				this.field_70254_i = true;
+			if ((axisalignedbb != null) && (axisalignedbb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ)))) {
+				this.blockCollision = true;
 			}
 		}
 
-		if (this.field_70254_i) {
+		if (this.blockCollision) {
 			onInGround();
 		} else {
-			this.field_70257_an += 1;
-			Vec3 vec3 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);
-			Vec3 vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-			MovingObjectPosition movingobjectposition = this.worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
-			vec3 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);
-			vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			ticksCount += 1;
+			Vec3 vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
+			Vec3 vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
+			MovingObjectPosition movingobjectposition = worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
+			vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
+			vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
 
 			if (movingobjectposition != null) {
-				vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+				vec31 = worldObj.getWorldVec3Pool().getVecFromPool(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
 			}
 
 			Entity entity = null;
-			List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+			List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
 			double d0 = 0.0D;
 
 			for (int l = 0; l < list.size(); l++) {
 				Entity entity1 = (Entity) list.get(l);
 
-				if ((entity1.canBeCollidedWith()) && ((entity1 != this.field_70250_c) || (this.field_70257_an >= 5))) {
+				if ((entity1.canBeCollidedWith()) && ((entity1 != playerEntity) || (ticksCount >= 5))) {
 					float f1 = 0.3F;
 					AxisAlignedBB axisalignedbb1 = entity1.boundingBox.expand(f1, f1, f1);
 					MovingObjectPosition movingobjectposition1 = axisalignedbb1.calculateIntercept(vec3, vec31);
@@ -174,25 +168,24 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			if ((movingobjectposition != null) && (movingobjectposition.entityHit != null) && ((movingobjectposition.entityHit instanceof EntityPlayer))) {
 				EntityPlayer entityplayer = (EntityPlayer) movingobjectposition.entityHit;
 
-				if ((entityplayer.capabilities.disableDamage) || (((this.field_70250_c instanceof EntityPlayer)) && (!this.field_70250_c.canAttackPlayer(entityplayer)))) {
+				if ((entityplayer.capabilities.disableDamage) || ((playerEntity != null) && (!playerEntity.canAttackPlayer(entityplayer)))) {
 					movingobjectposition = null;
 				}
-
 			}
 
 			if (movingobjectposition != null) {
-				if ((movingobjectposition.entityHit != null) && (this.ticks >= 1)) {
-					this.field_70254_i = true;
+				if ((movingobjectposition.entityHit != null) && (ticks >= 1)) {
+					blockCollision = true;
 					DamageSource damagesource = null;
 
-					if (this.field_70250_c != null) {
-						damagesource = DamageSource.causePlayerDamage(this.field_70250_c);
+					if (playerEntity != null) {
+						damagesource = DamageSource.causePlayerDamage(playerEntity);
 					} else {
 						damagesource = DamageSource.causeArrowDamage(this, this);
 					}
 
-					if ((this.field_70255_ao > 0.0F) && (movingobjectposition.entityHit.attackEntityFrom(damagesource, this.field_70255_ao))) {
-						if (((movingobjectposition.entityHit instanceof EntityLiving)) && (!movingobjectposition.entityHit.isDead)) {
+					if ((damage > 0.0F) && (movingobjectposition.entityHit.attackEntityFrom(damagesource, damage))) {
+						if (((movingobjectposition.entityHit instanceof EntityLiving)) && (!movingobjectposition.entityHit.isDead) && (damage > 0.0F)) {
 							EntityLiving entityliving = (EntityLiving) movingobjectposition.entityHit;
 							entityliving.hurtResistantTime = 0;
 						}
@@ -201,76 +194,77 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 						ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 						bytes.writeInt(10);
 						bytes.writeInt(0);
-						PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) this.field_70250_c);
+						PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) playerEntity);
 					}
 
 					hitEntity(movingobjectposition.entityHit);
 				} else {
-					this.field_70247_d = movingobjectposition.blockX;
-					this.field_70248_e = movingobjectposition.blockY;
-					this.field_70245_f = movingobjectposition.blockZ;
-					this.field_70246_g = this.worldObj.getBlockId(this.field_70247_d, this.field_70248_e, this.field_70245_f);
-					if ((this.field_70246_g == 20) || (this.field_70246_g == 30) || (this.field_70246_g == 89) || (this.field_70246_g == 102)) {
-						GunCus.removeBlockServer(this.field_70250_c, MathHelper.floor_double(this.field_70247_d), MathHelper.floor_double(this.field_70248_e),
-								MathHelper.floor_double(this.field_70245_f));
-					} else if (this.field_70246_g != 0) {
-						this.field_70253_h = this.worldObj.getBlockMetadata(this.field_70247_d, this.field_70248_e, this.field_70245_f);
-						this.motionX = ((float) (movingobjectposition.hitVec.xCoord - this.posX));
-						this.motionY = ((float) (movingobjectposition.hitVec.yCoord - this.posY));
-						this.motionZ = ((float) (movingobjectposition.hitVec.zCoord - this.posZ));
-						float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-						this.posX -= this.motionX / f2 * 0.0500000007450581D;
-						this.posY -= this.motionY / f2 * 0.0500000007450581D;
-						this.posZ -= this.motionZ / f2 * 0.0500000007450581D;
+					blockX = movingobjectposition.blockX;
+					blockY = movingobjectposition.blockY;
+					blockZ = movingobjectposition.blockZ;
+					blockId = worldObj.getBlockId(blockX, blockY, blockZ);
+					if ((blockId == 20) || (blockId == 30) || (blockId == 89) || (blockId == 102)) {
+						GunCus.removeBlockServer(playerEntity, MathHelper.floor_double(blockX), MathHelper.floor_double(blockY), MathHelper.floor_double(blockZ));
+					} else if (blockId != 0) {
+						// int blockMetadata =
+						// this.worldObj.getBlockMetadata(blockX, blockY,
+						// blockZ);
+						motionX = ((float) (movingobjectposition.hitVec.xCoord - posX));
+						motionY = ((float) (movingobjectposition.hitVec.yCoord - posY));
+						motionZ = ((float) (movingobjectposition.hitVec.zCoord - posZ));
+						float f2 = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+						posX -= motionX / f2 * 0.05D;
+						posY -= motionY / f2 * 0.05D;
+						posZ -= motionZ / f2 * 0.05D;
 						setIsCritical(false);
-						this.field_70254_i = true;
-						Block.blocksList[this.field_70246_g].onEntityCollidedWithBlock(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f, this);
+						blockCollision = true;
+						Block.blocksList[blockId].onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
 					}
 				}
 			}
 
-			this.posX += this.motionX;
-			this.posY += this.motionY;
-			this.posZ += this.motionZ;
-			float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.rotationYaw = ((float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / 3.141592653589793D));
+			posX += motionX;
+			posY += motionY;
+			posZ += motionZ;
+			float f2 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+			rotationYaw = ((float) (Math.atan2(motionX, motionZ) * 180.0D / Math.PI));
 
-			for (this.rotationPitch = ((float) (Math.atan2(this.motionY, f2) * 180.0D / 3.141592653589793D)); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
+			for (rotationPitch = ((float) (Math.atan2(motionY, f2) * 180.0D / Math.PI)); rotationPitch - prevRotationPitch < -180.0F; prevRotationPitch -= 360.0F)
 				;
-			while (this.rotationPitch - this.prevRotationPitch >= 180.0F) {
-				this.prevRotationPitch += 360.0F;
+			while (rotationPitch - prevRotationPitch >= 180.0F) {
+				prevRotationPitch += 360.0F;
 			}
 
-			while (this.rotationYaw - this.prevRotationYaw < -180.0F) {
-				this.prevRotationYaw -= 360.0F;
+			while (rotationYaw - prevRotationYaw < -180.0F) {
+				prevRotationYaw -= 360.0F;
 			}
 
-			while (this.rotationYaw - this.prevRotationYaw >= 180.0F) {
-				this.prevRotationYaw += 360.0F;
+			while (rotationYaw - prevRotationYaw >= 180.0F) {
+				prevRotationYaw += 360.0F;
 			}
 
-			this.rotationPitch = (this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F);
-			this.rotationYaw = (this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F);
+			rotationPitch = (prevRotationPitch + (rotationPitch - prevRotationPitch) * 0.2F);
+			rotationYaw = (prevRotationYaw + (rotationYaw - prevRotationYaw) * 0.2F);
 			float f4 = 0.99F;
 			// float f1 = 0.05F;
 
 			if (isInWater()) {
 				for (int j1 = 0; j1 < 4; j1++) {
 					float f3 = 0.25F;
-					this.worldObj.spawnParticle("bubble", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, this.motionX, this.motionY, this.motionZ);
+					worldObj.spawnParticle("bubble", posX - motionX * f3, posY - motionY * f3, posZ - motionZ * f3, motionX, motionY, motionZ);
 				}
 
 				f4 = 0.8F;
 			}
 
-			this.motionX *= f4;
-			this.motionY *= f4;
-			this.motionZ *= f4;
-			this.motionY -= (this.gravity ? 0.014D : 0.02D) * this.gravityMod;
-			setPosition(this.posX, this.posY, this.posZ);
+			motionX *= f4;
+			motionY *= f4;
+			motionZ *= f4;
+			motionY -= (hasBarrel ? 0.014D : 0.02D) * bulletGravity;
+			setPosition(posX, posY, posZ);
 			doBlockCollisions();
 
-			if (this.field_70254_i) {
+			if (blockCollision) {
 				onInGround();
 			}
 		}
@@ -278,12 +272,12 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 
 	@Override
 	protected void doBlockCollisions() {
-		int i = MathHelper.floor_double(this.boundingBox.minX + 0.001D);
-		int j = MathHelper.floor_double(this.boundingBox.minY + 0.001D);
-		int k = MathHelper.floor_double(this.boundingBox.minZ + 0.001D);
-		int l = MathHelper.floor_double(this.boundingBox.maxX - 0.001D);
-		int i1 = MathHelper.floor_double(this.boundingBox.maxY - 0.001D);
-		int j1 = MathHelper.floor_double(this.boundingBox.maxZ - 0.001D);
+		int i = MathHelper.floor_double(boundingBox.minX + 0.001D);
+		int j = MathHelper.floor_double(boundingBox.minY + 0.001D);
+		int k = MathHelper.floor_double(boundingBox.minZ + 0.001D);
+		int l = MathHelper.floor_double(boundingBox.maxX - 0.001D);
+		int i1 = MathHelper.floor_double(boundingBox.maxY - 0.001D);
+		int j1 = MathHelper.floor_double(boundingBox.maxZ - 0.001D);
 
 		if (this.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
 			for (int k1 = i; k1 <= l; k1++) {
@@ -300,49 +294,55 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 		}
 	}
 
-	public void hitEntity(Entity entity2) {
-		if ((FMLCommonHandler.instance().getEffectiveSide().isServer()) && ((entity2 instanceof EntityLivingBase))) {
-			EntityLivingBase entity = (EntityLivingBase) entity2;
+	public void hitEntity(Entity parEntity) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer() && (parEntity instanceof EntityLivingBase)) {
+			EntityLivingBase entity = (EntityLivingBase) parEntity;
 
-			if (this.effects.contains(Integer.valueOf(1))) {
-				entity.addPotionEffect(new PotionEffect(Potion.poison.id, MathHelper.floor_double(this.effectModifiers.get(Integer.valueOf(1)).floatValue()) * 20, 0));
+			if (bulletEffectModifiers.containsKey(1)) {
+				entity.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(bulletEffectModifiers.get(1)) * 20, 0));
 			}
 
-			if (this.effects.contains(Integer.valueOf(2))) {
-				entity.addPotionEffect(new PotionEffect(Potion.confusion.id, MathHelper.floor_double(this.effectModifiers.get(Integer.valueOf(2)).floatValue()) * 20, 0));
+			if (bulletEffectModifiers.containsKey(2)) {
+				entity.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)Math.floor(bulletEffectModifiers.get(2)) * 20, 0));
 			}
 
-			if (this.effects.contains(Integer.valueOf(3))) {
-				entity.setFire(MathHelper.floor_double(this.effectModifiers.get(Integer.valueOf(3)).floatValue()));
+			if (bulletEffectModifiers.containsKey(3)) {
+				entity.setFire((int)Math.floor(bulletEffectModifiers.get(3)));
 			}
 
-			if (this.effects.contains(Integer.valueOf(7))) {
-				entity.addPotionEffect(new PotionEffect(Potion.blindness.id, MathHelper.floor_double(this.effectModifiers.get(Integer.valueOf(7)).floatValue()) * 20, 0));
+			if (bulletEffectModifiers.containsKey(7)) {
+				entity.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)Math.floor(bulletEffectModifiers.get(7)) * 20, 0));
 			}
 
-			if (this.effects.contains(Integer.valueOf(6))) {
-				entity.heal(this.effectModifiers.get(Integer.valueOf(6)).floatValue());
+			if (bulletEffectModifiers.containsKey(6)) {
+				entity.heal(bulletEffectModifiers.get(6).floatValue());
+			}
+
+			if (bulletEffectModifiers.containsKey(8)) {// instant damage / harm
+				entity.addPotionEffect(new PotionEffect(Potion.harm.id, 1, (int)Math.floor(bulletEffectModifiers.get(8))));
+			}
+
+			if (bulletEffectModifiers.containsKey(9)) {// weaken / negative resistance (20% damage increased per level)
+				entity.addPotionEffect(new PotionEffect(Potion.resistance.id, (int)Math.floor(bulletEffectModifiers.get(8)), - bulletEffectAmplifiers.get(8)));
 			}
 		}
 	}
 
 	public void onInGround() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			if (this.effects.contains(Integer.valueOf(4))) {
-				this.worldObj.createExplosion(this.field_70250_c, this.posX, this.posY, this.posZ, this.effectModifiers.get(Integer.valueOf(4)).floatValue(), GunCus.blockDamage);
+			if (bulletEffectModifiers.containsKey(4)) {
+				worldObj.createExplosion(playerEntity, posX, posY, posZ, bulletEffectModifiers.get(4), GunCus.blockDamage);
 			}
 
-			if (this.effects.contains(Integer.valueOf(5))) {
-				this.worldObj.createExplosion(this.field_70250_c, this.posX, this.posY, this.posZ, this.effectModifiers.get(Integer.valueOf(5)).floatValue(), false);
+			if (bulletEffectModifiers.containsKey(5)) {
+				worldObj.createExplosion(playerEntity, posX, posY, posZ, bulletEffectModifiers.get(5), false);
 			}
 
-			if ((this.effects.contains(Integer.valueOf(3))) && (this.field_70248_e > 0)) {
-				if (this.worldObj.isAirBlock(this.field_70247_d, this.field_70248_e + 1, this.field_70245_f)) {
-					this.worldObj.setBlock(this.field_70247_d, this.field_70248_e + 1, this.field_70245_f, Block.fire.blockID);
-				}
-
-				if (this.worldObj.isAirBlock(this.field_70247_d, this.field_70248_e, this.field_70245_f)) {
-					this.worldObj.setBlock(this.field_70247_d, this.field_70248_e, this.field_70245_f, Block.fire.blockID);
+			if ((bulletEffectModifiers.containsKey(3)) && (blockY > 0)) {
+				if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
+					worldObj.setBlock(blockX, blockY + 1, blockZ, Block.fire.blockID);
+				} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {
+					worldObj.setBlock(blockX, blockY, blockZ, Block.fire.blockID);
 				}
 			}
 
