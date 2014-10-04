@@ -3,7 +3,9 @@ package stuuupiiid.guncus;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.IScheduledTickHandler;
 import cpw.mods.fml.common.TickType;
+
 import java.util.EnumSet;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;
@@ -11,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.ItemStack;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -69,6 +72,9 @@ public class GunCusTickHandlerClient implements IScheduledTickHandler {
 						GunCus.shootTime -= 1;
 					}
 				}
+			}
+			if (GunCus.shootTime <= 0) {
+				GunCus.reloading = false;
 			}
 
 			if ((entityPlayer.motionY + 0.07840000152587891D != 0.0D) && (GunCus.accuracy > 35.0D)) {
