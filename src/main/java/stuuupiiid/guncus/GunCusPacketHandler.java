@@ -1,11 +1,14 @@
 package stuuupiiid.guncus;
 
 import stuuupiiid.guncusexplosives.GunCusExplosivesRPG;
+
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;
@@ -44,7 +48,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 			int packetType = data.readInt();
 			int acc = data.readInt();
 
-			if (packetType == 1) {// ItemGun shoot(accuracy)
+			if (packetType == 1) {// ItemGun shoot(accuracy) client->server
 				if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
 						&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun))) {
 					GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
@@ -100,20 +104,20 @@ public class GunCusPacketHandler implements IPacketHandler {
 							world.playSoundAtEntity(entityPlayer, gun.soundN, 5.0F * (float) gun.soundModify,
 									1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
 						}
-						GunCusItemBullet bullet2;
+						GunCusItemBullet bulletItem;
 						if (gun.magId != -1) {
 							GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[gun.magId];
-							bullet2 = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack))
+							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack))
 									.get(mag2.bulletType);
 						} else {
-							bullet2 = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(var1);
+							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(var1);
 						}
 
-						if (acc > bullet2.spray) {
-							acc = bullet2.spray;
+						if (acc > bulletItem.spray) {
+							acc = bulletItem.spray;
 						}
 
-						float damage = gun.damage * bullet2.damage;
+						float damage = gun.damage * bulletItem.damage;
 
 						if (gun.hasHeavyBarrel(metadata)) {
 							damage += 2.0F;
@@ -122,11 +126,11 @@ public class GunCusPacketHandler implements IPacketHandler {
 							damage += 1.0F;
 						}
 
-						for (int v1 = 0; v1 < bullet2.split; v1++) {
-							GunCusEntityBullet bullet = new GunCusEntityBullet(world, entityPlayer, 10.0F, damage, acc)
-									.setLowerGravity(gun.hasPolygonalBarrel(metadata)).setGravityMod(bullet2.gravity)
-									.setEffects(bullet2.effects, bullet2.effectModifiers);
-							world.spawnEntityInWorld(bullet);
+						for (int v1 = 0; v1 < bulletItem.split; v1++) {
+							GunCusEntityBullet bulletEntity = new GunCusEntityBullet(world, entityPlayer, 10.0F, damage, acc)
+									.setLowerGravity(gun.hasPolygonalBarrel(metadata))
+									.setBullet(bulletItem);
+							world.spawnEntityInWorld(bulletEntity);
 						}
 
 						if ((!entityPlayer.capabilities.isCreativeMode) && (mag != null) && (mag.getItemDamage() >= mag.getMaxDamage())) {
@@ -138,7 +142,8 @@ public class GunCusPacketHandler implements IPacketHandler {
 						}
 					}
 				}
-			} else if (packetType == 2) {// Reloading
+			} else if (packetType == 2) {// Reloading (server->client)
+				GunCus.reloading = true;
 				GunCus.shootTime += 90;
 				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload", 1.0F, 1.0F);
 			} else if (packetType == 3) {// GuiGun
@@ -240,8 +245,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 					bytes.writeInt(0);
 					bytes.writeInt(actual);
 					bytes.writeInt(GunCusItemGun.gunList.get(actual).itemID);
-					PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()),
-							(Player) entityPlayer);
+					PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) entityPlayer);
 				} else if (acc == 0) {
 					entityPlayer.addChatMessage(container.info()[0]);
 					if (container.info()[1] != null) {
@@ -340,14 +344,12 @@ public class GunCusPacketHandler implements IPacketHandler {
 					}
 				}
 				if (packetType2 == 2) {
-					EntityPlayerMP entityPlayerMp = MinecraftServer.getServer().getConfigurationManager()
-							.getPlayerForUsername(entityPlayer.username);
+					EntityPlayerMP entityPlayerMp = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(entityPlayer.username);
 					String s = "You were using modified weapons!";
 
 					if (entityPlayerMp != null) {
 						entityPlayerMp.playerNetServerHandler.kickPlayerFromServer(s);
-						System.out.println("[GunCus] Kicked player " + entityPlayerMp.username
-								+ " because he was using modified weapons!");
+						System.out.println("[GunCus] Kicked player " + entityPlayerMp.username + " because he was using modified weapons!");
 					}
 				}
 			} else if (packetType == 15) {
@@ -355,6 +357,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				GunCus.actualItemID = data.readInt();
 			}
 		} catch (IOException exception) {
+			exception.printStackTrace();
 		}
 	}
 }

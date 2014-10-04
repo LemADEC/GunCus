@@ -36,6 +36,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -65,7 +67,7 @@ public class GunCus {
 	public static boolean startedBreathing;
 	public static boolean breathing = false;
 	public static int breathCounter = 0;
-	// public static int reloading = 0;
+	public static boolean reloading = false;
 	public static int hitmarker = 0;
 	public static String cameraZoom = "Y";
 	public static int actualItemID = 0;
@@ -215,131 +217,162 @@ public class GunCus {
 		GameRegistry.registerBlock(blockBullet, blockBullet.getUnlocalizedName());
 		GameRegistry.registerBlock(blockWeapon, blockWeapon.getUnlocalizedName());
 
-		GameRegistry.addShapedRecipe(
-				new ItemStack(part),
-				new Object[] { "ABA", "BCB", "ABA", Character.valueOf('A'), new ItemStack(Item.ingotIron),
-						Character.valueOf('B'), new ItemStack(Item.redstone), Character.valueOf('C'),
-						new ItemStack(Item.ingotGold) });
-		GameRegistry.addShapedRecipe(new ItemStack(magFill), new Object[] { "ABA", "BAB", "ABA",
-				Character.valueOf('B'), new ItemStack(Item.ingotIron), Character.valueOf('A'),
-				new ItemStack(Item.redstone) });
+		GameRegistry.addShapedRecipe(new ItemStack(part),
+				new Object[] { "ABA", "BCB", "ABA",
+					'A', new ItemStack(Item.ingotIron),
+					'B', new ItemStack(Item.redstone),
+					'C', new ItemStack(Item.ingotGold) });
+		GameRegistry.addShapedRecipe(new ItemStack(magFill),
+				new Object[] { "ABA", "BAB", "ABA",
+					'B', new ItemStack(Item.ingotIron),
+					'A', new ItemStack(Item.redstone) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockAmmo),
-				new Object[] { "BBB", "ABA", "BCB", Character.valueOf('A'), new ItemStack(part),
-						Character.valueOf('B'), new ItemStack(Item.ingotIron), Character.valueOf('C'),
-						new ItemStack(Block.blockIron) });
+				new Object[] { "BBB", "ABA", "BCB",
+					'A', new ItemStack(part),
+					'B', new ItemStack(Item.ingotIron),
+					'C', new ItemStack(Block.blockIron) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockBullet),
-				new Object[] { "BAB", "AAA", "BCB", Character.valueOf('A'), new ItemStack(part),
-						Character.valueOf('B'), new ItemStack(Item.ingotIron), Character.valueOf('C'),
-						new ItemStack(Block.blockIron) });
+				new Object[] { "BAB", "AAA", "BCB",
+					'A', new ItemStack(part),
+					'B', new ItemStack(Item.ingotIron),
+					'C', new ItemStack(Block.blockIron) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockMag),
-				new Object[] { "BAB", "ABA", "BCB", Character.valueOf('A'), new ItemStack(part),
-						Character.valueOf('B'), new ItemStack(Item.ingotIron), Character.valueOf('C'),
-						new ItemStack(Block.blockIron) });
+				new Object[] { "BAB", "ABA", "BCB",
+					'A', new ItemStack(part),
+					'B', new ItemStack(Item.ingotIron),
+					'C', new ItemStack(Block.blockIron) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockGun),
-				new Object[] { "BAB", "AAA", "BAB", Character.valueOf('A'), new ItemStack(part),
-						Character.valueOf('B'), new ItemStack(Item.ingotIron) });
+				new Object[] { "BAB", "AAA", "BAB",
+					'A', new ItemStack(part),
+					'B', new ItemStack(Item.ingotIron) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockWeapon),
-				new Object[] { "ABA", "ABA", "BCB", Character.valueOf('A'), new ItemStack(part),
-						Character.valueOf('B'), new ItemStack(Item.ingotIron), Character.valueOf('C'),
-						new ItemStack(Block.blockIron) });
-
+				new Object[] { "ABA", "ABA", "BCB",
+					'A', new ItemStack(part),
+					'B', new ItemStack(Item.ingotIron),
+					'C', new ItemStack(Block.blockIron) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 0),
-				new Object[] { " IG", "IRI", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('R'),
-						new ItemStack(Item.redstone, 1) });
+				new Object[] { " IG", "IRI",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 1),
-				new Object[] { "IG ", "IRI", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('R'),
-						new ItemStack(Item.redstone, 1) });
+				new Object[] { "IG ", "IRI",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 2),
-				new Object[] { " I ", "GRG", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('R'),
-						new ItemStack(Item.redstone, 1) });
+				new Object[] { " I ", "GRG", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 3),
-				new Object[] { "I I", "GRG", " I ", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('R'),
-						new ItemStack(Item.redstone, 1) });
+				new Object[] { "I I", "GRG", " I ",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 4),
-				new Object[] { " I ", "GDG", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { " I ", "GDG", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 5),
-				new Object[] { "I I", "GDG", " I ", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { "I I", "GDG", " I ",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 6),
-				new Object[] { "I I", "GDG", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { "I I", "GDG", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 7),
-				new Object[] { "I I", "GDG", " II", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { "I I", "GDG", " II",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 8),
-				new Object[] { "III", "GDG", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { "III", "GDG", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 9),
-				new Object[] { "I I", "D8G", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1), Character.valueOf('8'), new ItemStack(scope, 1, 7) });
+				new Object[] { "I I", "D8G", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1),
+					'8', new ItemStack(scope, 1, 7) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 10),
-				new Object[] { "D9G", " I ", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1), Character.valueOf('9'), new ItemStack(scope, 1, 8) });
+				new Object[] { "D9G", " I ",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1), Character.valueOf('9'), new ItemStack(scope, 1, 8) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 11),
-				new Object[] { "GIG", "DDD", "III", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1) });
+				new Object[] { "GIG", "DDD", "III",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 12),
-				new Object[] { " I ", "DBG", "I I", Character.valueOf('G'), new ItemStack(Block.thinGlass, 1),
-						Character.valueOf('I'), new ItemStack(Item.ingotIron, 1), Character.valueOf('D'),
-						new ItemStack(Item.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
+				new Object[] { " I ", "DBG", "I I",
+					'G', new ItemStack(Block.thinGlass, 1),
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
 
 		GameRegistry.addShapedRecipe(
 				new ItemStack(ammoM320),
-				new Object[] { "GI ", "IGI", " IG", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('G'), new ItemStack(Item.gunpowder, 1) });
+				new Object[] { "GI ", "IGI", " IG",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'G', new ItemStack(Item.gunpowder, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 0),
-				new Object[] { "I  ", " I ", "I I", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1) });
+				new Object[] { "I  ", " I ", "I I",
+					'I', new ItemStack(Item.ingotIron, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 1),
-				new Object[] { " I ", "I I", "I I", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1) });
+				new Object[] { " I ", "I I", "I I",
+					'I', new ItemStack(Item.ingotIron, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 2),
-				new Object[] { "II ", " I ", " II", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1) });
+				new Object[] { "II ", " I ", " II",
+					'I', new ItemStack(Item.ingotIron, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 3),
-				new Object[] { " II", "IRR", "I I", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('R'), new ItemStack(Item.redstone, 1) });
+				new Object[] { " II", "IRR", "I I",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 4),
-				new Object[] { "I  ", "IGI", "  I", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('G'), new ItemStack(Item.ingotGold, 1) });
+				new Object[] { "I  ", "IGI", "  I",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'G', new ItemStack(Item.ingotGold, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 5),
-				new Object[] { " L ", "LGL", " L ", Character.valueOf('L'), new ItemStack(Item.leather, 1),
-						Character.valueOf('G'), new ItemStack(attachment, 1, 2) });
+				new Object[] { " L ", "LGL", " L ",
+					'L', new ItemStack(Item.leather, 1),
+					'G', new ItemStack(attachment, 1, 2) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 6),
-				new Object[] { "II ", "RRI", "II ", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('R'), new ItemStack(Item.redstone, 1) });
+				new Object[] { "II ", "RRI", "II ",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'R', new ItemStack(Item.redstone, 1) });
 
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 0),
-				new Object[] { "SI ", "ISI", " IS", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('S'), new ItemStack(Item.slimeBall, 1) });
+				new Object[] { "SI ", "ISI", " IS",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'S', new ItemStack(Item.slimeBall, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(barrel, 1, 1),
-				new Object[] { "II ", "II ", "  I", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1) });
+				new Object[] { "II ", "II ", "  I",
+					'I', new ItemStack(Item.ingotIron, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 2),
-				new Object[] { "GI ", "IGI", " IG", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('G'), new ItemStack(Item.ingotGold, 1) });
+				new Object[] { "GI ", "IGI", " IG",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'G', new ItemStack(Item.ingotGold, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 3),
-				new Object[] { "II ", "IDI", " II", Character.valueOf('I'), new ItemStack(Item.ingotIron, 1),
-						Character.valueOf('D'), new ItemStack(Item.diamond, 1) });
+				new Object[] { "II ", "IDI", " II",
+					'I', new ItemStack(Item.ingotIron, 1),
+					'D', new ItemStack(Item.diamond, 1) });
 	}
 
 	public static void createExplosionServer(Entity entity, double x, double y, double z, float str) {
@@ -425,111 +458,130 @@ public class GunCus {
 			path1.mkdirs();
 		}
 
-		File defaultFile = new File(path1.getAbsolutePath() + "/bullets/default.cfg");
-		Configuration config1 = new Configuration(defaultFile);
-		Property idProp = config1.get("general", "ID", 1010);
-		idProp.comment = "The item ID of the bullet";
+		// default bullet configuration
+		File bulletConfigFile = new File(path1.getAbsolutePath() + "/bullets/default.cfg");
+		Configuration bulletConfig = new Configuration(bulletConfigFile);
+		Property idProp = bulletConfig.get("general", "ID", 1010);
+		idProp.comment = "Item ID of the bullet";
 
-		Property bulProp = config1.get("general", "BulletID", 1);
-		bulProp.comment = "The bullet ID of the bullet";
+		Property bulProp = bulletConfig.get("general", "BulletID", 1);
+		bulProp.comment = "Bullet ID of the bullet";
 
-		Property ironProp = config1.get("general", "Iron", 1);
+		Property ironProp = bulletConfig.get("general", "Iron", 1);
 		ironProp.comment = "How much iron you need to craft this bullet type";
 
-		Property sulProp = config1.get("general", "Gunpowder", 3);
+		Property sulProp = bulletConfig.get("general", "Gunpowder", 3);
 		sulProp.comment = "How much gunpowder you need to craft this bullet type";
 
-		Property stackProp = config1.get("general", "stackSize", 4);
+		Property stackProp = bulletConfig.get("general", "stackSize", 4);
 		stackProp.comment = "How much bullets you get at a time by crafting this bullet type";
 
-		Property nameProp = config1.get("general", "Name", "default");
-		nameProp.comment = "The name of the bullet";
+		Property nameProp = bulletConfig.get("general", "Name", "default");
+		nameProp.comment = "Name of the bullet";
 
-		Property iconProp = config1.get("general", "Icon", "");
-		iconProp.comment = "The texture of this bullet. Leave blanc for default";
+		Property iconProp = bulletConfig.get("general", "Icon", "");
+		iconProp.comment = "Texture of this bullet. Leave blank for default";
 
-		Property splitProp = config1.get("general", "Split", 1);
+		Property splitProp = bulletConfig.get("general", "Split", 1);
 		splitProp.comment = "How much bullets being shot at a time.";
 
-		Property sprayProp = config1.get("general", "Spray", 100);
-		sprayProp.comment = "The maximum accuracy by using this bullet. 100 = 100% accuracy. 30 = shotgun spray.";
+		Property sprayProp = bulletConfig.get("general", "Spray", 100);
+		sprayProp.comment = "Maximum accuracy when using this bullet in percent. 100 = perfect accuracy. 30 = shotgun spray.";
 
-		Property onImpactProp = config1.get("general", "Impact", "");
-		onImpactProp.comment = "Impact Effects. \"X\" is a modifier. 1:X = Poision (X = time in seconds) | 2:X = Nausea (X = time in seconds) | 3:X = Fire (X = time in seconds) | 4:X = Explosion (X = Strength, Example Strength: 7 = RPG, 4.5 = M320) | 5:X = Explosion without Block Damage (X = Strength, Example Strength: 7 = RPG, 4.5 = M320) | 6:X = Heal (X = heal amount) | 7:X = Blindness (X = time in seconds) . Use semicolons. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\"";
+		Property onImpactProp = bulletConfig.get("general", "Impact", "");
+		onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
+				+ "\n'X' and 'Y' are modifiers."
+				+ "\n1:X = Poison for X seconds"
+				+ "\n2:X = Nausea for X seconds"
+				+ "\n3:X = Fire for X seconds"
+				+ "\n4:X = Explosion of X Strength (3 is TnT, 7 is RPG, 4.5 is M320)"
+				+ "\n5:X = Explosion without Block Damage of X Strength"
+				+ "\n6:X = Heal of X points"
+				+ "\n7:X = Blindness for X seconds"
+				+ "\n8:X = Instant damage (harm) of X damages"
+				+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds.";
 
-		Property gravityProp = config1.get("general", "GravityModifier", 1.0D);
-		gravityProp.comment = "Modifies the applied gravity of a bullet. | Gravity x GravityModifier = Applied Gravity";
+		Property gravityProp = bulletConfig.get("general", "GravityModifier", 1.0D);
+		gravityProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
 
-		Property damageProp = config1.get("general", "Damage Modifier", 1.0D);
-		damageProp.comment = "Gun Damage * Damage Modifier = Applied Damage";
-		config1.save();
+		Property damageProp = bulletConfig.get("general", "Damage Modifier", 1.0D);
+		damageProp.comment = "Applied damage is Gun Damage * Damage Modifier";
+		bulletConfig.save();
 
-		File defaultFile2 = new File(path1 + "/guns/default.cfg");
-		Configuration config2 = new Configuration(defaultFile2);
+		// default gun configuration
+		File gunConfigFile = new File(path1 + "/guns/default.cfg");
+		Configuration gunConfig = new Configuration(gunConfigFile);
 
-		Property idMagProp = config2.get("general", "Mag ID", 1000);
-		idMagProp.comment = "The ID of the magazines | Should be 1 lower than the gun's ID";
+		Property idMagProp = gunConfig.get("general", "Mag ID", 1000);
+		idMagProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
 
-		Property idProp2 = config2.get("general", "ID", 1001);
-		idProp2.comment = "The ID of the gun";
+		Property idProp2 = gunConfig.get("general", "ID", 1001);
+		idProp2.comment = "ID of the gun";
 
-		Property shootTypeProp = config2.get("general", "Shoot", 2);
+		Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
 		shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
 
-		Property delayProp = config2.get("general", "Delay", 3);
-		delayProp.comment = "The delay between shots of the gun";
+		Property delayProp = gunConfig.get("general", "Delay", 3);
+		delayProp.comment = "Delay between shots of the gun (in ticks)";
 
-		Property magProp = config2.get("general", "Magsize", 1);
-		magProp.comment = "The size of the magazines";
+		Property magProp = gunConfig.get("general", "Magsize", 1);
+		magProp.comment = "Size of the magazines";
 
-		Property magIngotProp = config2.get("general", "Mag Ingots", 1);
-		magIngotProp.comment = "The number of iron ingots a mag needs to be crafted";
+		Property magIngotProp = gunConfig.get("general", "Mag Ingots", 1);
+		magIngotProp.comment = "Number of iron ingots a mag needs to be crafted";
 
-		Property ingotProp = config2.get("general", "Iron Ingots", 1);
-		ingotProp.comment = "The number of iron ingots this gun needs to be crafted";
+		Property ingotProp = gunConfig.get("general", "Iron Ingots", 1);
+		ingotProp.comment = "Number of iron ingots this gun needs to be crafted";
 
-		Property redProp = config2.get("general", "Redstone", 1);
-		redProp.comment = "The number of redstone this gun needs to be crafted";
+		Property redProp = gunConfig.get("general", "Redstone", 1);
+		redProp.comment = "Number of redstone this gun needs to be crafted";
 
-		Property nameProp2 = config2.get("general", "Name", "default");
-		nameProp2.comment = "The name of the gun";
+		Property nameProp2 = gunConfig.get("general", "Name", "default");
+		nameProp2.comment = "Name of the gun";
 
-		Property bulletProp = config2.get("general", "Bullets", "1");
-		bulletProp.comment = "The bullet IDs of all bullets this gun is using. You may type more than 1 bullet ID if this gun doesnt use magazines!. Use semicolons.";
+		Property bulletProp = gunConfig.get("general", "Bullets", "1");
+		bulletProp.comment = "Semicolon separated list of bullet IDs for this gun."
+				+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!";
 
-		Property usingMagProp = config2.get("general", "UsingMags", true);
+		Property usingMagProp = gunConfig.get("general", "UsingMags", true);
 		usingMagProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
 
-		Property iconProp2 = config2.get("general", "Texture", "");
+		Property iconProp2 = gunConfig.get("general", "Texture", "");
 		iconProp2.comment = "The texture of the gun. Leave blanc for default";
 
-		Property recProp = config2.get("general", "RecoilModifier", 1.0D);
+		Property recProp = gunConfig.get("general", "RecoilModifier", 1.0D);
 		recProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
 
-		Property sound_normalP = config2.get("general", "NormalSound", "Sound_DERP2");
+		Property sound_normalP = gunConfig.get("general", "NormalSound", "Sound_DERP2");
 		sound_normalP.comment = "The sound being used when shooting the gun. Only .ogg or .wav!!! Leave blanc for default";
 
-		Property sound_silencedP = config2.get("general", "SilencedSound", "");
+		Property sound_silencedP = gunConfig.get("general", "SilencedSound", "");
 		sound_silencedP.comment = "The sound being used when shooting the gun that has a silencer. Only .ogg or .wav!!! Leave blanc for default";
 
-		Property sndProp = config2.get("general", "SoundModifier", 1.0D);
-		sndProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots). | Default Sound Volume x SoundModifier = Used Sound Volume";
+		Property sndProp = gunConfig.get("general", "SoundModifier", 1.0D);
+		sndProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots).\nDefault Sound Volume x SoundModifier = Used Sound Volume";
 
-		Property extra1Prop = config2.get("general", "Attachments", "1;3;2;6");
-		extra1Prop.comment = "1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring | 6 = Improved Grip | 7 = Laser Pointer . Type all attachments that should be able to be attatched on the gun. Use semicolons.";
+		Property extra1Prop = gunConfig.get("general", "Attachments", "1;3;2;6");
+		extra1Prop.comment = "Semicolon separated list of attachments valid on this gun."
+				+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
+				+ "\n6 = Improved Grip | 7 = Laser Pointer.";
 
-		Property bar1Prop = config2.get("general", "Barrels", "1;2;3");
-		bar1Prop.comment = "1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel . Type all barrels that should be able to be attatched on the gun. Use semicolons.";
+		Property bar1Prop = gunConfig.get("general", "Barrels", "1;2;3");
+		bar1Prop.comment = "Semicolon separated list of barrels valid on this gun."
+				+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.";
 
-		Property scopesProp = config2.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
-		scopesProp.comment = "1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145 | 6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07 | 11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x . Type all scopes that should be able to be attached on the gun. Use semicolons.";
+		Property scopesProp = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
+		scopesProp.comment = "Semicolon separated list of scopes valid on this gun."
+				+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
+				+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
+				+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.";
 
-		Property defaultZoomProp = config2.get("general", "Zoom", 1.0D);
-		defaultZoomProp.comment = "The zoom factor without any scope. Default 1.0";
+		Property defaultZoomProp = gunConfig.get("general", "Zoom", 1.0D);
+		defaultZoomProp.comment = "Zoom factor without any scope. Default 1.0";
 
-		Property damageProp2 = config2.get("general", "Damage", 6);
-		damageProp2.comment = "The damage. 1 = a half heart";
-		config2.save();
+		Property damageProp2 = gunConfig.get("general", "Damage", 6);
+		damageProp2.comment = "Damage dealt (1 is half a heart)";
+		gunConfig.save();
 
 		File textures = new File(path1.getAbsolutePath() + "/assets/minecraft/textures");
 		if (!textures.exists()) {
@@ -566,10 +618,10 @@ public class GunCus {
 			config1.load();
 
 			Property idProp = config1.get("general", "ID", 1010);
-			idProp.comment = "The item ID of the bullet";
+			idProp.comment = "Item ID of the bullet";
 
 			Property bulProp = config1.get("general", "Bullet ID", 1);
-			bulProp.comment = "The bullet ID of the bullet";
+			bulProp.comment = "Bullet ID of the bullet";
 
 			Property ironProp = config1.get("general", "Iron", 1);
 			ironProp.comment = "How much iron you need to craft this bullet type";
@@ -581,25 +633,35 @@ public class GunCus {
 			stackProp.comment = "How much bullets you get at a time by crafting this bullet type";
 
 			Property nameProp = config1.get("general", "Name", "default");
-			nameProp.comment = "The name of the bullet";
+			nameProp.comment = "Name of the bullet";
 
 			Property iconProp = config1.get("general", "Icon", "");
-			iconProp.comment = "The texture of this bullet. Leave blanc for default";
+			iconProp.comment = "Texture of this bullet. Leave blanc for default";
 
 			Property splitProp = config1.get("general", "Split", 1);
 			splitProp.comment = "How much bullets being shot at a time.";
 
 			Property sprayProp = config1.get("general", "Spray", 100);
-			sprayProp.comment = "The maximum accuracy by using this bullet. 100 = 100% accuracy. 30 = shotgun spray.";
+			sprayProp.comment = "Maximum accuracy by using this bullet. 100 = 100% accuracy. 30 = shotgun spray.";
 
 			Property onImpactProp = config1.get("general", "Impact", "");
-			onImpactProp.comment = "Impact Effects. \"X\" is a modifier. 1:X = Poision (X = time in seconds) | 2:X = Nausea (X = time in seconds) | 3:X = Fire (X = time in seconds) | 4:X = Explosion (X = Strength, Example Strength: 7 = RPG, 4.5 = M320) | 5:X = Explosion without Block Damage (X = Strength, Example Strength: 7 = RPG, 4.5 = M320) | 6:X = Heal (X = heal amount) | 7:X = Blindness (X = time in seconds) . Use semicolons. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\"";
+			onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
+					+ "\n'X' and 'Y' are modifiers."
+					+ "\n1:X = Poison for X seconds"
+					+ "\n2:X = Nausea for X seconds"
+					+ "\n3:X = Fire for X seconds"
+					+ "\n4:X = Explosion of X Strength (3 is TnT, 7 is RPG, 4.5 is M320)"
+					+ "\n5:X = Explosion without Block Damage of X Strength"
+					+ "\n6:X = Heal of X points"
+					+ "\n7:X = Blindness for X seconds"
+					+ "\n8:X = Instant damage (harm) of X damages"
+					+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds.";
 
 			Property gravityProp = config1.get("general", "GravityModifier", 1.0D);
-			gravityProp.comment = "Modifies the applied gravity of a bullet. | Gravity x GravityModifier = Applied Gravity";
+			gravityProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
 
 			Property damageProp = config1.get("general", "Damage Modifier", 1.0D);
-			damageProp.comment = "Gun Damage * Damage Modifier = Applied Damage";
+			damageProp.comment = "Applied damage is Gun Damage * Damage Modifier";
 
 			float damage = (float) damageProp.getDouble(1.0D);
 			int id = idProp.getInt(1010);
@@ -639,10 +701,12 @@ public class GunCus {
 				for (String effect : effects) {
 					try {
 						if (effect.contains(":")) {
-							String[] effect2 = effect.split(":");
+							String[] effectParameters = effect.split(":");
 
-							if (effect2.length == 2) {
-								bullet.addEffect(Integer.parseInt(effect2[0]), Float.parseFloat(effect2[1]));
+							if (effectParameters.length == 2) {
+								bullet.addEffect(Integer.parseInt(effectParameters[0]), Float.parseFloat(effectParameters[1]), 0);
+							} else if (effectParameters.length == 3) {
+								bullet.addEffect(Integer.parseInt(effectParameters[0]), Float.parseFloat(effectParameters[1]), Integer.parseInt(effectParameters[2]));
 							}
 						}
 					} catch (Exception e) {
@@ -677,73 +741,80 @@ public class GunCus {
 		}
 
 		for (int v1 = 0; v1 < files.size(); v1++) {
-			Configuration config1 = new Configuration((File) files.get(v1));
-			config1.load();
+			Configuration gunConfig = new Configuration((File) files.get(v1));
+			gunConfig.load();
 
 			int bullets = -1;
 
-			Property idMagProp = config1.get("general", "Mag ID", 1000);
-			idMagProp.comment = "The ID of the magazines | Should be 1 lower than the gun's ID";
+			Property idMagProp = gunConfig.get("general", "Mag ID", 1000);
+			idMagProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
 
-			Property idProp = config1.get("general", "ID", 1001);
-			idProp.comment = "The ID of the gun";
+			Property idProp = gunConfig.get("general", "ID", 1001);
+			idProp.comment = "ID of the gun";
 
-			Property shootTypeProp = config1.get("general", "Shoot", 2);
+			Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
 			shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
 
-			Property delayProp = config1.get("general", "Delay", 3);
-			delayProp.comment = "The delay between shots of the gun";
+			Property delayProp = gunConfig.get("general", "Delay", 3);
+			delayProp.comment = "Delay between shots of the gun (in ticks)";
 
-			Property magProp = config1.get("general", "Magsize", 1);
-			magProp.comment = "The size of the magazines";
+			Property magProp = gunConfig.get("general", "Magsize", 1);
+			magProp.comment = "Size of the magazines";
 
-			Property magIngotProp = config1.get("general", "Mag Ingots", 1);
-			magIngotProp.comment = "The number of iron ingots a mag needs to be crafted";
+			Property magIngotProp = gunConfig.get("general", "Mag Ingots", 1);
+			magIngotProp.comment = "Number of iron ingots a mag needs to be crafted";
 
-			Property ingotProp = config1.get("general", "Iron Ingots", 1);
-			ingotProp.comment = "The number of iron ingots this gun needs to be crafted";
+			Property ingotProp = gunConfig.get("general", "Iron Ingots", 1);
+			ingotProp.comment = "Number of iron ingots this gun needs to be crafted";
 
-			Property redProp = config1.get("general", "Redstone", 1);
-			redProp.comment = "The number of redstone this gun needs to be crafted";
+			Property redProp = gunConfig.get("general", "Redstone", 1);
+			redProp.comment = "Number of redstone this gun needs to be crafted";
 
-			Property nameProp = config1.get("general", "Name", "default");
-			nameProp.comment = "The name of the gun";
+			Property nameProp = gunConfig.get("general", "Name", "default");
+			nameProp.comment = "Name of the gun";
 
-			Property bulletProp = config1.get("general", "Bullets", "1");
-			bulletProp.comment = "The bullet IDs of all bullets this gun is using. You may type more than 1 bullet ID if this gun doesnt use magazines!. Use semicolons.";
+			Property bulletProp = gunConfig.get("general", "Bullets", "1");
+			bulletProp.comment = "Semicolon separated list of bullet IDs for this gun."
+					+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!";
 
-			Property usingMagProp = config1.get("general", "UsingMags", true);
+			Property usingMagProp = gunConfig.get("general", "UsingMags", true);
 			usingMagProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
 
-			Property iconProp = config1.get("general", "Texture", "");
-			iconProp.comment = "The texture of the gun. Leave blanc for default";
+			Property iconProp = gunConfig.get("general", "Texture", "");
+			iconProp.comment = "Texture of the gun. Leave blanc for default";
 
-			Property recProp = config1.get("general", "RecoilModifier", 1.0D);
+			Property recProp = gunConfig.get("general", "RecoilModifier", 1.0D);
 			recProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
 
-			Property sound_normalP = config1.get("general", "NormalSound", "Sound_DERP2");
-			sound_normalP.comment = "The sound being used when shooting the gun. Only .ogg or .wav!!! Leave blanc for default";
+			Property sound_normalP = gunConfig.get("general", "NormalSound", "Sound_DERP2");
+			sound_normalP.comment = "Sound played when shooting. Only .ogg or .wav!!! Leave blanc for default";
 
-			Property sound_silencedP = config1.get("general", "SilencedSound", "");
-			sound_silencedP.comment = "The sound being used when shooting the gun that has a silencer. Only .ogg or .wav!!! Leave blanc for default";
+			Property sound_silencedP = gunConfig.get("general", "SilencedSound", "");
+			sound_silencedP.comment = "Sound played when shooting while gun has a silencer. Only .ogg or .wav!!! Leave blanc for default";
 
-			Property sndProp = config1.get("general", "SoundModifier", 1.0D);
+			Property sndProp = gunConfig.get("general", "SoundModifier", 1.0D);
 			sndProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots). | Default Sound Volume x SoundModifier = Used Sound Volume";
 
-			Property extra1Prop = config1.get("general", "Attachments", "1;3;2;6");
-			extra1Prop.comment = "1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring | 6 = Improved Grip | 7 = Laser Pointer . Type all attachments that should be able to be attatched on the gun. Use semicolons.";
+			Property extra1Prop = gunConfig.get("general", "Attachments", "1;3;2;6");
+			extra1Prop.comment = "Semicolon separated list of attachments valid on this gun."
+					+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
+					+ "\n6 = Improved Grip | 7 = Laser Pointer.";
 
-			Property bar1Prop = config1.get("general", "Barrels", "1;2;3");
-			bar1Prop.comment = "1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel . Type all barrels that should be able to be attatched on the gun. Use semicolons.";
+			Property bar1Prop = gunConfig.get("general", "Barrels", "1;2;3");
+			bar1Prop.comment = "Semicolon separated list of barrels valid on this gun."
+					+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.";
 
-			Property scopesProp = config1.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
-			scopesProp.comment = "1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145 | 6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07 | 11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x . Type all scopes that should be able to be attached on the gun. Use semicolons.";
+			Property scopesProp = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
+			scopesProp.comment = "Semicolon separated list of scopes valid on this gun."
+					+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
+					+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
+					+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.";
 
-			Property defaultZoomProp = config1.get("general", "Zoom", 1.0D);
-			defaultZoomProp.comment = "The zoom factor without any scope. Default 1.0";
+			Property defaultZoomProp = gunConfig.get("general", "Zoom", 1.0D);
+			defaultZoomProp.comment = "Zoom factor without any scope. Default 1.0";
 
-			Property damageProp = config1.get("general", "Damage", 6);
-			damageProp.comment = "The damage. 1 = a half heart";
+			Property damageProp = gunConfig.get("general", "Damage", 6);
+			damageProp.comment = "Damage dealth (1 is half a heart)";
 
 			int id = idProp.getInt(-1);
 			int shootType = shootTypeProp.getInt(2);
@@ -910,7 +981,7 @@ public class GunCus {
 				log("[" + pack + "] Something went wrong while initializing the gun \"" + name
 						+ "\"! Ignoring this gun!");
 			}
-			config1.save();
+			gunConfig.save();
 		}
 	}
 

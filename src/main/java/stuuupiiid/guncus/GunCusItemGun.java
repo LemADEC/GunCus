@@ -253,33 +253,33 @@ public class GunCusItemGun extends Item {
 			}
 
 			shoot(entityPlayer);
-			GunCusItemBullet bullet2;
+			GunCusItemBullet bulletItem;
 			if (this.magId != -1) {
 				GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[this.magId];
-				bullet2 = GunCusItemBullet.bulletsList.get(this.pack).get(mag2.bulletType);
+				bulletItem = GunCusItemBullet.bulletsList.get(this.pack).get(mag2.bulletType);
 			} else {
-				bullet2 = GunCusItemBullet.bulletsList.get(this.pack).get(this.bullets[this.actualBullet]);
+				bulletItem = GunCusItemBullet.bulletsList.get(this.pack).get(this.bullets[this.actualBullet]);
 			}
 
-			float damage1 = this.damage * bullet2.damage;
+			float damage1 = this.damage * bulletItem.damage;
 
-			double newAcc = damage1;
+			double newAccuracy = damage1;
 			if (Mouse.isButtonDown(1)) {
-				newAcc *= 0.9D;
+				newAccuracy *= 0.9D;
 			} else if (hasLaserPointer(itemStack.getItemDamage())) {
-				newAcc *= 0.9D;
+				newAccuracy *= 0.9D;
 			}
 
 			if (hasRifledBarrel(itemStack.getItemDamage())) {
-				newAcc *= 0.8D;
+				newAccuracy *= 0.8D;
 			}
 
 			if ((hasBipod(itemStack.getItemDamage())) && (canUseBipod(entityPlayer))) {
-				newAcc *= 0.65D;
+				newAccuracy *= 0.65D;
 			}
 
-			if (GunCus.accuracy > newAcc) {
-				GunCus.accuracy -= newAcc;
+			if (GunCus.accuracy > newAccuracy) {
+				GunCus.accuracy -= newAccuracy;
 			}
 
 			recoil(entityPlayer, itemStack.getItemDamage(), Mouse.isButtonDown(1), damage1);
