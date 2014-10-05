@@ -65,8 +65,8 @@ public class GunCusItemBullet extends GunCusItem {
 	}
 
 	public GunCusItemBullet addEffect(int effect, float modifier, int amplifier) {
-		this.effectModifiers.put(effect, modifier);
-		this.effectAmplifiers.put(effect, amplifier);
+		effectModifiers.put(effect, modifier);
+		effectAmplifiers.put(effect, amplifier);
 		return this;
 	}
 

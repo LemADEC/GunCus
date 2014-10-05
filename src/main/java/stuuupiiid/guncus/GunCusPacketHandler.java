@@ -107,8 +107,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 						GunCusItemBullet bulletItem;
 						if (gun.magId != -1) {
 							GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[gun.magId];
-							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack))
-									.get(mag2.bulletType);
+							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(mag2.bulletType);
 						} else {
 							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(var1);
 						}

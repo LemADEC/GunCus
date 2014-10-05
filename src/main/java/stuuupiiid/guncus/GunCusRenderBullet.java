@@ -12,8 +12,7 @@ import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
 public class GunCusRenderBullet extends RenderArrow {
-	public void renderArrow(GunCusEntityBullet par1EntityArrow, double par2, double par4, double par6, float par8,
-			float par9) {
+	public void renderArrow(GunCusEntityBullet par1EntityArrow, double par2, double par4, double par6, float par8, float par9) {
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float) par2, (float) par4, (float) par6);
 		GL11.glRotatef(par1EntityArrow.prevRotationYaw
