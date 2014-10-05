@@ -256,7 +256,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			motionX *= f4;
 			motionY *= f4;
 			motionZ *= f4;
-			motionY -= (hasBarrel ? 0.014D : 0.02D) * bullet.gravity;
+			motionY -= (hasBarrel ? 0.014D : 0.02D) * (bullet == null ? 1.0D : bullet.gravity);
 			setPosition(posX, posY, posZ);
 			doBlockCollisions();
 
