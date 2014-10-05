@@ -38,15 +38,13 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 	private int blockY = -1;
 	private int blockZ = -1;
 	private boolean blockCollision = false;
-	public EntityPlayer playerEntity;
+	private EntityPlayer playerEntity;
 	private int ticksCount = 0;
 	private float damage;
 	private int liveTime = 300;
 	public int ticks = 0;
-	public boolean hasBarrel = false;
-	double bulletGravity = 1.0D;
-	public HashMap<Integer, Float> bulletEffectModifiers = new HashMap();
-	public HashMap<Integer, Integer> bulletEffectAmplifiers = new HashMap();
+	private boolean hasBarrel = false;
+	private GunCusItemBullet bullet = null;
 
 	public GunCusEntityBullet(World world) {
 		super(world);
@@ -88,9 +86,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 	}
 	
 	public GunCusEntityBullet setBullet(GunCusItemBullet parBullet) {
-		bulletGravity = parBullet.gravity;
-		bulletEffectModifiers = parBullet.effectModifiers;
-		bulletEffectAmplifiers = parBullet.effectAmplifiers;
+		bullet = parBullet;
 		return this;
 	}
 	
@@ -260,7 +256,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			motionX *= f4;
 			motionY *= f4;
 			motionZ *= f4;
-			motionY -= (hasBarrel ? 0.014D : 0.02D) * bulletGravity;
+			motionY -= (hasBarrel ? 0.014D : 0.02D) * bullet.gravity;
 			setPosition(posX, posY, posZ);
 			doBlockCollisions();
 
@@ -298,54 +294,54 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer() && (parEntity instanceof EntityLivingBase)) {
 			EntityLivingBase entity = (EntityLivingBase) parEntity;
 
-			if (bulletEffectModifiers.containsKey(1)) {
-				entity.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(bulletEffectModifiers.get(1)) * 20, 0));
+			if (bullet.effectModifiers.containsKey(1)) {
+				entity.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(bullet.effectModifiers.get(1) * 20F), 0));
 			}
 
-			if (bulletEffectModifiers.containsKey(2)) {
-				entity.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)Math.floor(bulletEffectModifiers.get(2)) * 20, 0));
+			if (bullet.effectModifiers.containsKey(2)) {
+				entity.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)Math.floor(bullet.effectModifiers.get(2) * 20F), 0));
 			}
 
-			if (bulletEffectModifiers.containsKey(3)) {
-				entity.setFire((int)Math.floor(bulletEffectModifiers.get(3)));
+			if (bullet.effectModifiers.containsKey(3)) {
+				entity.setFire((int)Math.floor(bullet.effectModifiers.get(3)));
 			}
 
-			if (bulletEffectModifiers.containsKey(7)) {
-				entity.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)Math.floor(bulletEffectModifiers.get(7)) * 20, 0));
+			if (bullet.effectModifiers.containsKey(7)) {
+				entity.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)Math.floor(bullet.effectModifiers.get(7) * 20F), 0));
 			}
 
-			if (bulletEffectModifiers.containsKey(6)) {
-				entity.heal(bulletEffectModifiers.get(6).floatValue());
+			if (bullet.effectModifiers.containsKey(6)) {
+				entity.heal(bullet.effectModifiers.get(6).floatValue());
 			}
 
-			if (bulletEffectModifiers.containsKey(8)) {// instant damage / harm
-				entity.addPotionEffect(new PotionEffect(Potion.harm.id, 1, (int)Math.floor(bulletEffectModifiers.get(8))));
+			if (bullet.effectModifiers.containsKey(8)) {// instant damage / harm
+				entity.addPotionEffect(new PotionEffect(Potion.harm.id, 1, (int)Math.floor(bullet.effectModifiers.get(8))));
 			}
 
-			if (bulletEffectModifiers.containsKey(9)) {// weaken / negative resistance (20% damage increased per level)
-				entity.addPotionEffect(new PotionEffect(Potion.resistance.id, (int)Math.floor(bulletEffectModifiers.get(8)), - bulletEffectAmplifiers.get(8)));
+			if (bullet.effectModifiers.containsKey(9)) {// weaken / negative resistance (20% damage increased per level)
+				entity.addPotionEffect(new PotionEffect(Potion.resistance.id, (int)Math.floor(bullet.effectModifiers.get(9) * 20F), - bullet.effectAmplifiers.get(9)));
 			}
 		}
 	}
 
 	public void onInGround() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			if (bulletEffectModifiers.containsKey(4)) {
-				worldObj.createExplosion(playerEntity, posX, posY, posZ, bulletEffectModifiers.get(4), GunCus.blockDamage);
+			if (bullet.effectModifiers.containsKey(4)) {
+				worldObj.createExplosion(playerEntity, posX, posY, posZ, bullet.effectModifiers.get(4), GunCus.blockDamage);
 			}
-
-			if (bulletEffectModifiers.containsKey(5)) {
-				worldObj.createExplosion(playerEntity, posX, posY, posZ, bulletEffectModifiers.get(5), false);
+			
+			if (bullet.effectModifiers.containsKey(5)) {
+				worldObj.createExplosion(playerEntity, posX, posY, posZ, bullet.effectModifiers.get(5), false);
 			}
-
-			if ((bulletEffectModifiers.containsKey(3)) && (blockY > 0)) {
+			
+			if ((bullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
 				if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
 					worldObj.setBlock(blockX, blockY + 1, blockZ, Block.fire.blockID);
 				} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {
 					worldObj.setBlock(blockX, blockY, blockZ, Block.fire.blockID);
 				}
 			}
-
+			
 			setDead();
 		}
 	}
