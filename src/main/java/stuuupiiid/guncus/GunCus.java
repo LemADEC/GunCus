@@ -46,7 +46,7 @@ import net.minecraftforge.common.Property;
 
 import org.lwjgl.input.Keyboard;
 
-@Mod(modid = "GunCus", name = "Gun Customization", version = "1.7.10 BETA v2")
+@Mod(modid = "GunCus", name = "Gun Customization", version = "TDK1.6.4-v3.3x")
 @NetworkMod(channels = { "guncus" }, clientSideRequired = true, serverSideRequired = false, packetHandler = GunCusPacketHandler.class)
 public class GunCus {
 
@@ -710,18 +710,16 @@ public class GunCus {
 							}
 						}
 					} catch (Exception e) {
-						log("[" + pack + "] Something went wrong while trying to add the effect \"" + effect
-								+ "\" to the gun \"" + name + "\"!");
+						log("[" + pack + "] [" + name + "] Exception while trying to add effect \"" + effect + "\" to bullet");
+						e.printStackTrace();
 					}
 				}
 
 				this.loadedBullets.add(" - " + name + " (ID:" + id + ", Bullet ID:" + bul + ", Pack:" + pack + ")");
 			} else if (Item.itemsList[(id + 256)] != null) {
-				log("[" + pack + "] Conflict while trying to add \"" + name + "\" bullets: The ID \"" + id
-						+ "\" is already occupied!");
+				log("[" + pack + "] Conflict while trying to add \"" + name + "\" bullets: The ID \"" + id + "\" is already occupied!");
 			} else {
-				log("[" + pack + "] Something went wrong while initializing the bullet \"" + name
-						+ "\"! Ignoring this bullet!");
+				log("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 			}
 
 			config1.save();
@@ -942,8 +940,7 @@ public class GunCus {
 						gun.setSLNSound("minecraft:" + ssln);
 					}
 				} catch (Exception e) {
-					log("[" + pack + "] Error while trying to add the gun \"" + name
-							+ "\": ! Pls check the attachments, barrels and scopes of it!");
+					log("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
 				}
 
 				this.guns[id] = 1;
@@ -959,27 +956,22 @@ public class GunCus {
 					|| (((List) GunCusItemBullet.bulletsList.get(pack)).size() <= bullets)
 					|| (((List) GunCusItemBullet.bulletsList.get(pack)).get(bullets) == null)) {
 				if (id + 256 >= Item.itemsList.length) {
-					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id
-							+ "\" is too high!");
+					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id + "\" is too high!");
 				}
 				if (Item.itemsList[(id + 256)] != null) {
-					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id
-							+ "\" is already occupied!");
+					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id + "\" is already occupied!");
 				}
 				if (Item.itemsList[(magId + 256)] != null) {
-					log("[" + pack + "] Conflict while trying to add the magazine of the gun \"" + name
-							+ "\": The ID \"" + magId + "\" is already occupied!");
+					log("[" + pack + "] Conflict while trying to add the magazine of the gun \"" + name + "\": The ID \"" + magId + "\" is already occupied!");
 				}
 				if ((bullets >= 0)
 						&& ((!GunCusItemBullet.bulletsList.containsKey(pack))
 								|| (((List) GunCusItemBullet.bulletsList.get(pack)).size() <= bullets) || (((List) GunCusItemBullet.bulletsList
 								.get(pack)).get(bullets) == null))) {
-					log("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets
-							+ ")! Ignoring this gun!");
+					log("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets + ")! Ignoring this gun!");
 				}
 			} else {
-				log("[" + pack + "] Something went wrong while initializing the gun \"" + name
-						+ "\"! Ignoring this gun!");
+				log("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 			}
 			gunConfig.save();
 		}
@@ -1000,6 +992,6 @@ public class GunCus {
 	}
 
 	public static void log(Object s) {
-		System.out.println("[GunCus] " + s);
+		System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + " [GunCus] " + s);
 	}
 }
