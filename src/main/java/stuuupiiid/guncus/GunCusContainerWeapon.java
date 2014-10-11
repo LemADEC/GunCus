@@ -19,14 +19,14 @@ public class GunCusContainerWeapon extends Container {
 	public int posX;
 	public int posY;
 	public int posZ;
-	public int actualItemID;
+	public GunCusItemGun actualGunItem;
 	public int actual;
 
 	public GunCusContainerWeapon(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
 		actual = 0;
-		actualItemID = 0;
-		if (GunCusItemGun.gunList.size() > 0) {
-			actualItemID = GunCusItemGun.gunList.get(0).itemID;
+		actualGunItem = null;
+		if (GunCus.instance.guns.size() > 0) {
+			actualGunItem = GunCus.instance.guns.get(0);
 		}
 
 		worldObj = par2World;
@@ -63,16 +63,14 @@ public class GunCusContainerWeapon extends Container {
 	}
 
 	public String[] info() {
-		if (GunCusItemGun.gunList.size() > 0) {
-			GunCusItemGun gun = (GunCusItemGun) Item.itemsList[this.actualItemID];
-
+		if (GunCus.instance.guns.size() > 0) {
 			String rtn = "Oops! Something went wrong!";
 			String rtn2 = null;
 
-			if (gun != null) {
-				int iron = gun.ingots;
-				int redst = gun.field_redstone;
-				rtn = "Gun = \"" + gun.name + "\", Pack = \"" + gun.pack + "\"";
+			if (actualGunItem != null) {
+				int iron = actualGunItem.ingots;
+				int redst = actualGunItem.field_redstone;
+				rtn = "Gun = \"" + actualGunItem.name + "\", Pack = \"" + actualGunItem.pack + "\"";
 				rtn2 = "-> " + (iron > 0 ? iron + " iron ingot" + (iron > 1 ? "s, " : ", ") : "")
 						+ (redst > 0 ? redst + " redstone" : "");
 			}
@@ -82,19 +80,17 @@ public class GunCusContainerWeapon extends Container {
 	}
 
 	public void create() {
-		if (GunCusItemGun.gunList.size() > 0) {
+		if (GunCus.instance.guns.size() > 0) {
 			ItemStack ir = ((Slot) this.inventorySlots.get(0)).getStack();
 			ItemStack re = ((Slot) this.inventorySlots.get(1)).getStack();
 
-			GunCusItemGun gun = (GunCusItemGun) Item.itemsList[this.actualItemID];
-
-			if (gun != null) {
-				int reqIr = gun.ingots;
-				int reqRe = gun.field_redstone;
+			if (actualGunItem != null) {
+				int reqIr = actualGunItem.ingots;
+				int reqRe = actualGunItem.field_redstone;
 
 				if (((ir != null) && (ir.stackSize >= reqIr) && (ir.getItem() == Items.iron_ingot))
 						|| ((reqIr <= 0) && (((re != null) && (re.stackSize >= reqRe) && (re.getItem() == Items.redstone)) || (reqRe <= 0)))) {
-					((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(gun, 1, 0));
+					((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(actualGunItem, 1, 0));
 					if (ir != null) {
 						((Slot) this.inventorySlots.get(0)).decrStackSize(reqIr);
 					}

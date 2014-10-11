@@ -32,11 +32,6 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 	}
 
 	@Override
-	public void sound() {
-		MinecraftForge.EVENT_BUS.register(new GunCusSound());
-	}
-
-	@Override
 	public void sight() {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		if (client.thePlayer != null) {

@@ -11,13 +11,11 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -27,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -48,8 +47,7 @@ import net.minecraftforge.common.config.Property;
 
 import org.lwjgl.input.Keyboard;
 
-@Mod(modid = "GunCus", name = "Gun Customization", version = "TDK1.6.4-v3.3x")
-@NetworkMod(channels = { "guncus" }, clientSideRequired = true, serverSideRequired = false, packetHandler = GunCusPacketHandler.class)
+@Mod(modid = "GunCus", name = "Gun Customization", version = "TDK1.7.10-v3.3x")
 public class GunCus {
 
 	@SidedProxy(clientSide = "stuuupiiid.guncus.GunCusClientProxy", serverSide = "stuuupiiid.guncus.GunCusCommonProxy")
@@ -75,12 +73,7 @@ public class GunCus {
 	public static int actualItemID = 0;
 	public static int actual = 0;
 
-	public int[] guns = new int[Item.itemsList.length];
-	public int[] gunDelays = new int[Item.itemsList.length];
-	public int[] gunShoots = new int[Item.itemsList.length];
-	public int[] gunMags = new int[Item.itemsList.length];
-	public int[] gunBullets = new int[Item.itemsList.length];
-	public int[] gunRecoils = new int[Item.itemsList.length];
+	public LinkedList<GunCusItemGun> guns;
 
 	public static int check = 300;
 
@@ -200,13 +193,12 @@ public class GunCus {
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event) {
 		commonProxy.render();
-		commonProxy.sound();
 		instance = this;
 		LanguageRegistry.addName(quickKnife, "Quick Knife");
 		EntityRegistry.registerModEntity(GunCusEntityBullet.class, "guncusbullet", 200, this, 500, 1, true);
 
 		EntityRegistry.registerModEntity(GunCusEntityAT.class, "guncusat", 201, this, 500, 1, true);
-		NetworkRegistry.instance().registerGuiHandler(this, this.guiHandler);
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, this.guiHandler);
 
 		GameRegistry.registerBlock(blockGun, blockGun.getUnlocalizedName());
 		GameRegistry.registerBlock(blockAmmo, blockAmmo.getUnlocalizedName());
@@ -925,25 +917,19 @@ public class GunCus {
 							bullets, ingotsMag, ingots, red, pack, false, attach, bar, scopes, !usingMag, bulletsArray)
 							.setRecoilModifier(recModify).setSoundModifier(sndModify).defaultTexture(def).setZoom(zoom);
 
-					if ((!snormal.isEmpty()) && (!snormal.equals(" "))) {
+					if (!snormal.trim().isEmpty()) {
 						gun.setNormalSound("minecraft:" + snormal);
 					}
 
-					if ((!ssln.isEmpty()) && (!ssln.equals(" "))) {
-						gun.setSLNSound("minecraft:" + ssln);
+					if (!ssln.trim().isEmpty()) {
+						gun.setSilencedSound("minecraft:" + ssln);
 					}
+					guns.add(gun);
 				} catch (Exception e) {
 					log("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
 				}
 
-				this.guns[id] = 1;
-				this.gunDelays[id] = delay;
-				this.gunShoots[id] = shootType;
-				this.gunMags[id] = magId;
-				this.gunBullets[id] = bullets;
-				this.gunRecoils[id] = MathHelper.floor_double(recModify);
-
-				this.loadedGuns.add(" - " + name + " (ID:" + id + ", Pack:" + pack + ")");
+				loadedGuns.add(" - " + name + " (ID:" + id + ", Pack:" + pack + ")");
 			} else if ( (!GunCusItemBullet.bulletsList.containsKey(pack))
 					|| (GunCusItemBullet.bulletsList.get(pack).size() <= bullets)
 					|| (GunCusItemBullet.bulletsList.get(pack).get(bullets) == null) ) {
@@ -961,7 +947,7 @@ public class GunCus {
 		if ((file != null) && (file.exists())) {
 			for (File f : file.listFiles()) {
 				if ((f.getName().endsWith(".ogg")) || ((f.getName().endsWith(".wav")) && (!f.getName().contains(" ")))) {
-					GunCusSound.addSound(f.getName());
+					// FIXME: GunCusSound.addSound(f.getName());
 				}
 			}
 		} else {

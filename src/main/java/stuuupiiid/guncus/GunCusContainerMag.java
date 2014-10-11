@@ -75,8 +75,7 @@ public class GunCusContainerMag extends Container {
 			stackSize -= ingotsRequired;
 
 			((Slot) this.inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, stackSize));
-			((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(Item.itemsList[gun.magId], 1,
-					Item.itemsList[gun.magId].getMaxDamage()));
+			((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(gun.mag, 1, gun.mag.getMaxDamage()));
 		}
 	}
 

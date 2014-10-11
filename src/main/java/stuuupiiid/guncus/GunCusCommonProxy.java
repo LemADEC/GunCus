@@ -6,10 +6,6 @@ public class GunCusCommonProxy
   {
   }
 
-  public void sound()
-  {
-  }
-
   public void sight()
   {
   }

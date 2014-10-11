@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -70,7 +71,6 @@ public class GunCusItemGun extends Item {
 	public int subs;
 	public boolean tubing = false;
 	public String pack;
-	public static List<GunCusItemGun> gunList = new ArrayList();
 	public String soundNormal;
 	public String soundSilenced;
 	public int damage;
@@ -127,8 +127,6 @@ public class GunCusItemGun extends Item {
 			mag.setCreativeTab(tab);
 		}
 
-		gunList.add(this);
-
 		int i = this.scopes.length + 1;
 
 		if (this.barrel.length > 0) {
@@ -174,7 +172,7 @@ public class GunCusItemGun extends Item {
 		return this;
 	}
 
-	public GunCusItemGun setSLNSound(String sound) {
+	public GunCusItemGun setSilencedSound(String sound) {
 		this.soundSilenced = sound;
 		return this;
 	}
@@ -306,16 +304,16 @@ public class GunCusItemGun extends Item {
 				&& (GunCus.switchTime <= 0) && (!canHaveStraightPullBolt())) {
 			switch (this.shootType) {
 			case 0:
-				entityPlayer.addChatMessage("The Fire Mode Of This Gun Can Not Be Changed!");
+				entityPlayer.addChatComponentMessage(new ChatComponentText("The Fire Mode Of This Gun Can Not Be Changed!"));
 				break;
 			case 1:
 				switch (this.actualType) {
 				case 0:
-					entityPlayer.addChatMessage("Switched To Burst Mode!");
+					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
 					this.actualType = 1;
 					break;
 				case 1:
-					entityPlayer.addChatMessage("Switched To Single Mode!");
+					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
 					this.actualType = 0;
 				}
 
@@ -323,15 +321,15 @@ public class GunCusItemGun extends Item {
 			case 2:
 				switch (this.actualType) {
 				case 0:
-					entityPlayer.addChatMessage("Switched To Burst Mode!");
+					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
 					this.actualType = 1;
 					break;
 				case 1:
-					entityPlayer.addChatMessage("Switched To Auto Mode!");
+					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Auto Mode!"));
 					this.actualType = 2;
 					break;
 				case 2:
-					entityPlayer.addChatMessage("Switched To Single Mode!");
+					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
 					this.actualType = 0;
 				}
 
@@ -343,10 +341,10 @@ public class GunCusItemGun extends Item {
 				&& (GunCus.switchTime <= 0) && (hasM320(itemStack.getItemDamage()))) {
 			GunCus.switchTime = 20;
 			if (this.tubing) {
-				entityPlayer.addChatMessage("You are no longer using the M320!");
+				entityPlayer.addChatComponentMessage(new ChatComponentText("You are no longer using the M320!"));
 				this.tubing = false;
 			} else {
-				entityPlayer.addChatMessage("You are now using the M320!");
+				entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using the M320!"));
 				this.tubing = true;
 			}
 		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(34))
@@ -356,9 +354,8 @@ public class GunCusItemGun extends Item {
 			if (actualBullet >= bullets.length) {
 				actualBullet = 0;
 			}
-			entityPlayer.addChatMessage("You are now using \""
-					+ ((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
-							.get(this.bullets[this.actualBullet])).name + "\" ammunition!");
+			entityPlayer.addChatComponentMessage(new ChatComponentText(
+					"You are now using \"" + GunCusItemBullet.bulletsList.get(pack).get(bullets[actualBullet]).name + "\" ammunition!"));
 		}
 	}
 

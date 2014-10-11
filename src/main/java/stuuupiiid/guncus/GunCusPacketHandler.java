@@ -34,6 +34,7 @@ import net.minecraft.network.NetServerHandler;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -171,9 +172,9 @@ public class GunCusPacketHandler implements IPacketHandler {
 				if (acc == 0) {
 					container.create();
 				} else if (acc == 1) {
-					entityPlayer.addChatMessage(container.info()[0]);
+					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
 					if (container.info()[1] != null) {
-						entityPlayer.addChatMessage(container.info()[1]);
+						entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
 					}
 				}
 			} else if (packetType == 7) {// GuiBullet
@@ -182,9 +183,9 @@ public class GunCusPacketHandler implements IPacketHandler {
 				if (acc == 0) {
 					container.create();
 				} else if (acc == 1) {
-					entityPlayer.addChatMessage(container.info()[0]);
+					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
 					if (container.info()[1] != null) {
-						entityPlayer.addChatMessage(container.info()[1]);
+						entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
 					}
 				}
 			} else if (packetType == 8) {// ItemAttachment (tube accurrency)
@@ -226,25 +227,25 @@ public class GunCusPacketHandler implements IPacketHandler {
 				if (acc == 1) {
 					int actual = data.readInt();
 					actual++;
-					if (actual >= GunCusItemGun.gunList.size()) {
+					if (actual >= GunCus.instance.guns.size()) {
 						actual = 0;
 					}
 
-					if (GunCusItemGun.gunList.size() > actual) {
+					if (GunCus.instance.guns.size() > actual) {
 						container.actual = actual;
-						container.actualItemID = GunCusItemGun.gunList.get(actual).itemID;
+						container.actualItemID = GunCus.instance.guns.get(actual).itemID;
 					}
 
 					ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 					bytes.writeInt(15);
 					bytes.writeInt(0);
 					bytes.writeInt(actual);
-					bytes.writeInt(GunCusItemGun.gunList.get(actual).itemID);
+					bytes.writeInt(GunCus.instance.guns.get(actual).itemID);
 					PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) entityPlayer);
 				} else if (acc == 0) {
-					entityPlayer.addChatMessage(container.info()[0]);
+					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
 					if (container.info()[1] != null) {
-						entityPlayer.addChatMessage(container.info()[1]);
+						entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
 					}
 				} else if (acc == 2) {
 					container.create();
@@ -317,14 +318,13 @@ public class GunCusPacketHandler implements IPacketHandler {
 					int bullets = var5;
 					int recModify = var6;
 
-					int shootType2 = GunCus.instance.gunShoots[id];
-					int delay2 = GunCus.instance.gunDelays[id];
-					int magId2 = GunCus.instance.gunMags[id];
-					int bullets2 = GunCus.instance.gunBullets[id];
-					int recModify2 = GunCus.instance.gunRecoils[id];
+					GunCusItemGun gun = GunCus.instance.guns.get(id);
 
-					if ((delay != delay2) || (shootType != shootType2) || (magId != magId2) || (bullets != bullets2)
-							|| (recModify != recModify2)) {
+					if (   (delay != gun.delay)
+						|| (shootType != gun.shootType)
+						|| (magId != gun.mag.name)
+						|| (bullets != gun.mag.bulletType)
+						|| (recModify != gun.recModify)) {
 						ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 						bytes.writeShort(14);
 						bytes.writeShort(0);

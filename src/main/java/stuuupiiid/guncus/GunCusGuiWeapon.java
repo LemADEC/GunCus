@@ -25,8 +25,8 @@ public class GunCusGuiWeapon extends GuiContainer {
 		super(new GunCusContainerWeapon(inventory, world, x, y, z));
 		GunCus.actual = 0;
 		GunCus.actualItemID = 0;
-		if (GunCusItemGun.gunList.size() > 0) {
-			GunCus.actualItemID = GunCusItemGun.gunList.get(0).itemID;
+		if (GunCus.instance.guns.size() > 0) {
+			GunCus.actualItemID = GunCus.instance.guns.get(0);
 		}
 	}
 
@@ -55,10 +55,8 @@ public class GunCusGuiWeapon extends GuiContainer {
 			int k = (this.width - this.xSize) / 2;
 			int l = (this.height - this.ySize) / 2;
 			itemStack = new ItemStack(Item.itemsList[GunCus.actualItemID]);
-			GuiContainer.itemRenderer.renderItemAndEffectIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack,
-					k + 80, l + 14);
-			GuiContainer.itemRenderer.renderItemOverlayIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack,
-					k + 80, l + 14);
+			GuiContainer.itemRenderer.renderItemAndEffectIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack, k + 80, l + 14);
+			GuiContainer.itemRenderer.renderItemOverlayIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack, k + 80, l + 14);
 		}
 	}
 
@@ -66,7 +64,7 @@ public class GunCusGuiWeapon extends GuiContainer {
 	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
 		case 1:
-			if (GunCusItemGun.gunList.size() > 0) {
+			if (GunCus.instance.guns.size() > 0) {
 				ByteArrayDataOutput bytes3 = ByteStreams.newDataOutput();
 				bytes3.writeInt(9);
 				bytes3.writeInt(1);
