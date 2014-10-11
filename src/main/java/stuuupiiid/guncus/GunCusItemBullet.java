@@ -22,9 +22,9 @@ public class GunCusItemBullet extends GunCusItem {
 
 	public static HashMap<String, List<GunCusItemBullet>> bulletsList = new HashMap();
 
-	public GunCusItemBullet(int par1, String name, int bulletType, int sulphur, int iron, int stackOnCreate,
+	public GunCusItemBullet(String name, int bulletType, int sulphur, int iron, int stackOnCreate,
 			String pack, String icon, float damage) {
-		super(par1, icon, name, "bullet" + pack + bulletType);
+		super(icon, name, "bullet" + pack + bulletType);
 
 		if (!bulletsList.containsKey(pack)) {
 			bulletsList.put(pack, new ArrayList());

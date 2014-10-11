@@ -19,16 +19,16 @@ public class GunCusContainerGun extends Container {
 	public int posZ;
 
 	public GunCusContainerGun(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
-		this.worldObj = par2World;
-		this.posX = par3;
-		this.posY = par4;
-		this.posZ = par5;
+		worldObj = par2World;
+		posX = par3;
+		posY = par4;
+		posZ = par5;
 
-		addSlotToContainer(new Slot(this.craftMatrix, 0, 80, 56));
-		addSlotToContainer(new Slot(this.craftMatrix, 1, 80, 14));
-		addSlotToContainer(new Slot(this.craftMatrix, 2, 59, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 3, 101, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 4, 80, 35));
+		addSlotToContainer(new Slot(craftMatrix, 0, 80, 56));
+		addSlotToContainer(new Slot(craftMatrix, 1, 80, 14));
+		addSlotToContainer(new Slot(craftMatrix, 2, 59, 35));
+		addSlotToContainer(new Slot(craftMatrix, 3, 101, 35));
+		addSlotToContainer(new Slot(craftMatrix, 4, 80, 35));
 
 		for (int var6 = 0; var6 < 3; var6++) {
 			for (int var7 = 0; var7 < 9; var7++) {
@@ -48,7 +48,7 @@ public class GunCusContainerGun extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if (var3 != null) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}
@@ -129,19 +129,18 @@ public class GunCusContainerGun extends Container {
 	}
 
 	public void build() {
-		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
-		ItemStack top = ((Slot) this.inventorySlots.get(1)).getStack();
-		ItemStack left = ((Slot) this.inventorySlots.get(2)).getStack();
-		// ItemStack right = ((Slot)this.inventorySlots.get(3)).getStack();
-		ItemStack mid = ((Slot) this.inventorySlots.get(4)).getStack();
+		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack top = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack left = ((Slot) inventorySlots.get(2)).getStack();
+		// ItemStack right = ((Slot) inventorySlots.get(3)).getStack();
+		ItemStack mid = ((Slot) inventorySlots.get(4)).getStack();
 
 		int scope = 0;
 
 		if (top != null) {
-			if (top.getItem() != null) {
-				int scope1 = top.getItem().itemID;
-
-				if (scope1 == GunCus.scope.itemID) {
+			Item topItem = top.getItem();
+			if (topItem != null) {
+				if (topItem == GunCus.scope) {
 					int scopeMeta = top.getItemDamage();
 
 					scope = scopeMeta + 1;
@@ -152,10 +151,9 @@ public class GunCusContainerGun extends Container {
 		int bar1 = 0;
 
 		if (left != null) {
-			if (left.getItem() != null) {
-				int ex = left.getItem().itemID;
-
-				if (ex == GunCus.barrel.itemID) {
+			Item leftItem = left.getItem();
+			if (leftItem != null) {
+				if (leftItem == GunCus.barrel) {
 					int attaMeta = left.getItemDamage();
 					bar1 = attaMeta + 1;
 				}
@@ -167,10 +165,9 @@ public class GunCusContainerGun extends Container {
 		int extra1 = 0;
 
 		if (down != null) {
-			if (down.getItem() != null) {
-				int ex = down.getItem().itemID;
-
-				if (ex == GunCus.attachment.itemID) {
+			Item downItem = down.getItem();
+			if (downItem != null) {
+				if (downItem == GunCus.attachment) {
 					int attaMeta = down.getItemDamage();
 
 					extra1 = attaMeta + 1;
@@ -209,7 +206,7 @@ public class GunCusContainerGun extends Container {
 
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlockId(this.posX, this.posY, this.posZ) == GunCus.blockGun.blockID;
+		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockGun;
 	}
 
 	@Override

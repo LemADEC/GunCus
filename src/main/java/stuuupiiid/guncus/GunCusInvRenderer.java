@@ -2,7 +2,7 @@ package stuuupiiid.guncus;
 
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -25,7 +25,7 @@ public class GunCusInvRenderer implements IItemRenderer {
 	@Override
 	public void renderItem(IItemRenderer.ItemRenderType type, ItemStack itemStack, Object... data) {
 		GunCusItemGun gun = (GunCusItemGun) itemStack.getItem();
-		Icon icon = itemStack.getIconIndex();
+		IIcon icon = itemStack.getIconIndex();
 		renderItem.renderIcon(0, 0, icon, 16, 16);
 
 		for (int v1 = 0; v1 < gun.barrel.length; v1++) {

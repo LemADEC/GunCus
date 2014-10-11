@@ -7,8 +7,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class GunCusItemMagFill extends GunCusItem {
-	public GunCusItemMagFill(int par1) {
-		super(par1, "guncus:magFiller", "Manual Mag Filler", "magFiller");
+	public GunCusItemMagFill() {
+		super("guncus:magFiller", "Manual Mag Filler", "magFiller");
 	}
 
 	@Override

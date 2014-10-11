@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -35,6 +36,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 public class GunCusPacketHandler implements IPacketHandler {
@@ -58,7 +60,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 					if (gun.magId != -1) {
 						for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
 							if ((entityPlayer.inventory.getStackInSlot(v1) != null)
-									&& (entityPlayer.inventory.getStackInSlot(v1).getItem().itemID == gun.magId)
+									&& (entityPlayer.inventory.getStackInSlot(v1).getItem() == gun.mag)
 									&& (entityPlayer.inventory.getStackInSlot(v1).isItemDamaged())
 									&& (entityPlayer.inventory.getStackInSlot(v1).getItemDamage() < entityPlayer.inventory
 											.getStackInSlot(v1).getMaxDamage())) {
@@ -70,7 +72,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 						if (mag == null) {
 							for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
 								if ((entityPlayer.inventory.getStackInSlot(v1) != null)
-										&& (entityPlayer.inventory.getStackInSlot(v1).getItem().itemID == gun.magId)
+										&& (entityPlayer.inventory.getStackInSlot(v1).getItem() == gun.mag)
 										&& (!entityPlayer.inventory.getStackInSlot(v1).isItemDamaged())) {
 									mag = entityPlayer.inventory.getStackInSlot(v1);
 									break;
@@ -81,35 +83,29 @@ public class GunCusPacketHandler implements IPacketHandler {
 
 					int var1 = -1;
 
-					if (gun.magId == -1) {
+					if (gun.mag == null) {
 						var1 = data.readInt();
 					}
 
-					if (((mag != null) && (gun.magId != -1))
-							|| ((gun.magId == -1) && (entityPlayer.inventory
-									.hasItem(((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack))
-											.get(var1)).itemID))) || (entityPlayer.capabilities.isCreativeMode)) {
-						if ((!entityPlayer.capabilities.isCreativeMode) && (gun.magId != -1) && (mag != null)) {
+					if ( ((mag != null) && (gun.mag != null))
+							|| ((gun.mag == null) && (entityPlayer.inventory.hasItem(GunCusItemBullet.bulletsList.get(gun.pack).get(var1))))
+							|| (entityPlayer.capabilities.isCreativeMode)) {
+						if ((!entityPlayer.capabilities.isCreativeMode) && (gun.mag != null) && (mag != null)) {
 							mag.damageItem(1, entityPlayer);
-						} else if ((!entityPlayer.capabilities.isCreativeMode) && (gun.magId == -1)) {
-							entityPlayer.inventory
-									.consumeInventoryItem(((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList
-											.get(gun.pack)).get(var1)).itemID);
+						} else if ((!entityPlayer.capabilities.isCreativeMode) && (gun.mag == null)) {
+							entityPlayer.inventory.consumeInventoryItem(GunCusItemBullet.bulletsList.get(gun.pack).get(var1));
 						}
 
 						if (gun.hasSilencer(metadata)) {
-							world.playSoundAtEntity(entityPlayer, gun.soundS, 1.0F,
-									1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
+							world.playSoundAtEntity(entityPlayer, gun.soundSilenced, 1.0F, 1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
 						} else {
-							world.playSoundAtEntity(entityPlayer, gun.soundN, 5.0F * (float) gun.soundModify,
-									1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
+							world.playSoundAtEntity(entityPlayer, gun.soundNormal, 5.0F * (float) gun.soundModify, 1.0F / (world.rand.nextFloat() * 0.4F + 0.8F));
 						}
 						GunCusItemBullet bulletItem;
-						if (gun.magId != -1) {
-							GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[gun.magId];
-							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(mag2.bulletType);
+						if (gun.mag != null) {
+							bulletItem = GunCusItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletType);
 						} else {
-							bulletItem = (GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(gun.pack)).get(var1);
+							bulletItem = GunCusItemBullet.bulletsList.get(gun.pack).get(var1);
 						}
 
 						if (acc > bulletItem.spray) {
@@ -144,7 +140,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 			} else if (packetType == 2) {// Reloading (server->client)
 				GunCus.reloading = true;
 				GunCus.shootTime += 90;
-				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload", 1.0F, 1.0F);
+				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload")));
 			} else if (packetType == 3) {// GuiGun
 				GunCusContainerGun container = (GunCusContainerGun) entityPlayer.openContainer;
 
@@ -197,18 +193,18 @@ public class GunCusPacketHandler implements IPacketHandler {
 						GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 						int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
 
-						if ((gun.hasM320(metadata))
-								&& (((entityPlayer.inventory.hasItem(GunCus.ammoM320.itemID)) && (entityPlayer.inventory
-										.consumeInventoryItem(GunCus.ammoM320.itemID))) || (entityPlayer.capabilities.isCreativeMode))) {
+						if (gun.hasM320(metadata)
+								&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320) && entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))
+										|| entityPlayer.capabilities.isCreativeMode)) {
 							GunCusEntityAT rocket = new GunCusEntityAT(world, entityPlayer, acc, 2);
 							world.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 							world.spawnEntityInWorld(rocket);
 						}
-					} else if ((entityPlayer.inventory.getCurrentItem().getItem().itemID == GunCus.attachment.itemID)
+					} else if ((entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
 							&& (entityPlayer.inventory.getCurrentItem().getItemDamage() == 3)) {
-						if ((entityPlayer.capabilities.isCreativeMode)
-								|| ((entityPlayer.inventory.hasItem(GunCus.ammoM320.itemID)) && (entityPlayer.inventory
-										.consumeInventoryItem(GunCus.ammoM320.itemID)))) {
+						if (entityPlayer.capabilities.isCreativeMode
+								|| (	entityPlayer.inventory.hasItem(GunCus.ammoM320)
+										&& entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))) {
 							GunCusEntityAT rocket = new GunCusEntityAT(world, entityPlayer, acc, 2);
 							world.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 							world.spawnEntityInWorld(rocket);
@@ -255,7 +251,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 				}
 			} else if (packetType == 10) {// bullet
 				GunCus.hitmarker = 5;
-				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:inground", 1.0F, 1.0F);
+				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:inground")));
 			} else if (packetType == 11) {
 				float str = acc / 100.0F;
 				int x = data.readInt();
@@ -343,12 +339,12 @@ public class GunCusPacketHandler implements IPacketHandler {
 					}
 				}
 				if (packetType2 == 2) {
-					EntityPlayerMP entityPlayerMp = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(entityPlayer.username);
+					EntityPlayerMP entityPlayerMp = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(entityPlayer.getDisplayName());
 					String s = "You were using modified weapons!";
 
 					if (entityPlayerMp != null) {
 						entityPlayerMp.playerNetServerHandler.kickPlayerFromServer(s);
-						System.out.println("[GunCus] Kicked player " + entityPlayerMp.username + " because he was using modified weapons!");
+						System.out.println("[GunCus] Kicked player " + entityPlayerMp.getDisplayName() + " because he was using modified weapons!");
 					}
 				}
 			} else if (packetType == 15) {

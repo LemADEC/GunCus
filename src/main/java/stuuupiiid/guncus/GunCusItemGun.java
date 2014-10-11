@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundManager;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,8 +28,9 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 
@@ -45,14 +48,14 @@ public class GunCusItemGun extends Item {
 	protected boolean shot = false;
 	public String iconName;
 	public String name;
-	protected Icon icon;
-	protected Icon[] iconAttach;
-	protected Icon[] iconBar;
-	protected Icon iconScp;
-	public int magId = 0;
+	protected IIcon icon;
+	protected IIcon[] iconAttach;
+	protected IIcon[] iconBar;
+	protected IIcon iconScp;
+	public GunCusItemMag mag = null;
 	public int ingotsMag;
 	public int ingots;
-	public int field_77767_aC;
+	public int field_redstone;
 	protected double recModify;
 	public double soundModify;
 	public boolean isOfficial;
@@ -68,60 +71,59 @@ public class GunCusItemGun extends Item {
 	public boolean tubing = false;
 	public String pack;
 	public static List<GunCusItemGun> gunList = new ArrayList();
-	public String soundN;
-	public String soundS;
+	public String soundNormal;
+	public String soundSilenced;
 	public int damage;
 
-	public GunCusItemGun(int id, int damage, int shootType, int delay, String name, String iconName, int magSize,
-			int magId, int bulletType, int ingotsMag, int ingots, int redstone, String pack, boolean isOfficial,
-			int[] attach, int[] barrel, int[] scopes, boolean noMag, int[] bullets) {
-		super(id);
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-			MinecraftForgeClient.registerItemRenderer(this.itemID, new GunCusInvRenderer());
-		this.isOfficial = isOfficial;
-		this.damage = damage;
+	public GunCusItemGun(int parDamage, int parShootType, int parDelay, String parName, String parIconName, int magSize,
+			int magId, int bulletType, int parIngotsMag, int parIngots, int parRedstone, String parPack, boolean parIsOfficial,
+			int[] parAttach, int[] parBarrel, int[] parScopes, boolean noMag, int[] parBullets) {
+		super();
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			MinecraftForgeClient.registerItemRenderer(this, new GunCusInvRenderer());
+		}
+		isOfficial = parIsOfficial;
+		damage = parDamage;
 		setHasSubtypes(true);
-		this.maxStackSize = 1;
+		maxStackSize = 1;
 		setFull3D();
-		this.shootType = shootType;
-		this.actualType = shootType;
-		this.delay = delay;
+		shootType = parShootType;
+		actualType = parShootType;
+		delay = parDelay;
 		setMaxDamage(0);
-		this.name = name;
-		this.iconName = iconName;
-		this.ingots = ingots;
-		this.field_77767_aC = redstone;
-		this.pack = pack;
-		this.recModify = 1.0D;
-		this.soundModify = 1.0D;
+		name = parName;
+		iconName = parIconName;
+		ingots = parIngots;
+		field_redstone = parRedstone;
+		pack = parPack;
+		recModify = 1.0D;
+		soundModify = 1.0D;
+		attach = parAttach;
+		barrel = parBarrel;
+		scopes = parScopes;
 
-		this.attach = attach;
-		this.barrel = barrel;
-		this.scopes = scopes;
-
-		this.factor = ((this.attach.length + 1) * (this.scopes.length + 1));
+		factor = ((attach.length + 1) * (scopes.length + 1));
 
 		if (canHaveStraightPullBolt()) {
-			this.soundN = "guncus:shoot_sniper";
-			this.shootType = 0;
-			this.actualType = 0;
+			soundNormal = "guncus:shoot_sniper";
+			shootType = 0;
+			actualType = 0;
 		} else {
-			this.soundN = "guncus:shoot_normal";
+			soundNormal = "guncus:shoot_normal";
 		}
-		this.soundS = "guncus:shoot_silenced";
+		soundSilenced = "guncus:shoot_silenced";
 
-		GunCusCreativeTab tab = new GunCusCreativeTab(name, this.itemID);
+		GunCusCreativeTab tab = new GunCusCreativeTab(parName, this);
 		setCreativeTab(tab);
 
-		this.actualBullet = 0;
+		actualBullet = 0;
 
 		if (noMag) {
-			this.bullets = bullets;
-			this.magId = -1;
+			bullets = parBullets;
+			mag = null;
 		} else {
-			Item mag = new GunCusItemMag(magId, name, getName(0), magSize, iconName, bulletType, pack);
-			this.magId = mag.itemID;
-			this.ingotsMag = ingotsMag;
+			mag = new GunCusItemMag(magId, parName, getName(0), magSize, parIconName, bulletType, parPack);
+			ingotsMag = parIngotsMag;
 			mag.setCreativeTab(tab);
 		}
 
@@ -168,12 +170,12 @@ public class GunCusItemGun extends Item {
 	}
 
 	public GunCusItemGun setNormalSound(String sound) {
-		this.soundN = sound;
+		this.soundNormal = sound;
 		return this;
 	}
 
 	public GunCusItemGun setSLNSound(String sound) {
-		this.soundS = sound;
+		this.soundSilenced = sound;
 		return this;
 	}
 
@@ -191,31 +193,31 @@ public class GunCusItemGun extends Item {
 		if (entityPlayer == null || entityPlayer.getHeldItem() == null || !entityPlayer.getHeldItem().isItemEqual(itemStack)) {
 			return;
 		}
-		ItemStack mag = null;
+		ItemStack playerMag = null;
 
-		if (this.magId != -1) {
+		if (mag != null) {
 			// search for a damaged magazine first
 			for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
-				mag = entityPlayer.inventory.getStackInSlot(v1);
-				if ((mag != null)
-						&& (mag.getItem().itemID == this.magId)
-						&& (mag.isItemDamaged())
-						&& (mag.getItemDamage() < mag.getMaxDamage())) {
+				playerMag = entityPlayer.inventory.getStackInSlot(v1);
+				if ((playerMag != null)
+						&& (playerMag.getItem() == mag)
+						&& (playerMag.isItemDamaged())
+						&& (playerMag.getItemDamage() < playerMag.getMaxDamage())) {
 					break;
 				}
-				mag = null;
+				playerMag = null;
 			}
 
-			if (mag == null) {
+			if (playerMag == null) {
 				// search for a full magazine
 				for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
-					mag = entityPlayer.inventory.getStackInSlot(v1);
-					if ((mag != null)
-							&& (mag.getItem().itemID == this.magId)
-							&& (!mag.isItemDamaged())) {
+					playerMag = entityPlayer.inventory.getStackInSlot(v1);
+					if ((playerMag != null)
+							&& (playerMag.getItem() == mag)
+							&& (!playerMag.isItemDamaged())) {
 						break;
 					}
-					mag = null;
+					playerMag = null;
 				}
 			}
 		}
@@ -223,20 +225,20 @@ public class GunCusItemGun extends Item {
 		if ((GunCus.shootTime <= 0)
 				&& (Mouse.isButtonDown(0))
 				&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-				&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320.itemID)) || (entityPlayer.capabilities.isCreativeMode))
+				&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320)) || (entityPlayer.capabilities.isCreativeMode))
 				&& (this.tubing)) {
 			GunCus.shootTime += 95;
 			tube(entityPlayer);
 			recoilTube(entityPlayer);
-			Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload_tube", 1.0F, 1.0F);
+			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube")));
 		}
 		if ((GunCus.shootTime <= 0)
 				&& (Mouse.isButtonDown(0))
 				&& (!this.shot)
 				&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-				&& ( (mag != null) || (entityPlayer.capabilities.isCreativeMode)
+				&& ( (playerMag != null) || (entityPlayer.capabilities.isCreativeMode)
 				  || ((this.bullets != null)
-					&& (entityPlayer.inventory.hasItem( (GunCusItemBullet.bulletsList.get(this.pack)).get(this.bullets[this.actualBullet]).itemID ))))
+					&& (entityPlayer.inventory.hasItem( (GunCusItemBullet.bulletsList.get(this.pack)).get(this.bullets[this.actualBullet]) ))))
 				&& (!this.tubing)) {
 			GunCus.shootTime += this.delay;
 			this.reloadBurst = 0;
@@ -254,11 +256,10 @@ public class GunCusItemGun extends Item {
 
 			shoot(entityPlayer);
 			GunCusItemBullet bulletItem;
-			if (this.magId != -1) {
-				GunCusItemMag mag2 = (GunCusItemMag) Item.itemsList[this.magId];
-				bulletItem = GunCusItemBullet.bulletsList.get(this.pack).get(mag2.bulletType);
+			if (mag != null) {
+				bulletItem = GunCusItemBullet.bulletsList.get(pack).get(mag.bulletType);
 			} else {
-				bulletItem = GunCusItemBullet.bulletsList.get(this.pack).get(this.bullets[this.actualBullet]);
+				bulletItem = GunCusItemBullet.bulletsList.get(pack).get(bullets[actualBullet]);
 			}
 
 			float damage1 = this.damage * bulletItem.damage;
@@ -351,9 +352,9 @@ public class GunCusItemGun extends Item {
 		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(34))
 				&& (GunCus.switchTime <= 0) && (this.bullets != null) && (this.bullets.length > 1)) {
 			GunCus.switchTime = 20;
-			this.actualBullet += 1;
-			if (this.actualBullet >= this.bullets.length) {
-				this.actualBullet = 0;
+			actualBullet += 1;
+			if (actualBullet >= bullets.length) {
+				actualBullet = 0;
 			}
 			entityPlayer.addChatMessage("You are now using \""
 					+ ((GunCusItemBullet) ((List) GunCusItemBullet.bulletsList.get(this.pack))
@@ -365,8 +366,8 @@ public class GunCusItemGun extends Item {
 		ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 		bytes.writeInt(1);
 		bytes.writeInt(MathHelper.floor_double(GunCus.accuracy));
-		if (this.magId == -1) {
-			bytes.writeInt(this.bullets[this.actualBullet]);
+		if (mag == null) {
+			bytes.writeInt(bullets[actualBullet]);
 		}
 		PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
 	}
@@ -402,7 +403,7 @@ public class GunCusItemGun extends Item {
 	}
 
 	@Override
-	public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List) {
+	public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
 		for (int j = 0; j < this.subs; j++) {
 			ItemStack itemStack = new ItemStack(par1, 1, j);
 			par3List.add(itemStack);
@@ -590,16 +591,16 @@ public class GunCusItemGun extends Item {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister par1IconRegister) {
+	public void registerIcons(IIconRegister par1IconRegister) {
 		this.icon = par1IconRegister.registerIcon(this.iconName + "gun");
 
-		this.iconAttach = new Icon[this.attach.length];
+		this.iconAttach = new IIcon[this.attach.length];
 
 		for (int v1 = 0; v1 < this.attach.length; v1++) {
 			this.iconAttach[v1] = par1IconRegister.registerIcon(this.iconName + getAttachIcon("a", this.attach[v1]));
 		}
 
-		this.iconBar = new Icon[this.barrel.length];
+		this.iconBar = new IIcon[this.barrel.length];
 
 		for (int v1 = 0; v1 < this.barrel.length; v1++) {
 			this.iconBar[v1] = par1IconRegister.registerIcon(this.iconName + getAttachIcon("b", this.barrel[v1]));
@@ -659,7 +660,7 @@ public class GunCusItemGun extends Item {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int par1) {
 		return this.icon;
 	}
 

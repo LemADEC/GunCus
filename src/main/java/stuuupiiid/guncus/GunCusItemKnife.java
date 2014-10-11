@@ -7,8 +7,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class GunCusItemKnife extends GunCusItem {
-	public GunCusItemKnife(int par1) {
-		super(par1, "guncus:knife", "Knife", "gcKnife");
+	public GunCusItemKnife() {
+		super( "guncus:knife", "Knife", "gcKnife");
 	}
 
 	@Override

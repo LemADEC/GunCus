@@ -14,7 +14,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.EventBus;
 
 import org.lwjgl.input.Mouse;
 
@@ -43,7 +42,7 @@ public class GunCusClientProxy extends GunCusCommonProxy {
 		if (client.thePlayer != null) {
 			EntityPlayer entityPlayer = client.thePlayer;
 			boolean hasGunInHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun);
-			ScaledResolution scale = new ScaledResolution(client.gameSettings, client.displayWidth,	client.displayHeight);
+			ScaledResolution scale = new ScaledResolution(client, client.displayWidth,	client.displayHeight);
 			int scaledWidth = scale.getScaledWidth();
 			int scaledHeight = scale.getScaledHeight();
 			int xCenter = scaledWidth / 2;

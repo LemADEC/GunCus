@@ -24,9 +24,8 @@ public class GunCusGuiBullet extends GuiContainer {
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		this.fontRenderer.drawString("Bullet Box", 8, this.ySize - 160, 4210752);
-		this.fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2,
-				4210752);
+		this.fontRendererObj.drawString("Bullet Box", 8, this.ySize - 160, 0x404040);
+		this.fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 0x404040);
 		this.buttonList.clear();
 		int var5 = (this.width - this.xSize) / 2;
 		int var6 = (this.height - this.ySize) / 2;

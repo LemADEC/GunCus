@@ -1,9 +1,11 @@
 package stuuupiiid.guncus;
 
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
@@ -46,7 +48,7 @@ public class GunCusContainerMag extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if ((var3 != null) && (par1EntityPlayer != null)) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}
@@ -66,13 +68,13 @@ public class GunCusContainerMag extends Container {
 		}
 
 		if ((gun != null) && (left != null) && (left.getItem() != null)
-				&& (left.getItem().itemID == Item.ingotIron.itemID) && (right == null) && (ingotsRequired > 0)
+				&& (left.getItem() == Items.iron_ingot) && (right == null) && (ingotsRequired > 0)
 				&& (left.stackSize >= ingotsRequired)) {
 			int stackSize = left.stackSize;
 
 			stackSize -= ingotsRequired;
 
-			((Slot) this.inventorySlots.get(1)).putStack(new ItemStack(Item.ingotIron, stackSize));
+			((Slot) this.inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, stackSize));
 			((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(Item.itemsList[gun.magId], 1,
 					Item.itemsList[gun.magId].getMaxDamage()));
 		}
@@ -99,7 +101,7 @@ public class GunCusContainerMag extends Container {
 
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlockId(this.posX, this.posY, this.posZ) == GunCus.blockMag.blockID;
+		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockMag;
 	}
 
 	@Override

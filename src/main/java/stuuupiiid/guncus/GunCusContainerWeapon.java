@@ -1,9 +1,11 @@
 package stuuupiiid.guncus;
 
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
@@ -21,20 +23,20 @@ public class GunCusContainerWeapon extends Container {
 	public int actual;
 
 	public GunCusContainerWeapon(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
-		this.actual = 0;
-		this.actualItemID = 0;
+		actual = 0;
+		actualItemID = 0;
 		if (GunCusItemGun.gunList.size() > 0) {
-			this.actualItemID = GunCusItemGun.gunList.get(0).itemID;
+			actualItemID = GunCusItemGun.gunList.get(0).itemID;
 		}
 
-		this.worldObj = par2World;
-		this.posX = par3;
-		this.posY = par4;
-		this.posZ = par5;
+		worldObj = par2World;
+		posX = par3;
+		posY = par4;
+		posZ = par5;
 
-		addSlotToContainer(new Slot(this.craftMatrix, 0, 59, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 1, 80, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 2, 101, 35));
+		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
+		addSlotToContainer(new Slot(craftMatrix, 1, 80, 35));
+		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
 
 		for (int var6 = 0; var6 < 3; var6++) {
 			for (int var7 = 0; var7 < 9; var7++) {
@@ -54,7 +56,7 @@ public class GunCusContainerWeapon extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if (var3 != null) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}
@@ -69,7 +71,7 @@ public class GunCusContainerWeapon extends Container {
 
 			if (gun != null) {
 				int iron = gun.ingots;
-				int redst = gun.field_77767_aC;
+				int redst = gun.field_redstone;
 				rtn = "Gun = \"" + gun.name + "\", Pack = \"" + gun.pack + "\"";
 				rtn2 = "-> " + (iron > 0 ? iron + " iron ingot" + (iron > 1 ? "s, " : ", ") : "")
 						+ (redst > 0 ? redst + " redstone" : "");
@@ -88,10 +90,10 @@ public class GunCusContainerWeapon extends Container {
 
 			if (gun != null) {
 				int reqIr = gun.ingots;
-				int reqRe = gun.field_77767_aC;
+				int reqRe = gun.field_redstone;
 
-				if (((ir != null) && (ir.stackSize >= reqIr) && (ir.getItem().itemID == Item.ingotIron.itemID))
-						|| ((reqIr <= 0) && (((re != null) && (re.stackSize >= reqRe) && (re.getItem().itemID == Item.redstone.itemID)) || (reqRe <= 0)))) {
+				if (((ir != null) && (ir.stackSize >= reqIr) && (ir.getItem() == Items.iron_ingot))
+						|| ((reqIr <= 0) && (((re != null) && (re.stackSize >= reqRe) && (re.getItem() == Items.redstone)) || (reqRe <= 0)))) {
 					((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(gun, 1, 0));
 					if (ir != null) {
 						((Slot) this.inventorySlots.get(0)).decrStackSize(reqIr);
@@ -106,7 +108,7 @@ public class GunCusContainerWeapon extends Container {
 
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlockId(this.posX, this.posY, this.posZ) == GunCus.blockWeapon.blockID;
+		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockWeapon;
 	}
 
 	@Override

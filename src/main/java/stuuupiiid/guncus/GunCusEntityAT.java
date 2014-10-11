@@ -1,30 +1,28 @@
  package stuuupiiid.guncus;
  
  import java.util.HashMap;
- import java.util.List;
- import java.util.Random;
- import net.minecraft.block.Block;
- import net.minecraft.entity.Entity;
- import net.minecraft.entity.IProjectile;
- import net.minecraft.entity.player.EntityPlayer;
- import net.minecraft.entity.player.PlayerCapabilities;
- import net.minecraft.entity.projectile.EntityArrow;
- import net.minecraft.nbt.NBTTagCompound;
- import net.minecraft.util.AxisAlignedBB;
- import net.minecraft.util.MathHelper;
- import net.minecraft.util.MovingObjectPosition;
- import net.minecraft.util.Vec3;
- import net.minecraft.util.Vec3Pool;
- import net.minecraft.world.World;
+import java.util.List;
+import java.util.Random;
+
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
  
- public class GunCusEntityAT extends EntityArrow
-   implements IProjectile
- {
-   private int field_70247_d = -1;
-   private int field_70248_e = -1;
-   private int field_70245_f = -1;
-   private int field_70246_g = 0;
-   private int field_70253_h = 0;		// metadata
+ public class GunCusEntityAT extends EntityArrow implements IProjectile {
+   private int blockX = -1;
+   private int blockY = -1;
+   private int blockZ = -1;
+   private Block collision_block = Blocks.air;
    private boolean field_70254_i = false;
    public EntityPlayer field_70250_c;
    private int field_70252_j;
@@ -96,14 +94,13 @@ public void onUpdate()
        this.prevRotationPitch = (this.rotationPitch = (float)(Math.atan2(this.motionY, f) * 180.0D / 3.141592653589793D));
      }
  
-     int i = this.worldObj.getBlockId(this.field_70247_d, this.field_70248_e, this.field_70245_f);
+     Block block = this.worldObj.getBlock(this.blockX, this.blockY, this.blockZ);
  
-     if (i > 0)
-     {
-       Block.blocksList[i].setBlockBoundsBasedOnState(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f);
-       AxisAlignedBB axisalignedbb = Block.blocksList[i].getCollisionBoundingBoxFromPool(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f);
+     if (block != Blocks.air) {
+       block.setBlockBoundsBasedOnState(this.worldObj, this.blockX, this.blockY, this.blockZ);
+       AxisAlignedBB axisalignedbb = block.getCollisionBoundingBoxFromPool(this.worldObj, this.blockX, this.blockY, this.blockZ);
  
-       if ((axisalignedbb != null) && (axisalignedbb.isVecInside(this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ))))
+       if ((axisalignedbb != null) && (axisalignedbb.isVecInside(Vec3.createVectorHelper(this.posX, this.posY, this.posZ))))
        {
          this.field_70254_i = true;
        }
@@ -130,15 +127,15 @@ public void onUpdate()
      else
      {
        this.field_70257_an += 1;
-       Vec3 vec3 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);
-       Vec3 vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+       Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+       Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
        MovingObjectPosition movingobjectposition = this.worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
-       vec3 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);
-       vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+       vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+       vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
  
        if (movingobjectposition != null)
        {
-         vec31 = this.worldObj.getWorldVec3Pool().getVecFromPool(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+         vec31 = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
        }
  
        Entity entity = null;
@@ -177,12 +174,11 @@ public void onUpdate()
        {
          EntityPlayer entityplayer = (EntityPlayer)movingobjectposition.entityHit;
  
-         if ((entityplayer.capabilities.disableDamage) || (((this.field_70250_c instanceof EntityPlayer)) && (!this.field_70250_c.canAttackPlayer(entityplayer))))
+         if ((entityplayer.capabilities.disableDamage) || ((this.field_70250_c != null) && (!this.field_70250_c.canAttackPlayer(entityplayer))))
          {
            movingobjectposition = null;
          }
- 
-       }
+        }
  
        if (movingobjectposition != null)
        {
@@ -192,32 +188,31 @@ public void onUpdate()
          }
          else
          {
-           this.field_70247_d = movingobjectposition.blockX;
-           this.field_70248_e = movingobjectposition.blockY;
-           this.field_70245_f = movingobjectposition.blockZ;
-           this.field_70246_g = this.worldObj.getBlockId(this.field_70247_d, this.field_70248_e, this.field_70245_f);
-           this.field_70253_h = this.worldObj.getBlockMetadata(this.field_70247_d, this.field_70248_e, this.field_70245_f);
-           this.motionX = ((float)(movingobjectposition.hitVec.xCoord - this.posX));
-           this.motionY = ((float)(movingobjectposition.hitVec.yCoord - this.posY));
-           this.motionZ = ((float)(movingobjectposition.hitVec.zCoord - this.posZ));
-           float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-           this.posX -= this.motionX / f2 * 0.0500000007450581D;
-           this.posY -= this.motionY / f2 * 0.0500000007450581D;
-           this.posZ -= this.motionZ / f2 * 0.0500000007450581D;
-           this.field_70254_i = true;
+           blockX = movingobjectposition.blockX;
+           blockY = movingobjectposition.blockY;
+           blockZ = movingobjectposition.blockZ;
+           collision_block = worldObj.getBlock(blockX, blockY, blockZ);
+           motionX = ((float)(movingobjectposition.hitVec.xCoord - posX));
+           motionY = ((float)(movingobjectposition.hitVec.yCoord - posY));
+           motionZ = ((float)(movingobjectposition.hitVec.zCoord - posZ));
+           float f2 = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+           posX -= motionX / f2 * 0.0500000007450581D;
+           posY -= motionY / f2 * 0.0500000007450581D;
+           posZ -= motionZ / f2 * 0.0500000007450581D;
+           field_70254_i = true;
            setIsCritical(false);
  
-           if (this.field_70246_g != 0)
+           if (collision_block != Blocks.air)
            {
-             Block.blocksList[this.field_70246_g].onEntityCollidedWithBlock(this.worldObj, this.field_70247_d, this.field_70248_e, this.field_70245_f, this);
+             collision_block.onEntityCollidedWithBlock(this.worldObj, this.blockX, this.blockY, this.blockZ, this);
            }
          }
-         this.field_70254_i = true;
+         field_70254_i = true;
        }
  
-       this.posX += this.motionX;
-       this.posY += this.motionY;
-       this.posZ += this.motionZ;
+       posX += motionX;
+       posY += motionY;
+       posZ += motionZ;
        float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
        this.rotationYaw = ((float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / 3.141592653589793D));
  
@@ -284,7 +279,3 @@ public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)
      setDead();
    }
  }
-
-
-
-

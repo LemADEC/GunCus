@@ -4,7 +4,7 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,22 +12,22 @@ import net.minecraft.item.ItemStack;
 public class GunCusItem extends Item {
 	String iconName;
 
-	public GunCusItem(int par1, String iconName, String name, String unlocalized) {
-		super(par1);
+	public GunCusItem(String iconName, String name, String unlocalized) {
+		super();
 		setCreativeTab(GunCus.gcTab);
 		this.iconName = iconName;
 		setUnlocalizedName(unlocalized);
 		LanguageRegistry.addName(this, name);
 	}
 
-	public GunCusItem(int par1) {
-		super(par1);
+	public GunCusItem() {
+		super();
 		setCreativeTab(GunCus.gcTab);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister iconRegister) {
+	public void registerIcons(IIconRegister iconRegister) {
 		this.itemIcon = iconRegister.registerIcon(this.iconName);
 	}
 

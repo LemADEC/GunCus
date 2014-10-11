@@ -2,9 +2,11 @@ package stuuupiiid.guncus;
 
 import java.util.HashMap;
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
@@ -25,10 +27,10 @@ public class GunCusContainerBullet extends Container {
 		this.posY = par4;
 		this.posZ = par5;
 
-		addSlotToContainer(new Slot(this.craftMatrix, 0, 80, 14));
-		addSlotToContainer(new Slot(this.craftMatrix, 1, 59, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 2, 101, 35));
-		addSlotToContainer(new Slot(this.craftMatrix, 3, 80, 35));
+		addSlotToContainer(new Slot(craftMatrix, 0, 80, 14));
+		addSlotToContainer(new Slot(craftMatrix, 1, 59, 35));
+		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
+		addSlotToContainer(new Slot(craftMatrix, 3, 80, 35));
 
 		for (int var6 = 0; var6 < 3; var6++) {
 			for (int var7 = 0; var7 < 9; var7++) {
@@ -48,17 +50,17 @@ public class GunCusContainerBullet extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if (var3 != null) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}
 	}
 
 	public void create() {
-		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
-		ItemStack left = ((Slot) this.inventorySlots.get(1)).getStack();
-		ItemStack right = ((Slot) this.inventorySlots.get(2)).getStack();
-		ItemStack mid = ((Slot) this.inventorySlots.get(3)).getStack();
+		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack left = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack right = ((Slot) inventorySlots.get(2)).getStack();
+		ItemStack mid = ((Slot) inventorySlots.get(3)).getStack();
 
 		GunCusItemMag mag = null;
 		GunCusItemBullet bullet = null;
@@ -76,12 +78,12 @@ public class GunCusContainerBullet extends Container {
 					&& ((sulphur > 0) || (iron > 0))
 					&& (left != null)
 					&& (left.getItem() != null)
-					&& (left.getItem().itemID == Item.ingotIron.itemID)
+					&& (left.getItem() == Items.iron_ingot)
 					&& (mid != null)
 					&& (mid.getItem() != null)
-					&& (mid.getItem().itemID == Item.gunpowder.itemID)
+					&& (mid.getItem() == Items.gunpowder)
 					&& ((right == null) || ((right != null) && (right.getItem() != null)
-							&& (right.getItem().itemID == bullet.itemID) && (right.stackSize + bullet.stackOnCreate <= 64)))
+							&& (right.getItem() == bullet) && (right.stackSize + bullet.stackOnCreate <= 64)))
 					&& (bullet.stackOnCreate >= 1) && (left.stackSize >= iron) && (mid.stackSize >= sulphur)) {
 				int sizeIr = left.stackSize;
 				int sizeSu = mid.stackSize;
@@ -92,9 +94,9 @@ public class GunCusContainerBullet extends Container {
 				int size = bullet.stackOnCreate
 						+ ((right != null) && (right.getItem() != null) && (right.stackSize > 0) ? right.stackSize : 0);
 
-				((Slot) this.inventorySlots.get(1)).putStack(new ItemStack(Item.ingotIron, sizeIr));
-				((Slot) this.inventorySlots.get(3)).putStack(new ItemStack(Item.gunpowder, sizeSu));
-				((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(bullet, size));
+				((Slot) inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, sizeIr));
+				((Slot) inventorySlots.get(3)).putStack(new ItemStack(Items.gunpowder, sizeSu));
+				((Slot) inventorySlots.get(2)).putStack(new ItemStack(bullet, size));
 			}
 		}
 	}
@@ -135,7 +137,7 @@ public class GunCusContainerBullet extends Container {
 
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlockId(this.posX, this.posY, this.posZ) == GunCus.blockBullet.blockID;
+		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockBullet;
 	}
 
 	@Override

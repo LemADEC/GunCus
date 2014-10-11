@@ -33,6 +33,8 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
@@ -41,8 +43,8 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 import org.lwjgl.input.Keyboard;
 
@@ -138,43 +140,47 @@ public class GunCus {
 		int ammo1 = config1.get("Gun Customization IDs", "GC 40x46mm SR Frag", 13006).getInt(13006);
 		config1.save();
 
-		blockWeapon = new GunCusBlockWeapon(b1);
-		blockMag = new GunCusBlockMag(b2);
-		blockBullet = new GunCusBlockBullet(b3);
-		blockAmmo = new GunCusBlockAmmo(b4);
-		blockGun = new GunCusBlockGun(b5);
+		blockWeapon = new GunCusBlockWeapon();
+		blockMag = new GunCusBlockMag();
+		blockBullet = new GunCusBlockBullet();
+		blockAmmo = new GunCusBlockAmmo();
+		blockGun = new GunCusBlockGun();
 
-		magFill = new GunCusItemMagFill(i2);
-		part = new GunCusItem(i3, "guncus:boxpart", "Box Part", "boxpart");
+		magFill = new GunCusItemMagFill();
+		part = new GunCusItem("guncus:boxpart", "Box Part", "boxpart");
 
-		scope = new GunCusItemScope(s, "scope", "scope", new GunCusScope[] {
-				new GunCusScope("Reflex (RDS) Scope", "reflex", 1.0F, 1),
-				new GunCusScope("Kobra (RDS) Scope", "kobra", 1.0F, 2),
-				new GunCusScope("Holographic (Holo) Scope", "holographic", 1.0F, 3),
-				new GunCusScope("PKA-S (Holo) Scope", "pka-s", 1.0F, 4),
-				new GunCusScope("M145 (3.4x) Scope", "m145", 3.4F, 5),
-				new GunCusScope("PK-A (3.4x) Scope", "pk-a", 3.4F, 6),
-				new GunCusScope("ACOG (4x) Scope", "acog", 4.0F, 7),
-				new GunCusScope("PSO-1 (4x) Scope", "pso-1", 4.0F, 8),
-				new GunCusScope("Rifle (6x) Scope", "rifle", 6.0F, 9),
-				new GunCusScope("PKS-07 (7x) Scope", "pks-07", 7.0F, 10),
-				new GunCusScope("Rifle (8x) Scope", "rifle", 8.0F, 11),
-				new GunCusScope("Ballistic (12x) Scope", "ballistic", 4.0F, 12),
-				new GunCusScope("Ballistic (20x) Scope", "ballistic", 20.0F, 13) });
-		barrel = new GunCusItemMetadata(b, "barrel", "barrel", new GunCusCustomizationPart[] {
-				new GunCusCustomizationPart("Silencer", "-sln", 1),
-				new GunCusCustomizationPart("Heavy Barrel", "-hbl", 2),
-				new GunCusCustomizationPart("Rifled Barrel", "-rbl", 3),
-				new GunCusCustomizationPart("Polygonal Barrel", "-pbl", 4) });
-		attachment = new GunCusItemAttachment(a, "attachment", "attachment", new GunCusCustomizationPart[] {
-				new GunCusCustomizationPart("Straight Pull Bolt", "-spb", 1),
-				new GunCusCustomizationPart("Bipod", "-bpd", 2), new GunCusCustomizationPart("Foregrip", "-grp", 3),
-				new GunCusCustomizationPart("M320", "-320", 4),
-				new GunCusCustomizationPart("Strong Spiral Spring", "-sss", 5),
-				new GunCusCustomizationPart("Improved Grip", "-img", 6),
-				new GunCusCustomizationPart("Laser Pointer", "-ptr", 7) });
+		scope = new GunCusItemScope("scope", "scope",
+				new GunCusScope[] {
+					new GunCusScope("Reflex (RDS) Scope", "reflex", 1.0F, 1),
+					new GunCusScope("Kobra (RDS) Scope", "kobra", 1.0F, 2),
+					new GunCusScope("Holographic (Holo) Scope", "holographic", 1.0F, 3),
+					new GunCusScope("PKA-S (Holo) Scope", "pka-s", 1.0F, 4),
+					new GunCusScope("M145 (3.4x) Scope", "m145", 3.4F, 5),
+					new GunCusScope("PK-A (3.4x) Scope", "pk-a", 3.4F, 6),
+					new GunCusScope("ACOG (4x) Scope", "acog", 4.0F, 7),
+					new GunCusScope("PSO-1 (4x) Scope", "pso-1", 4.0F, 8),
+					new GunCusScope("Rifle (6x) Scope", "rifle", 6.0F, 9),
+					new GunCusScope("PKS-07 (7x) Scope", "pks-07", 7.0F, 10),
+					new GunCusScope("Rifle (8x) Scope", "rifle", 8.0F, 11),
+					new GunCusScope("Ballistic (12x) Scope", "ballistic", 4.0F, 12),
+					new GunCusScope("Ballistic (20x) Scope", "ballistic", 20.0F, 13) });
+		barrel = new GunCusItemMetadata("barrel", "barrel",
+				new GunCusCustomizationPart[] {
+					new GunCusCustomizationPart("Silencer", "-sln", 1),
+					new GunCusCustomizationPart("Heavy Barrel", "-hbl", 2),
+					new GunCusCustomizationPart("Rifled Barrel", "-rbl", 3),
+					new GunCusCustomizationPart("Polygonal Barrel", "-pbl", 4) });
+		attachment = new GunCusItemAttachment("attachment", "attachment",
+				new GunCusCustomizationPart[] {
+					new GunCusCustomizationPart("Straight Pull Bolt", "-spb", 1),
+					new GunCusCustomizationPart("Bipod", "-bpd", 2),
+				new GunCusCustomizationPart("Foregrip", "-grp", 3),
+					new GunCusCustomizationPart("M320", "-320", 4),
+					new GunCusCustomizationPart("Strong Spiral Spring", "-sss", 5),
+					new GunCusCustomizationPart("Improved Grip", "-img", 6),
+					new GunCusCustomizationPart("Laser Pointer", "-ptr", 7) });
 
-		ammoM320 = new GunCusItem(ammo1, "guncus:ammoM320", "GC 40x46mm SR Frag", "ammoM320").setMaxStackSize(8);
+		ammoM320 = new GunCusItem("guncus:ammoM320", "GC 40x46mm SR Frag", "ammoM320").setMaxStackSize(8);
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			registerTickHandlers();
@@ -219,160 +225,160 @@ public class GunCus {
 
 		GameRegistry.addShapedRecipe(new ItemStack(part),
 				new Object[] { "ABA", "BCB", "ABA",
-					'A', new ItemStack(Item.ingotIron),
-					'B', new ItemStack(Item.redstone),
-					'C', new ItemStack(Item.ingotGold) });
+					'A', new ItemStack(Items.iron_ingot),
+					'B', new ItemStack(Items.redstone),
+					'C', new ItemStack(Items.gold_ingot) });
 		GameRegistry.addShapedRecipe(new ItemStack(magFill),
 				new Object[] { "ABA", "BAB", "ABA",
-					'B', new ItemStack(Item.ingotIron),
-					'A', new ItemStack(Item.redstone) });
+					'B', new ItemStack(Items.iron_ingot),
+					'A', new ItemStack(Items.redstone) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockAmmo),
 				new Object[] { "BBB", "ABA", "BCB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Item.ingotIron),
-					'C', new ItemStack(Block.blockIron) });
+					'B', new ItemStack(Items.iron_ingot),
+					'C', new ItemStack(Blocks.iron_block) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockBullet),
 				new Object[] { "BAB", "AAA", "BCB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Item.ingotIron),
-					'C', new ItemStack(Block.blockIron) });
+					'B', new ItemStack(Items.iron_ingot),
+					'C', new ItemStack(Blocks.iron_block) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockMag),
 				new Object[] { "BAB", "ABA", "BCB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Item.ingotIron),
-					'C', new ItemStack(Block.blockIron) });
+					'B', new ItemStack(Items.iron_ingot),
+					'C', new ItemStack(Blocks.iron_block) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockGun),
 				new Object[] { "BAB", "AAA", "BAB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Item.ingotIron) });
+					'B', new ItemStack(Items.iron_ingot) });
 		GameRegistry.addShapedRecipe(new ItemStack(blockWeapon),
 				new Object[] { "ABA", "ABA", "BCB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Item.ingotIron),
-					'C', new ItemStack(Block.blockIron) });
+					'B', new ItemStack(Items.iron_ingot),
+					'C', new ItemStack(Blocks.iron_block) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 0),
 				new Object[] { " IG", "IRI",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 1),
 				new Object[] { "IG ", "IRI",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 2),
 				new Object[] { " I ", "GRG", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 3),
 				new Object[] { "I I", "GRG", " I ",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 4),
 				new Object[] { " I ", "GDG", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 5),
 				new Object[] { "I I", "GDG", " I ",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 6),
 				new Object[] { "I I", "GDG", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 7),
 				new Object[] { "I I", "GDG", " II",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 8),
 				new Object[] { "III", "GDG", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 9),
 				new Object[] { "I I", "D8G", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1),
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1),
 					'8', new ItemStack(scope, 1, 7) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 10),
 				new Object[] { "D9G", " I ",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1), Character.valueOf('9'), new ItemStack(scope, 1, 8) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1), Character.valueOf('9'), new ItemStack(scope, 1, 8) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 11),
 				new Object[] { "GIG", "DDD", "III",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 12),
 				new Object[] { " I ", "DBG", "I I",
-					'G', new ItemStack(Block.thinGlass, 1),
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
+					'G', new ItemStack(Blocks.glass_pane, 1),
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
 
 		GameRegistry.addShapedRecipe(
 				new ItemStack(ammoM320),
 				new Object[] { "GI ", "IGI", " IG",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'G', new ItemStack(Item.gunpowder, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'G', new ItemStack(Items.gunpowder, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 0),
 				new Object[] { "I  ", " I ", "I I",
-					'I', new ItemStack(Item.ingotIron, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 1),
 				new Object[] { " I ", "I I", "I I",
-					'I', new ItemStack(Item.ingotIron, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 2),
 				new Object[] { "II ", " I ", " II",
-					'I', new ItemStack(Item.ingotIron, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 3),
 				new Object[] { " II", "IRR", "I I",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 4),
 				new Object[] { "I  ", "IGI", "  I",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'G', new ItemStack(Item.ingotGold, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'G', new ItemStack(Items.gold_ingot, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 5),
 				new Object[] { " L ", "LGL", " L ",
-					'L', new ItemStack(Item.leather, 1),
+					'L', new ItemStack(Items.leather, 1),
 					'G', new ItemStack(attachment, 1, 2) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 6),
 				new Object[] { "II ", "RRI", "II ",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'R', new ItemStack(Item.redstone, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'R', new ItemStack(Items.redstone, 1) });
 
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 0),
 				new Object[] { "SI ", "ISI", " IS",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'S', new ItemStack(Item.slimeBall, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'S', new ItemStack(Items.slime_ball, 1) });
 		GameRegistry.addShapedRecipe(new ItemStack(barrel, 1, 1),
 				new Object[] { "II ", "II ", "  I",
-					'I', new ItemStack(Item.ingotIron, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 2),
 				new Object[] { "GI ", "IGI", " IG",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'G', new ItemStack(Item.ingotGold, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'G', new ItemStack(Items.gold_ingot, 1) });
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 3),
 				new Object[] { "II ", "IDI", " II",
-					'I', new ItemStack(Item.ingotIron, 1),
-					'D', new ItemStack(Item.diamond, 1) });
+					'I', new ItemStack(Items.iron_ingot, 1),
+					'D', new ItemStack(Items.diamond, 1) });
 	}
 
 	public static void createExplosionServer(Entity entity, double x, double y, double z, float str) {
@@ -385,7 +391,7 @@ public class GunCus {
 	public static void removeBlockServer(Entity entity, int x, int y, int z) {
 		if ((FMLCommonHandler.instance().getEffectiveSide().isServer()) && (blockDamage)) {
 			World world = entity.worldObj;
-			world.setBlock(x, y, z, 0);
+			world.setBlockToAir(x, y, z);
 		}
 	}
 
@@ -664,7 +670,6 @@ public class GunCus {
 			damageProp.comment = "Applied damage is Gun Damage * Damage Modifier";
 
 			float damage = (float) damageProp.getDouble(1.0D);
-			int id = idProp.getInt(1010);
 			int bul = bulProp.getInt(1);
 			int iron = ironProp.getInt(1);
 			int sul = sulProp.getInt(3);
@@ -681,21 +686,20 @@ public class GunCus {
 			}
 
 			if ((name != null)
-					&& (id > 0)
 					&& (bul > 0)
 					&& (iron >= 0)
 					&& (sul >= 0)
 					&& ((iron > 0) || (sul > 0))
 					&& (stack > 0)
-					&& (((((List) GunCusItemBullet.bulletsList.get(pack)).size() > bul) && (((List) GunCusItemBullet.bulletsList
-							.get(pack)).get(bul) == null)) || ((((List) GunCusItemBullet.bulletsList.get(pack)).size() <= bul) && (Item.itemsList[(id + 256)] == null)))) {
-				if ((icon.equals("")) || (icon.equals(" "))) {
+					&& ( ( (GunCusItemBullet.bulletsList.get(pack).size() > bul) && (GunCusItemBullet.bulletsList.get(pack).get(bul) == null) )
+							|| (GunCusItemBullet.bulletsList.get(pack).size() <= bul) ) ) {
+				if (icon.equals("") || icon.equals(" ")) {
 					icon = "guncus:bullet";
 				} else {
 					icon = "minecraft:bullets/" + icon;
 				}
 
-				GunCusItemBullet bullet = new GunCusItemBullet(id, name, bul, sul, iron, stack, pack, icon, damage)
+				GunCusItemBullet bullet = new GunCusItemBullet(name, bul, sul, iron, stack, pack, icon, damage)
 						.setSplit(split).setGravityModifier(gravity).setSpray(spray);
 
 				for (String effect : effects) {
@@ -715,9 +719,7 @@ public class GunCus {
 					}
 				}
 
-				this.loadedBullets.add(" - " + name + " (ID:" + id + ", Bullet ID:" + bul + ", Pack:" + pack + ")");
-			} else if (Item.itemsList[(id + 256)] != null) {
-				log("[" + pack + "] Conflict while trying to add \"" + name + "\" bullets: The ID \"" + id + "\" is already occupied!");
+				loadedBullets.add(" - " + name + " (Bullet ID:" + bul + ", Pack:" + pack + ")");
 			} else {
 				log("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 			}
@@ -885,11 +887,11 @@ public class GunCus {
 					&& (ingotsMag >= 0)
 					&& (red >= 0)
 					&& ((ingots > 0) || (red > 0))
-					&& (Item.itemsList[(id + 256)] == null)
-					&& (((usingMag) && (Item.itemsList[(magId + 256)] == null)) || ((!usingMag)
-							&& (bulletsArray.length >= 1) && (GunCusItemBullet.bulletsList.get(pack) != null) && ((!usingMag) || ((usingMag)
-							&& (((List) GunCusItemBullet.bulletsList.get(pack)).size() > bullets) && (((List) GunCusItemBullet.bulletsList
-							.get(pack)).get(bullets) != null)))))) {
+					&& (usingMag
+							|| ((!usingMag) && (bulletsArray.length >= 1)
+									&& (GunCusItemBullet.bulletsList.get(pack) != null)
+									&& (GunCusItemBullet.bulletsList.get(pack).size() > bullets)
+									&& (GunCusItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
 				boolean def = false;
 				String icon;
 				if ((icon2.equals("")) || (icon2.equals(" "))) {
@@ -928,7 +930,7 @@ public class GunCus {
 						scopes = new int[0];
 					}
 
-					GunCusItemGun gun = new GunCusItemGun(id, damage, shootType, delay, name, icon, magSize, magId,
+					GunCusItemGun gun = new GunCusItemGun(damage, shootType, delay, name, icon, magSize, magId,
 							bullets, ingotsMag, ingots, red, pack, false, attach, bar, scopes, !usingMag, bulletsArray)
 							.setRecoilModifier(recModify).setSoundModifier(sndModify).defaultTexture(def).setZoom(zoom);
 
@@ -951,25 +953,10 @@ public class GunCus {
 				this.gunRecoils[id] = MathHelper.floor_double(recModify);
 
 				this.loadedGuns.add(" - " + name + " (ID:" + id + ", Pack:" + pack + ")");
-			} else if ((id + 256 >= Item.itemsList.length) || (Item.itemsList[(id + 256)] != null)
-					|| (Item.itemsList[(magId + 256)] != null) || (!GunCusItemBullet.bulletsList.containsKey(pack))
-					|| (((List) GunCusItemBullet.bulletsList.get(pack)).size() <= bullets)
-					|| (((List) GunCusItemBullet.bulletsList.get(pack)).get(bullets) == null)) {
-				if (id + 256 >= Item.itemsList.length) {
-					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id + "\" is too high!");
-				}
-				if (Item.itemsList[(id + 256)] != null) {
-					log("[" + pack + "] Conflict while trying to add the gun \"" + name + "\": The ID \"" + id + "\" is already occupied!");
-				}
-				if (Item.itemsList[(magId + 256)] != null) {
-					log("[" + pack + "] Conflict while trying to add the magazine of the gun \"" + name + "\": The ID \"" + magId + "\" is already occupied!");
-				}
-				if ((bullets >= 0)
-						&& ((!GunCusItemBullet.bulletsList.containsKey(pack))
-								|| (((List) GunCusItemBullet.bulletsList.get(pack)).size() <= bullets) || (((List) GunCusItemBullet.bulletsList
-								.get(pack)).get(bullets) == null))) {
-					log("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets + ")! Ignoring this gun!");
-				}
+			} else if ( (!GunCusItemBullet.bulletsList.containsKey(pack))
+					|| (GunCusItemBullet.bulletsList.get(pack).size() <= bullets)
+					|| (GunCusItemBullet.bulletsList.get(pack).get(bullets) == null) ) {
+				log("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets + ")! Ignoring this gun!");
 			} else {
 				log("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 			}

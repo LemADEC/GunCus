@@ -21,6 +21,7 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.potion.Potion;
@@ -30,7 +31,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.util.Vec3Pool;
 import net.minecraft.world.World;
 
 public class GunCusEntityBullet extends EntityArrow implements IProjectile {
@@ -108,14 +108,14 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f) * 180.0D / Math.PI));
 		}
 
-		int blockId = worldObj.getBlockId(blockX, blockY, blockZ);
+		Block block = worldObj.getBlock(blockX, blockY, blockZ);
 
 		// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
-		if ((blockId > 0) && (blockId != 20) && (blockId != 30) && (blockId != 89) && (blockId != 102)) {
-			Block.blocksList[blockId].setBlockBoundsBasedOnState(worldObj, blockX, blockY, blockZ);
-			AxisAlignedBB axisalignedbb = Block.blocksList[blockId].getCollisionBoundingBoxFromPool(worldObj, blockX, blockY, blockZ);
+		if ((block != Blocks.air) && (block != Blocks.glass) && (block != Blocks.web) && (block != Blocks.glowstone) && (block != Blocks.glass_pane)) {
+			block.setBlockBoundsBasedOnState(worldObj, blockX, blockY, blockZ);
+			AxisAlignedBB axisalignedbb = block.getCollisionBoundingBoxFromPool(worldObj, blockX, blockY, blockZ);
 
-			if ((axisalignedbb != null) && (axisalignedbb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ)))) {
+			if ((axisalignedbb != null) && (axisalignedbb.isVecInside(Vec3.createVectorHelper(posX, posY, posZ)))) {
 				this.blockCollision = true;
 			}
 		}
@@ -124,14 +124,14 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			onInGround();
 		} else {
 			ticksCount += 1;
-			Vec3 vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
-			Vec3 vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
+			Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+			Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 			MovingObjectPosition movingobjectposition = worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
-			vec3 = worldObj.getWorldVec3Pool().getVecFromPool(posX, posY, posZ);
-			vec31 = worldObj.getWorldVec3Pool().getVecFromPool(posX + motionX, posY + motionY, posZ + motionZ);
+			vec3 = Vec3.createVectorHelper(posX, posY, posZ);
+			vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 
 			if (movingobjectposition != null) {
-				vec31 = worldObj.getWorldVec3Pool().getVecFromPool(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+				vec31 = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
 			}
 
 			Entity entity = null;
@@ -198,10 +198,11 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 					blockX = movingobjectposition.blockX;
 					blockY = movingobjectposition.blockY;
 					blockZ = movingobjectposition.blockZ;
-					blockId = worldObj.getBlockId(blockX, blockY, blockZ);
-					if ((blockId == 20) || (blockId == 30) || (blockId == 89) || (blockId == 102)) {
+					block = worldObj.getBlock(blockX, blockY, blockZ);
+					// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
+					if ((block != Blocks.glass) && (block != Blocks.web) && (block != Blocks.glowstone) && (block != Blocks.glass_pane)) {
 						GunCus.removeBlockServer(playerEntity, MathHelper.floor_double(blockX), MathHelper.floor_double(blockY), MathHelper.floor_double(blockZ));
-					} else if (blockId != 0) {
+					} else if (block != Blocks.air) {
 						// int blockMetadata =
 						// this.worldObj.getBlockMetadata(blockX, blockY,
 						// blockZ);
@@ -214,7 +215,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 						posZ -= motionZ / f2 * 0.05D;
 						setIsCritical(false);
 						blockCollision = true;
-						Block.blocksList[blockId].onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
+						block.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
 					}
 				}
 			}
@@ -279,10 +280,11 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			for (int k1 = i; k1 <= l; k1++) {
 				for (int l1 = j; l1 <= i1; l1++) {
 					for (int i2 = k; i2 <= j1; i2++) {
-						int j2 = this.worldObj.getBlockId(k1, l1, i2);
+						Block block = this.worldObj.getBlock(k1, l1, i2);
 
-						if ((j2 > 0) && (j2 != 20) && (j2 != 30) && (j2 != 89) && (j2 != 102)) {
-							Block.blocksList[j2].onEntityCollidedWithBlock(this.worldObj, k1, l1, i2, this);
+						// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
+						if ((block != Blocks.air) && (block != Blocks.glass) && (block != Blocks.web) && (block != Blocks.glowstone) && (block != Blocks.glass_pane)) {
+							block.onEntityCollidedWithBlock(worldObj, k1, l1, i2, this);
 						}
 					}
 				}
@@ -336,9 +338,9 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			
 			if ((bullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
 				if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
-					worldObj.setBlock(blockX, blockY + 1, blockZ, Block.fire.blockID);
+					worldObj.setBlock(blockX, blockY + 1, blockZ, Blocks.fire);
 				} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {
-					worldObj.setBlock(blockX, blockY, blockZ, Block.fire.blockID);
+					worldObj.setBlock(blockX, blockY, blockZ, Blocks.fire);
 				}
 			}
 			

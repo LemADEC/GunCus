@@ -44,7 +44,7 @@ public class GunCusContainerAmmoMan extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if (var3 != null) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}

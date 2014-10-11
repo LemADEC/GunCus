@@ -45,7 +45,7 @@ public class GunCusContainerAmmo extends Container {
 			for (int var2 = 0; var2 < 9; var2++) {
 				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
 				if (var3 != null) {
-					par1EntityPlayer.dropPlayerItem(var3);
+					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
 				}
 			}
 		}
@@ -129,7 +129,7 @@ public class GunCusContainerAmmo extends Container {
 
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlockId(this.posX, this.posY, this.posZ) == GunCus.blockAmmo.blockID;
+		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockAmmo;
 	}
 
 	@Override

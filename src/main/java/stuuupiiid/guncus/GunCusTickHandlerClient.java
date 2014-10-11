@@ -7,12 +7,14 @@ import cpw.mods.fml.common.TickType;
 import java.util.EnumSet;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -59,13 +61,13 @@ public class GunCusTickHandlerClient implements IScheduledTickHandler {
 							if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage())) {
 								GunCus.shootTime -= 1;
 								if (GunCus.shootTime <= 0) {
-									Minecraft.getMinecraft().sndManager.playSoundFX("guncus:click", 1.0F, 1.0F);
+									Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:click")));
 								}
 							}
 						} else {
 							GunCus.shootTime -= 1;
 							if (GunCus.shootTime <= 0) {
-								Minecraft.getMinecraft().sndManager.playSoundFX("guncus:click", 1.0F, 1.0F);
+								Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:click")));
 							}
 						}
 					} else {

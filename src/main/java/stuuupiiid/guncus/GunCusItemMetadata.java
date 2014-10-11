@@ -3,19 +3,22 @@ package stuuupiiid.guncus;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.List;
-import net.minecraft.client.renderer.texture.IconRegister;
+
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 
 public class GunCusItemMetadata extends GunCusItem {
 	public GunCusCustomizationPart[] metadatas;
-	public Icon[] icons;
+	public IIcon[] icons;
 	public String unlocalized;
 
-	public GunCusItemMetadata(int par1, String unlocalized, String iconName, GunCusCustomizationPart[] metadatas) {
-		super(par1);
+	public GunCusItemMetadata(String unlocalized, String iconName, GunCusCustomizationPart[] metadatas) {
+		super();
 
 		this.unlocalized = unlocalized;
 		this.iconName = iconName;
@@ -28,7 +31,7 @@ public class GunCusItemMetadata extends GunCusItem {
 	}
 
 	@Override
-	public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List) {
+	public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
 		for (int j = 0; j < this.metadatas.length; j++) {
 			ItemStack itemStack = new ItemStack(par1, 1, j);
 			par3List.add(itemStack);
@@ -37,8 +40,8 @@ public class GunCusItemMetadata extends GunCusItem {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister par1IconRegister) {
-		this.icons = new Icon[this.metadatas.length];
+	public void registerIcons(IIconRegister par1IconRegister) {
+		this.icons = new IIcon[this.metadatas.length];
 
 		for (int i = 0; i < this.metadatas.length; i++) {
 			this.icons[i] = par1IconRegister.registerIcon("guncus:" + this.iconName + i);
@@ -47,7 +50,7 @@ public class GunCusItemMetadata extends GunCusItem {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int par1) {
 		return this.icons[par1];
 	}
 
