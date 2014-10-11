@@ -1,0 +1,11 @@
+{
+   "shoot_normal"  : { "category": "master", "sounds": [ { "name": "shoot_normal"  , "stream": false } ] },
+   "inground"      : { "category": "master", "sounds": [ { "name": "inground"      , "stream": false } ] },
+   "knife"         : { "category": "master", "sounds": [ { "name": "knife"         , "stream": false } ] },
+   "shoot_silenced": { "category": "master", "sounds": [ { "name": "shoot_silenced", "stream": false } ] },
+   "shoot_sniper"  : { "category": "master", "sounds": [ { "name": "shoot_sniper"  , "stream": false } ] },
+   "reload"        : { "category": "master", "sounds": [ { "name": "reload"        , "stream": false } ] },
+   "click"         : { "category": "master", "sounds": [ { "name": "click"         , "stream": false } ] },
+   "reload_tube"   : { "category": "master", "sounds": [ { "name": "reload_tube"   , "stream": false } ] },
+   "reload_rpg"    : { "category": "master", "sounds": [ { "name": "reload_rpg"    , "stream": false } ] }
+}
