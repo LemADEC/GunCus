@@ -8,7 +8,8 @@ import net.minecraft.world.World;
 
 public class GunCusItemKnife extends GunCusItem {
 	public GunCusItemKnife() {
-		super( "guncus:knife", "Knife", "gcKnife");
+		super("guncus:knife", "Knife", "quickKnife");
+		setFull3D();
 	}
 
 	@Override

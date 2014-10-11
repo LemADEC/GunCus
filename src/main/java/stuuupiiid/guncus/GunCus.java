@@ -115,10 +115,10 @@ public class GunCus {
 		config1.load();
 		int i1 = config1.get("Gun Customization IDs", "Quick Knife", 13000).getInt(13000);
 
-		quickKnife = new GunCusItemKnife(i1).setUnlocalizedName("quickKnife").setFull3D();
+		quickKnife = new GunCusItemKnife();
 		config1.save();
 
-		gcTab = new GunCusCreativeTab("Gun Customization Modification", quickKnife.itemID);
+		gcTab = new GunCusCreativeTab("Gun Customization Modification", quickKnife);
 		quickKnife.setCreativeTab(gcTab);
 
 		config1.load();
@@ -183,7 +183,7 @@ public class GunCus {
 		ammoM320 = new GunCusItem("guncus:ammoM320", "GC 40x46mm SR Frag", "ammoM320").setMaxStackSize(8);
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			registerTickHandlers();
+			FMLCommonHandler.instance().bus().register(new TickHandler());
 		}
 
 		path = new File(preEvent.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
@@ -195,15 +195,6 @@ public class GunCus {
 		}
 
 		loadGunPacks(path);
-	}
-
-	@SideOnly(Side.CLIENT)
-	private boolean registerTickHandlers() {
-		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-			TickRegistry.registerScheduledTickHandler(new GunCusTickHandlerClient(), Side.CLIENT);
-			TickRegistry.registerScheduledTickHandler(new GunCusTickHandlerRender(), Side.CLIENT);
-		}
-		return FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT;
 	}
 
 	@Mod.EventHandler

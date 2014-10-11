@@ -122,7 +122,7 @@ public class GunCusItemGun extends Item {
 			bullets = parBullets;
 			mag = null;
 		} else {
-			mag = new GunCusItemMag(magId, parName, getName(0), magSize, parIconName, bulletType, parPack);
+			mag = new GunCusItemMag(parName, getName(0), magSize, parIconName, bulletType, parPack);
 			ingotsMag = parIngotsMag;
 			mag.setCreativeTab(tab);
 		}
