@@ -23,10 +23,10 @@ import org.lwjgl.opengl.GL11;
 public class GunCusGuiWeapon extends GuiContainer {
 	public GunCusGuiWeapon(InventoryPlayer inventory, World world, int x, int y, int z) {
 		super(new GunCusContainerWeapon(inventory, world, x, y, z));
-		GunCus.actual = 0;
-		GunCus.actualItemID = 0;
+		GunCus.actualIndex = 0;
+		GunCus.actualItem = null;
 		if (GunCus.instance.guns.size() > 0) {
-			GunCus.actualItemID = GunCus.instance.guns.get(0);
+			GunCus.actualItem = GunCus.instance.guns.get(0);
 		}
 	}
 
@@ -50,34 +50,35 @@ public class GunCusGuiWeapon extends GuiContainer {
 		int var6 = (this.height - this.ySize) / 2;
 		drawTexturedModalRect(var5, var6, 0, 0, this.xSize, this.ySize);
 		ItemStack itemStack = null;
-		if ((GunCus.actualItemID > 0) && (Item.itemsList[GunCus.actualItemID] != null)
-				&& ((Item.itemsList[GunCus.actualItemID] instanceof GunCusItemGun))) {
+		if ( (GunCus.actualItem != null) && (GunCus.actualItem instanceof GunCusItemGun) ) {
 			int k = (this.width - this.xSize) / 2;
 			int l = (this.height - this.ySize) / 2;
-			itemStack = new ItemStack(Item.itemsList[GunCus.actualItemID]);
-			GuiContainer.itemRenderer.renderItemAndEffectIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack, k + 80, l + 14);
-			GuiContainer.itemRenderer.renderItemOverlayIntoGUI(this.fontRenderer, this.mc.renderEngine, itemStack, k + 80, l + 14);
+			itemStack = new ItemStack(GunCus.actualItem);
+			GuiContainer.itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.renderEngine, itemStack, k + 80, l + 14);
+			GuiContainer.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.renderEngine, itemStack, k + 80, l + 14);
 		}
 	}
 
 	@Override
 	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
-		case 1:
-			if (GunCus.instance.guns.size() > 0) {
-				ByteArrayDataOutput bytes3 = ByteStreams.newDataOutput();
-				bytes3.writeInt(9);
-				bytes3.writeInt(1);
-				bytes3.writeInt(GunCus.actual);
-				PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes3.toByteArray()));
-			}
-			break;
 		case 0:
 			ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 			bytes.writeInt(9);
 			bytes.writeInt(0);
 			PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
 			break;
+
+		case 1:
+			if (GunCus.instance.guns.size() > 0) {
+				ByteArrayDataOutput bytes3 = ByteStreams.newDataOutput();
+				bytes3.writeInt(9);
+				bytes3.writeInt(1);
+				bytes3.writeInt(GunCus.actualIndex);
+				PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes3.toByteArray()));
+			}
+			break;
+
 		case 2:
 			ByteArrayDataOutput bytes2 = ByteStreams.newDataOutput();
 			bytes2.writeInt(9);

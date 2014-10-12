@@ -58,7 +58,7 @@ public class GunCusPacketHandler implements IPacketHandler {
 					int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
 					ItemStack mag = null;
 
-					if (gun.magId != -1) {
+					if (gun.mag != null) {
 						for (int v1 = 0; v1 < entityPlayer.inventory.getSizeInventory(); v1++) {
 							if ((entityPlayer.inventory.getStackInSlot(v1) != null)
 									&& (entityPlayer.inventory.getStackInSlot(v1).getItem() == gun.mag)
@@ -232,15 +232,15 @@ public class GunCusPacketHandler implements IPacketHandler {
 					}
 
 					if (GunCus.instance.guns.size() > actual) {
-						container.actual = actual;
-						container.actualItemID = GunCus.instance.guns.get(actual).itemID;
+						container.actualGunIndex = actual;
+						container.actualGunItem = GunCus.instance.guns.get(actual);
 					}
 
 					ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 					bytes.writeInt(15);
 					bytes.writeInt(0);
 					bytes.writeInt(actual);
-					bytes.writeInt(GunCus.instance.guns.get(actual).itemID);
+					bytes.writeUTF(GunCus.instance.guns.get(actual).getUnlocalizedName());
 					PacketDispatcher.sendPacketToPlayer(new Packet250CustomPayload("guncus", bytes.toByteArray()), (Player) entityPlayer);
 				} else if (acc == 0) {
 					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
@@ -348,8 +348,8 @@ public class GunCusPacketHandler implements IPacketHandler {
 					}
 				}
 			} else if (packetType == 15) {
-				GunCus.actual = data.readInt();
-				GunCus.actualItemID = data.readInt();
+				GunCus.actualIndex = data.readInt();
+				GunCus.actualItem = data.readInt();
 			}
 		} catch (IOException exception) {
 			exception.printStackTrace();

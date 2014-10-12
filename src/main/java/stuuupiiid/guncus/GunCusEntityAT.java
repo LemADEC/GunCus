@@ -116,7 +116,7 @@ public void onUpdate()
      {
        this.motionY -= (this.type == 1 ? 0.007D : 0.15D);
        setPosition(this.posX, this.posY, this.posZ);
-       doBlockCollisions();
+       func_145775_I();	// doBlockCollisions();
        this.field_70252_j += 1;
        if (this.field_70252_j > 100)
        {
@@ -129,7 +129,7 @@ public void onUpdate()
        this.field_70257_an += 1;
        Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
        Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-       MovingObjectPosition movingobjectposition = this.worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
+       MovingObjectPosition movingobjectposition = this.worldObj.func_147447_a(vec3, vec31, false, true, false);
        vec3 = Vec3.createVectorHelper(posX, posY, posZ);
        vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
  
@@ -252,7 +252,7 @@ public void onUpdate()
        this.motionZ *= f4;
        this.motionY -= (this.type == 1 ? 0.0122D : 0.15D);
        setPosition(this.posX, this.posY, this.posZ);
-       doBlockCollisions();
+       func_145775_I();	// doBlockCollisions();
  
        if ((this.field_70254_i) && (this.ticks >= 5))
        {

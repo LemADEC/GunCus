@@ -70,8 +70,8 @@ public class GunCus {
 	public static boolean reloading = false;
 	public static int hitmarker = 0;
 	public static String cameraZoom = "Y";
-	public static int actualItemID = 0;
-	public static int actual = 0;
+	public static Item actualItem = null;
+	public static int actualIndex = 0;
 
 	public LinkedList<GunCusItemGun> guns;
 

@@ -2,15 +2,20 @@ package stuuupiiid.guncusexplosives;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.GunCusItem;
+
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.Random;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,16 +25,18 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+
 import org.lwjgl.input.Mouse;
 
 public class GunCusExplosivesRPG extends GunCusItem {
-	public int ammo;
+	public Item ammo;
 
-	public GunCusExplosivesRPG(int par1, String iconName, String name, String unlocalized, int ammo) {
-		super(par1, iconName, name, unlocalized);
+	public GunCusExplosivesRPG(String iconName, String name, String unlocalized, Item parAmmo) {
+		super(iconName, name, unlocalized);
 		setFull3D();
-		this.ammo = ammo;
+		ammo = parAmmo;
 	}
 
 	@Override
@@ -52,7 +59,7 @@ public class GunCusExplosivesRPG extends GunCusItem {
 				GunCus.shootTime += 90;
 				tube(entityPlayer);
 				recoilTube(entityPlayer);
-				Minecraft.getMinecraft().sndManager.playSoundFX("guncus:reload_rpg", 1.0F, 1.0F);
+				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_rpg")));
 			}
 		}
 	}

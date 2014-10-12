@@ -20,10 +20,10 @@ public class GunCusContainerWeapon extends Container {
 	public int posY;
 	public int posZ;
 	public GunCusItemGun actualGunItem;
-	public int actual;
+	public int actualGunIndex;
 
 	public GunCusContainerWeapon(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
-		actual = 0;
+		actualGunIndex = 0;
 		actualGunItem = null;
 		if (GunCus.instance.guns.size() > 0) {
 			actualGunItem = GunCus.instance.guns.get(0);

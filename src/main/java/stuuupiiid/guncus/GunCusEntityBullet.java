@@ -126,7 +126,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			ticksCount += 1;
 			Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
 			Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-			MovingObjectPosition movingobjectposition = worldObj.rayTraceBlocks_do_do(vec3, vec31, false, true);
+			MovingObjectPosition movingobjectposition = worldObj.func_147447_a(vec3, vec31, false, true, false); // rayTraceBlocks_do_do
 			vec3 = Vec3.createVectorHelper(posX, posY, posZ);
 			vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 
@@ -259,7 +259,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 			motionZ *= f4;
 			motionY -= (hasBarrel ? 0.014D : 0.02D) * (bullet == null ? 1.0D : bullet.gravity);
 			setPosition(posX, posY, posZ);
-			doBlockCollisions();
+			func_145775_I();	// doBlockCollisions();
 
 			if (blockCollision) {
 				onInGround();
@@ -268,7 +268,7 @@ public class GunCusEntityBullet extends EntityArrow implements IProjectile {
 	}
 
 	@Override
-	protected void doBlockCollisions() {
+	protected void func_145775_I() {	// doBlockCollisions();
 		int i = MathHelper.floor_double(boundingBox.minX + 0.001D);
 		int j = MathHelper.floor_double(boundingBox.minY + 0.001D);
 		int k = MathHelper.floor_double(boundingBox.minZ + 0.001D);
