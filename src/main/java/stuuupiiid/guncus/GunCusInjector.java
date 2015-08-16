@@ -2,7 +2,6 @@ package stuuupiiid.guncus;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.net.URI;
 
 public class GunCusInjector {
 	public ClassLoader classloader;

@@ -4,20 +4,15 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 
-import java.util.EnumSet;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.audio.SoundManager;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+
+import stuuupiiid.guncus.item.ItemGun;
 
 public class TickHandler {
  
@@ -65,10 +60,10 @@ public class TickHandler {
 			if (GunCus.shootTime > 0) {
 				if (entityPlayer.inventory.getCurrentItem() == null) {
 					GunCus.shootTime -= 1;
-				} else if (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun)) {
+				} else if (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)) {
 					GunCus.shootTime -= 1;
 				} else {
-					GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
+					ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 
 					if (gun.canHaveStraightPullBolt()) {
 						if (Mouse.isButtonDown(1)) {
@@ -105,8 +100,8 @@ public class TickHandler {
 				}
 			} else if ((!Mouse.isButtonDown(1)) && (GunCus.accuracy > 85.0D)) {
 				if ((entityPlayer.inventory.getCurrentItem() == null)
-						|| (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun))
-						|| (!((GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem())
+						|| (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
+						|| (!((ItemGun) entityPlayer.inventory.getCurrentItem().getItem())
 								.hasLaserPointer(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					GunCus.accuracy = 85.0D;
 				} else if (GunCus.accuracy > 92.5D) {
@@ -119,9 +114,9 @@ public class TickHandler {
 			}
 
 			if ((entityPlayer.inventory.getCurrentItem() != null)
-					&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof GunCusItemGun))
+					&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
 					&& (Mouse.isButtonDown(1))) {
-				GunCusItemGun gun = (GunCusItemGun) entityPlayer.inventory.getCurrentItem().getItem();
+				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 				if ((Keyboard.isKeyDown(42)) && (GunCus.counter <= 0)
 						&& (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
 						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {

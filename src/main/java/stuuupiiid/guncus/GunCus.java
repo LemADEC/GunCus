@@ -1,26 +1,16 @@
 package stuuupiiid.guncus;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
-import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,31 +19,45 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-
-import org.lwjgl.input.Keyboard;
+import stuuupiiid.guncus.block.BlockAmmo;
+import stuuupiiid.guncus.block.BlockBullet;
+import stuuupiiid.guncus.block.BlockGun;
+import stuuupiiid.guncus.block.BlockMag;
+import stuuupiiid.guncus.block.BlockMine;
+import stuuupiiid.guncus.block.BlockWeapon;
+import stuuupiiid.guncus.data.CustomizationPart;
+import stuuupiiid.guncus.data.ScopePart;
+import stuuupiiid.guncus.entity.EntityGrenade;
+import stuuupiiid.guncus.entity.EntityBullet;
+import stuuupiiid.guncus.gui.GuiHandler;
+import stuuupiiid.guncus.item.GunCusItem;
+import stuuupiiid.guncus.item.ItemAttachment;
+import stuuupiiid.guncus.item.ItemBullet;
+import stuuupiiid.guncus.item.ItemGun;
+import stuuupiiid.guncus.item.ItemKnife;
+import stuuupiiid.guncus.item.ItemMagFill;
+import stuuupiiid.guncus.item.ItemMetadata;
+import stuuupiiid.guncus.item.ItemMine;
+import stuuupiiid.guncus.item.ItemRPG;
+import stuuupiiid.guncus.item.ItemScope;
 
 @Mod(modid = "GunCus", name = "Gun Customization", version = "TDK1.7.10-v3.3x")
 public class GunCus {
 
 	@SidedProxy(clientSide = "stuuupiiid.guncus.GunCusClientProxy", serverSide = "stuuupiiid.guncus.GunCusCommonProxy")
-	public static GunCusCommonProxy commonProxy = new GunCusCommonProxy();
+	public static CommonProxy commonProxy = new CommonProxy();
 	public static Configuration config;
-	public static boolean blockDamage;
+	public static boolean enableBlockDamage;
 	public static int shootTime = 0;
 	public static int switchTime = 0;
 	public static double accuracy = 100.0D;
@@ -73,7 +77,7 @@ public class GunCus {
 	public static Item actualItem = null;
 	public static int actualIndex = 0;
 
-	public LinkedList<GunCusItemGun> guns;
+	public LinkedList<ItemGun> guns;
 
 	public static int check = 300;
 
@@ -83,7 +87,9 @@ public class GunCus {
 
 	@Mod.Instance("GunCus")
 	public static GunCus instance;
-	public GunCusGuiHandler guiHandler = new GunCusGuiHandler();
+	public GuiHandler guiHandler = new GuiHandler();
+	private boolean enableExplosives;
+	private boolean enableOfficialGuns;
 	public static Item quickKnife;
 	public static CreativeTabs gcTab;
 	public static Block blockWeapon;
@@ -93,87 +99,93 @@ public class GunCus {
 	public static Block blockGun;
 	public static Item magFill;
 	public static Item part;
-	public static GunCusItemScope scope;
-	public static GunCusItemMetadata barrel;
-	public static GunCusItemMetadata attachment;
+	public static ItemScope scope;
+	public static ItemMetadata barrel;
+	public static ItemMetadata attachment;
 	public static Item ammoM320;
 	public static int knifeTime = 0;
+	
+	// explosives extension
+	public static Item rpgm;
+	public static Item rpg;
+	public static Item smawm;
+	public static Item smaw;
+	public static Block mineBlock;
+	public static Item mineItem;
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent preEvent) {
 		config = new Configuration(preEvent.getSuggestedConfigurationFile());
+		config.load();
 
-		Configuration config1 = this.config;
-
-		config1.load();
-		int i1 = config1.get("Gun Customization IDs", "Quick Knife", 13000).getInt(13000);
-
-		quickKnife = new GunCusItemKnife();
-		config1.save();
-
+		quickKnife = new ItemKnife();
 		gcTab = new GunCusCreativeTab("Gun Customization Modification", quickKnife);
 		quickKnife.setCreativeTab(gcTab);
 
-		config1.load();
-		blockDamage = config1.get("Gun Customization", "Enable Block Damage", true).getBoolean(true);
+		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true).getBoolean(true);
+		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
+		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true).getBoolean(true);
 
-		int b1 = config1.get("Gun Customization IDs", "Weapon Box", 500).getInt(500);
-		int b2 = config1.get("Gun Customization IDs", "Mag Box", 501).getInt(501);
-		int b3 = config1.get("Gun Customization IDs", "Bullet Box", 502).getInt(502);
-		int b4 = config1.get("Gun Customization IDs", "Ammo Box", 503).getInt(503);
-		int b5 = config1.get("Gun Customization IDs", "Gun Box", 504).getInt(504);
+		config.save();
 
-		int i2 = config1.get("Gun Customization IDs", "Manual Mag Filler", 13001).getInt(13001);
-		int i3 = config1.get("Gun Customization IDs", "Box Part", 13002).getInt(13002);
+		blockWeapon = new BlockWeapon();
+		blockMag = new BlockMag();
+		blockBullet = new BlockBullet();
+		blockAmmo = new BlockAmmo();
+		blockGun = new BlockGun();
 
-		int s = config1.get("Gun Customization IDs", "Scopes", 13003).getInt(13003);
-		int b = config1.get("Gun Customization IDs", "Barrels", 13004).getInt(13004);
-		int a = config1.get("Gun Customization IDs", "Attachments", 13005).getInt(13005);
-
-		int ammo1 = config1.get("Gun Customization IDs", "GC 40x46mm SR Frag", 13006).getInt(13006);
-		config1.save();
-
-		blockWeapon = new GunCusBlockWeapon();
-		blockMag = new GunCusBlockMag();
-		blockBullet = new GunCusBlockBullet();
-		blockAmmo = new GunCusBlockAmmo();
-		blockGun = new GunCusBlockGun();
-
-		magFill = new GunCusItemMagFill();
+		magFill = new ItemMagFill();
 		part = new GunCusItem("guncus:boxpart", "Box Part", "boxpart");
 
-		scope = new GunCusItemScope("scope", "scope",
-				new GunCusScope[] {
-					new GunCusScope("Reflex (RDS) Scope", "reflex", 1.0F, 1),
-					new GunCusScope("Kobra (RDS) Scope", "kobra", 1.0F, 2),
-					new GunCusScope("Holographic (Holo) Scope", "holographic", 1.0F, 3),
-					new GunCusScope("PKA-S (Holo) Scope", "pka-s", 1.0F, 4),
-					new GunCusScope("M145 (3.4x) Scope", "m145", 3.4F, 5),
-					new GunCusScope("PK-A (3.4x) Scope", "pk-a", 3.4F, 6),
-					new GunCusScope("ACOG (4x) Scope", "acog", 4.0F, 7),
-					new GunCusScope("PSO-1 (4x) Scope", "pso-1", 4.0F, 8),
-					new GunCusScope("Rifle (6x) Scope", "rifle", 6.0F, 9),
-					new GunCusScope("PKS-07 (7x) Scope", "pks-07", 7.0F, 10),
-					new GunCusScope("Rifle (8x) Scope", "rifle", 8.0F, 11),
-					new GunCusScope("Ballistic (12x) Scope", "ballistic", 4.0F, 12),
-					new GunCusScope("Ballistic (20x) Scope", "ballistic", 20.0F, 13) });
-		barrel = new GunCusItemMetadata("barrel", "barrel",
-				new GunCusCustomizationPart[] {
-					new GunCusCustomizationPart("Silencer", "-sln", 1),
-					new GunCusCustomizationPart("Heavy Barrel", "-hbl", 2),
-					new GunCusCustomizationPart("Rifled Barrel", "-rbl", 3),
-					new GunCusCustomizationPart("Polygonal Barrel", "-pbl", 4) });
-		attachment = new GunCusItemAttachment("attachment", "attachment",
-				new GunCusCustomizationPart[] {
-					new GunCusCustomizationPart("Straight Pull Bolt", "-spb", 1),
-					new GunCusCustomizationPart("Bipod", "-bpd", 2),
-				new GunCusCustomizationPart("Foregrip", "-grp", 3),
-					new GunCusCustomizationPart("M320", "-320", 4),
-					new GunCusCustomizationPart("Strong Spiral Spring", "-sss", 5),
-					new GunCusCustomizationPart("Improved Grip", "-img", 6),
-					new GunCusCustomizationPart("Laser Pointer", "-ptr", 7) });
+		scope = new ItemScope("scope", "scope",
+				new ScopePart[] {
+					new ScopePart("Reflex (RDS) Scope", "reflex", 1.0F, 1),
+					new ScopePart("Kobra (RDS) Scope", "kobra", 1.0F, 2),
+					new ScopePart("Holographic (Holo) Scope", "holographic", 1.0F, 3),
+					new ScopePart("PKA-S (Holo) Scope", "pka-s", 1.0F, 4),
+					new ScopePart("M145 (3.4x) Scope", "m145", 3.4F, 5),
+					new ScopePart("PK-A (3.4x) Scope", "pk-a", 3.4F, 6),
+					new ScopePart("ACOG (4x) Scope", "acog", 4.0F, 7),
+					new ScopePart("PSO-1 (4x) Scope", "pso-1", 4.0F, 8),
+					new ScopePart("Rifle (6x) Scope", "rifle", 6.0F, 9),
+					new ScopePart("PKS-07 (7x) Scope", "pks-07", 7.0F, 10),
+					new ScopePart("Rifle (8x) Scope", "rifle", 8.0F, 11),
+					new ScopePart("Ballistic (12x) Scope", "ballistic", 12.0F, 12),
+					new ScopePart("Ballistic (20x) Scope", "ballistic", 20.0F, 13) });
+		barrel = new ItemMetadata("barrel", "barrel",
+				new CustomizationPart[] {
+					new CustomizationPart("Silencer", "-sln", 1),
+					new CustomizationPart("Heavy Barrel", "-hbl", 2),
+					new CustomizationPart("Rifled Barrel", "-rbl", 3),
+					new CustomizationPart("Polygonal Barrel", "-pbl", 4) });
+		attachment = new ItemAttachment("attachment", "attachment",
+				new CustomizationPart[] {
+					new CustomizationPart("Straight Pull Bolt", "-spb", 1),
+					new CustomizationPart("Bipod", "-bpd", 2),
+					new CustomizationPart("Foregrip", "-grp", 3),
+					new CustomizationPart("M320", "-320", 4),
+					new CustomizationPart("Strong Spiral Spring", "-sss", 5),
+					new CustomizationPart("Improved Grip", "-img", 6),
+					new CustomizationPart("Laser Pointer", "-ptr", 7) });
 
 		ammoM320 = new GunCusItem("guncus:ammoM320", "GC 40x46mm SR Frag", "ammoM320").setMaxStackSize(8);
+
+		if (enableExplosives) {
+			mineBlock = new BlockMine();
+			mineItem = new ItemMine();
+	
+			rpgm = new GunCusItem("guncus:rpgm", "GC PG-7VL Rocket", "gcrpgm");
+			smawm = new GunCusItem("guncus:smawm", "GC HEDP Rocket", "gcsmawm");
+	
+			rpg = new ItemRPG("guncus:rpg", "GC RPG-7V2", "gcrpg", rpgm);
+			smaw = new ItemRPG("guncus:smaw", "GC SMAW", "gcsmaw", smawm);
+	
+			GameRegistry.registerBlock(mineBlock, mineBlock.getUnlocalizedName());
+		}
+		
+		if (enableOfficialGuns) {
+			OfficialGuns.load();
+		}
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			FMLCommonHandler.instance().bus().register(new TickHandler());
@@ -195,9 +207,9 @@ public class GunCus {
 		commonProxy.render();
 		instance = this;
 		LanguageRegistry.addName(quickKnife, "Quick Knife");
-		EntityRegistry.registerModEntity(GunCusEntityBullet.class, "guncusbullet", 200, this, 500, 1, true);
+		EntityRegistry.registerModEntity(EntityBullet.class, "guncusbullet", 200, this, 500, 1, true);
 
-		EntityRegistry.registerModEntity(GunCusEntityAT.class, "guncusat", 201, this, 500, 1, true);
+		EntityRegistry.registerModEntity(EntityGrenade.class, "guncusat", 201, this, 500, 1, true);
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, this.guiHandler);
 
 		GameRegistry.registerBlock(blockGun, blockGun.getUnlocalizedName());
@@ -362,35 +374,44 @@ public class GunCus {
 				new Object[] { "II ", "IDI", " II",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) });
+		
+		if (enableExplosives) {
+			GameRegistry.addRecipe(
+					new ItemStack(rpg, 1),
+					new Object[] { "IIR", "IWR", "RRW",
+						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+						Character.valueOf('W'), new ItemStack(Blocks.planks),
+						Character.valueOf('R'), new ItemStack(Items.redstone) });
+			GameRegistry.addRecipe(
+					new ItemStack(smaw, 1),
+					new Object[] { "RI ", "IRI", " IR",
+						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+						Character.valueOf('R'), new ItemStack(Items.redstone) });
+
+			GameRegistry.addRecipe(
+					new ItemStack(rpgm, 2),
+					new Object[] { "II ", "IG ", "  G",
+						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+						Character.valueOf('G'), new ItemStack(Items.gunpowder) });
+			GameRegistry.addRecipe(
+					new ItemStack(smawm, 2),
+					new Object[] { "G  ", " GI", " II",
+						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+						Character.valueOf('G'), new ItemStack(Items.gunpowder) });
+		}
 	}
 
 	public static void createExplosionServer(Entity entity, double x, double y, double z, float str) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			World world = entity.worldObj;
-			world.createExplosion(entity, x, y, z, str, blockDamage);
+			world.createExplosion(entity, x, y, z, str, enableBlockDamage);
 		}
 	}
 
 	public static void removeBlockServer(Entity entity, int x, int y, int z) {
-		if ((FMLCommonHandler.instance().getEffectiveSide().isServer()) && (blockDamage)) {
+		if ((FMLCommonHandler.instance().getEffectiveSide().isServer()) && (enableBlockDamage)) {
 			World world = entity.worldObj;
 			world.setBlockToAir(x, y, z);
-		}
-	}
-
-	@SideOnly(Side.CLIENT)
-	public static void doKnife() {
-		if ((knifeTime <= 0) && (FMLClientHandler.instance().getClient().thePlayer != null)
-				&& (FMLClientHandler.instance().getClient().theWorld != null)) {
-			if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(33))
-					&& (FMLClientHandler.instance().getClient().currentScreen == null)) {
-				knifeTime += 25;
-				shootTime += 24;
-				ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
-				bytes.writeInt(13);
-				bytes.writeInt(0);
-				PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
-			}
 		}
 	}
 
@@ -664,8 +685,8 @@ public class GunCus {
 			int spray = sprayProp.getInt(100);
 			double gravity = gravityProp.getDouble(1.0D);
 
-			if (!GunCusItemBullet.bulletsList.containsKey(pack)) {
-				GunCusItemBullet.bulletsList.put(pack, new ArrayList());
+			if (!ItemBullet.bulletsList.containsKey(pack)) {
+				ItemBullet.bulletsList.put(pack, new ArrayList());
 			}
 
 			if ((name != null)
@@ -674,15 +695,15 @@ public class GunCus {
 					&& (sul >= 0)
 					&& ((iron > 0) || (sul > 0))
 					&& (stack > 0)
-					&& ( ( (GunCusItemBullet.bulletsList.get(pack).size() > bul) && (GunCusItemBullet.bulletsList.get(pack).get(bul) == null) )
-							|| (GunCusItemBullet.bulletsList.get(pack).size() <= bul) ) ) {
+					&& ( ( (ItemBullet.bulletsList.get(pack).size() > bul) && (ItemBullet.bulletsList.get(pack).get(bul) == null) )
+							|| (ItemBullet.bulletsList.get(pack).size() <= bul) ) ) {
 				if (icon.equals("") || icon.equals(" ")) {
 					icon = "guncus:bullet";
 				} else {
 					icon = "minecraft:bullets/" + icon;
 				}
 
-				GunCusItemBullet bullet = new GunCusItemBullet(name, bul, sul, iron, stack, pack, icon, damage)
+				ItemBullet bullet = new ItemBullet(name, bul, sul, iron, stack, pack, icon, damage)
 						.setSplit(split).setGravityModifier(gravity).setSpray(spray);
 
 				for (String effect : effects) {
@@ -872,9 +893,9 @@ public class GunCus {
 					&& ((ingots > 0) || (red > 0))
 					&& (usingMag
 							|| ((!usingMag) && (bulletsArray.length >= 1)
-									&& (GunCusItemBullet.bulletsList.get(pack) != null)
-									&& (GunCusItemBullet.bulletsList.get(pack).size() > bullets)
-									&& (GunCusItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
+									&& (ItemBullet.bulletsList.get(pack) != null)
+									&& (ItemBullet.bulletsList.get(pack).size() > bullets)
+									&& (ItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
 				boolean def = false;
 				String icon;
 				if ((icon2.equals("")) || (icon2.equals(" "))) {
@@ -913,7 +934,7 @@ public class GunCus {
 						scopes = new int[0];
 					}
 
-					GunCusItemGun gun = new GunCusItemGun(damage, shootType, delay, name, icon, magSize, magId,
+					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize, magId,
 							bullets, ingotsMag, ingots, red, pack, false, attach, bar, scopes, !usingMag, bulletsArray)
 							.setRecoilModifier(recModify).setSoundModifier(sndModify).defaultTexture(def).setZoom(zoom);
 
@@ -930,9 +951,9 @@ public class GunCus {
 				}
 
 				loadedGuns.add(" - " + name + " (ID:" + id + ", Pack:" + pack + ")");
-			} else if ( (!GunCusItemBullet.bulletsList.containsKey(pack))
-					|| (GunCusItemBullet.bulletsList.get(pack).size() <= bullets)
-					|| (GunCusItemBullet.bulletsList.get(pack).get(bullets) == null) ) {
+			} else if ( (!ItemBullet.bulletsList.containsKey(pack))
+					|| (ItemBullet.bulletsList.get(pack).size() <= bullets)
+					|| (ItemBullet.bulletsList.get(pack).get(bullets) == null) ) {
 				log("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets + ")! Ignoring this gun!");
 			} else {
 				log("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
