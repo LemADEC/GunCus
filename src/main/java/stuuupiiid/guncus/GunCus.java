@@ -426,7 +426,6 @@ public class GunCus {
 			e.printStackTrace();
 		}
 
-		GunCusInjector injector = new GunCusInjector(classloader, method);
 		defaultPack(path1.getAbsolutePath());
 
 		for (File pack : path1.listFiles()) {
@@ -435,7 +434,14 @@ public class GunCus {
 				guns(pack.getAbsolutePath(), pack.getName());
 				sounds(pack.getAbsolutePath());
 
-				injector.addToClassPath(pack);
+				if (method != null) {
+					try {
+						method.invoke(classloader, new Object[] { pack.toURI().toURL() });
+					} catch (Exception exception) {
+						GunCus.log("Failed to add some textures to class path");
+						exception.printStackTrace();
+					}
+				}
 			}
 		}
 
