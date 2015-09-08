@@ -219,7 +219,7 @@ public class ItemGun extends Item {
 				&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320)) || (entityPlayer.capabilities.isCreativeMode))
 				&& (this.tubing)) {
 			GunCus.shootTime += 95;
-			PacketHandler.sendToServer_playerAction_tube(entityPlayer);
+			PacketHandler.sendToServer_playerAction_tube();
 			recoilTube(entityPlayer);
 			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube")));
 		}

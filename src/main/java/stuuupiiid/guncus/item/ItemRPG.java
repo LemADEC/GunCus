@@ -46,7 +46,7 @@ public class ItemRPG extends GunCusItem {
 					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
 					&& ((entityPlayer.inventory.hasItem(this.ammo)) || (entityPlayer.capabilities.isCreativeMode))) {
 				GunCus.shootTime += 90;
-				PacketHandler.sendToServer_playerAction_tube(entityPlayer);
+				PacketHandler.sendToServer_playerAction_tube();
 				recoilTube(entityPlayer);
 				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_rpg")));
 			}

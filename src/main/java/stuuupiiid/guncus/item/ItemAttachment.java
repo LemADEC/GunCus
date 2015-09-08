@@ -44,7 +44,7 @@ public class ItemAttachment extends ItemMetadata {
 					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
 					&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320)) || (entityPlayer.capabilities.isCreativeMode))) {
 				GunCus.shootTime += 95;
-				PacketHandler.sendToServer_playerAction_tube(entityPlayer);
+				PacketHandler.sendToServer_playerAction_tube();
 				recoilTube(entityPlayer);
 				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource
 			}
