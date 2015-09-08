@@ -299,13 +299,13 @@ public class PacketHandler {
 				if (packetType2 == 2) {
 					EntityPlayerMP entityPlayerMp = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(entityPlayer.getDisplayName());
 					String s = "You were using modified weapons!";
-
+					
 					if (entityPlayerMp != null) {
 						entityPlayerMp.playerNetServerHandler.kickPlayerFromServer(s);
-						System.out.println("[GunCus] Kicked player " + entityPlayerMp.getDisplayName() + " because he was using modified weapons!");
+						GunCus.logger.info("[GunCus] Kicked player " + entityPlayerMp.getDisplayName() + " because he was using modified weapons!");
 					}
 				}
-			} else if (packetType == 15) {// not sure (server -> client)
+			} else if (packetType == 15) {// weapon selection in weapon box (server -> client)
 				GunCus.actualIndex = data.readInt();
 				GunCus.actualItem = data.readInt();
 			}
