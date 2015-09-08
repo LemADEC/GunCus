@@ -18,14 +18,15 @@ import stuuupiiid.guncus.item.ItemRPG;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import cpw.mods.fml.common.network.IPacketHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +54,18 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-public class PacketHandler implements IPacketHandler {
+public class PacketHandler {
+	public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(GunCus.MODID);
+	private static Method EntityTrackerEntry_getPacketForThisEntity;
+	
+	public static void init() {
+		// Forge packets
+		simpleNetworkManager.registerMessage(MessageReloading.class , MessageReloading.class , 2, Side.CLIENT);	// legacy 2
+		
+		simpleNetworkManager.registerMessage(MessageTubeShoot.class , MessageTubeShoot.class , 101, Side.SERVER);	// legacy 1
+		simpleNetworkManager.registerMessage(MessageTubeShoot.class , MessageTubeShoot.class , 108, Side.SERVER);	// legacy 8
+	}
+
 	@Override
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
 		try {
@@ -64,7 +76,8 @@ public class PacketHandler implements IPacketHandler {
 			int packetType = data.readInt();
 			int packetData = data.readInt();
 
-			if (packetType == 1) {// ItemGun shoot(accuracy) client->server
+			if (packetType == 1) {// ItemGun shoot(accuracy) client->server	=> MessageGunShoot
+				/*
 				if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
 						&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))) {
 					ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
@@ -151,12 +164,15 @@ public class PacketHandler implements IPacketHandler {
 						}
 					}
 				}
-			} else if (packetType == 2) {// Reloading (server->client)
+				/**/
+			} else if (packetType == 2) {// Reloading (server->client)	MessageReloading
+				/*
 				GunCus.reloading = true;
 				GunCus.shootTime += 90;
 				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload")));
-				
-			} else if (packetType == 8) {// ItemAttachment (tube accuracy) (client->server)
+				/**/
+			} else if (packetType == 8) {// ItemAttachment (tube accuracy) (client->server)	MessageTubeShoot
+				/*
 				if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)) {
 					if ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)) {
 						ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
@@ -189,6 +205,7 @@ public class PacketHandler implements IPacketHandler {
 						}
 					}
 				}
+				/**/
 			} else if (packetType == 10) {// bullet sound (server -> client)
 				GunCus.hitmarker = 5;
 				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:inground")));
@@ -206,6 +223,7 @@ public class PacketHandler implements IPacketHandler {
 
 				world.destroyBlock(x, y, z, true);
 			} else if (packetType == 13) {// doKnife
+				/*
 				world.playSoundAtEntity(entityPlayer, "guncus:knife", 1.0F, 1.0F);
 				EntityLiving target = null;
 				double acD = 2.0D;
@@ -239,6 +257,7 @@ public class PacketHandler implements IPacketHandler {
 				if ((target != null) && (acD <= 2.0001D)) {
 					target.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), 20.0F);
 				}
+				/**/
 			} else if (packetType == 14) {// playerLoggedIn
 				int packetType2 = data.readShort();
 
@@ -364,19 +383,17 @@ public class PacketHandler implements IPacketHandler {
 			}
 		} else if (packetType == GuiHandler.weaponBlock) {// 9 GuiWeapon
 			ContainerWeapon container = (ContainerWeapon) entityPlayer.openContainer;
-	
+			
 			if (buttonId == 1) {
 				int actual = currentGun;
 				actual++;
 				if (actual >= GunCus.instance.guns.size()) {
 					actual = 0;
 				}
-	
-				if (GunCus.instance.guns.size() > actual) {
-					container.actualGunIndex = actual;
-					container.actualGunItem = GunCus.instance.guns.get(actual);
-				}
-	
+				
+				container.actualGunIndex = actual;
+				container.actualGunItem = GunCus.instance.guns.get(actual);
+				
 				ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
 				bytes.writeInt(15);
 				bytes.writeInt(0);
@@ -393,28 +410,21 @@ public class PacketHandler implements IPacketHandler {
 			}
 		}
 	}
-
-	public static void sendToServer_playerAction_shoot(EntityPlayer entityPlayer, ItemMag mag, int[] bullets) {
-		ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
-		bytes.writeInt(1);
-		bytes.writeInt(MathHelper.floor_double(GunCus.accuracy));
-		if (mag == null) {
-			bytes.writeInt(bullets[actualBullet]);
-		}
-		PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
+	
+	public static void sendToServer_playerAction_shoot(EntityPlayer entityPlayer, ItemMag mag, int[] bullets, int actualBullet) {
+		MessageGunShoot gunShootMessage = new MessageGunShoot(MathHelper.floor_double(GunCus.accuracy), (mag == null) ? bullets[actualBullet] : -1);
+		PacketHandler.simpleNetworkManager.sendToServer(gunShootMessage);
 	}
-
-	public static void sendToServer_playerAction_tube(EntityPlayer entityPlayer) {
-		ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
-		bytes.writeInt(8);
-		bytes.writeInt(MathHelper.floor_double(GunCus.accuracy));
-		PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
+	
+	public static void sendToServer_playerAction_tube() {
+		MessageTubeShoot tubeShootMessage = new MessageTubeShoot(MathHelper.floor_double(GunCus.accuracy));
+		PacketHandler.simpleNetworkManager.sendToServer(tubeShootMessage);
 	}
-
+	
 	public static void sendToServer_playerAction_knife() {
-		ByteArrayDataOutput bytes = ByteStreams.newDataOutput();
+		MessageKnife knifeMessage = new MessageKnife();
+		PacketHandler.simpleNetworkManager.sendToServer(knifeMessage);
 		bytes.writeInt(13);
 		bytes.writeInt(0);
-		PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("guncus", bytes.toByteArray()));
 	}
 }
