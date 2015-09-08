@@ -3,6 +3,7 @@ package stuuupiiid.guncus;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -17,6 +18,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
@@ -112,28 +115,35 @@ public class GunCus {
 	public static Item smaw;
 	public static Block mineBlock;
 	public static Item mineItem;
-
+	
+	// logging options
+	public static boolean logging_enableNetwork = true;
+	
+	public static Logger logger;
+	
 	@Mod.EventHandler
-	public void preInit(FMLPreInitializationEvent preEvent) {
-		config = new Configuration(preEvent.getSuggestedConfigurationFile());
+	public void onFMLPreInitialization(FMLPreInitializationEvent event) {
+		logger = event.getModLog();
+		
+		config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
-
+		
 		quickKnife = new ItemKnife();
 		gcTab = new GunCusCreativeTab("Gun Customization Modification", quickKnife);
 		quickKnife.setCreativeTab(gcTab);
-
+		
 		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true).getBoolean(true);
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
 		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true).getBoolean(true);
-
+		
 		config.save();
-
+		
 		blockWeapon = new BlockWeapon();
 		blockMag = new BlockMag();
 		blockBullet = new BlockBullet();
 		blockAmmo = new BlockAmmo();
 		blockGun = new BlockGun();
-
+		
 		magFill = new ItemMagFill();
 		part = new GunCusItem("guncus:boxpart", "Box Part", "boxpart");
 
@@ -191,7 +201,7 @@ public class GunCus {
 			FMLCommonHandler.instance().bus().register(new TickHandler());
 		}
 
-		path = new File(preEvent.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
+		path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
 
 		if (!path.exists()) {
 			path.mkdirs();
@@ -414,26 +424,26 @@ public class GunCus {
 			world.setBlockToAir(x, y, z);
 		}
 	}
-
+	
 	private void loadGunPacks(File path1) {
 		ClassLoader classloader = MinecraftServer.class.getClassLoader();
 		Method method = null;
 		try {
 			method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
 			method.setAccessible(true);
-		} catch (Exception e) {
+		} catch (Exception exception) {
 			log("Failed to get the classloader; the textures wont work!");
-			e.printStackTrace();
+			exception.printStackTrace();
 		}
-
+		
 		defaultPack(path1.getAbsolutePath());
-
+		
 		for (File pack : path1.listFiles()) {
 			if ((pack.isDirectory()) && (!pack.getName().equals("default"))) {
 				bullets(pack.getAbsolutePath(), pack.getName());
 				guns(pack.getAbsolutePath(), pack.getName());
 				sounds(pack.getAbsolutePath());
-
+				
 				if (method != null) {
 					try {
 						method.invoke(classloader, new Object[] { pack.toURI().toURL() });
@@ -444,7 +454,7 @@ public class GunCus {
 				}
 			}
 		}
-
+		
 		if (this.loadedBullets.size() > 0) {
 			System.out.println("");
 			log("The GunCus addon found the following bullet files:");
@@ -981,8 +991,8 @@ public class GunCus {
 			log("Could not load sounds!");
 		}
 	}
-
-	public static void log(Object s) {
-		System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + " [GunCus] " + s);
+	
+	public static void log(String message) {// TODO replace with direct access to logger
+		logger.info(message);
 	}
 }
