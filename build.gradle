@@ -27,13 +27,17 @@ configFile.withReader {
     ext.config = new ConfigSlurper().parse prop
 }
 
-group = "stuuupiiid"
+group = "stuuupiiid.guncus"
 version = config.mod_version
-archivesBaseName = "GunCustomization-TDK"
+archivesBaseName = "GunCustomization" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
     assetDir = "run/assets"
+
+    // replacing
+    replace "@version@", project.version
+    replaceIn "GunCus.java"
 
     replaceIn "lib/Reference.java"
     if (project.hasProperty("guncus_signature"))

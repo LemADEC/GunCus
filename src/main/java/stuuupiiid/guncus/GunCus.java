@@ -3,7 +3,6 @@ package stuuupiiid.guncus;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -54,10 +53,15 @@ import stuuupiiid.guncus.item.ItemMine;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.item.ItemScope;
 
-@Mod(modid = "GunCus", name = "Gun Customization", version = "TDK1.7.10-v3.3x")
+/**
+ * @author LemADEC
+ */
+@Mod(modid = GunCus.MODID, name = "Gun Customization", version = GunCus.VERSION, dependencies = "")
 public class GunCus {
-
-	@SidedProxy(clientSide = "stuuupiiid.guncus.GunCusClientProxy", serverSide = "stuuupiiid.guncus.GunCusCommonProxy")
+	public static final String MODID = "GunCus";
+	public static final String VERSION = "@version@";
+	
+	@SidedProxy(clientSide = "stuuupiiid.guncus.ClientProxy", serverSide = "stuuupiiid.guncus.CommonProxy")
 	public static CommonProxy commonProxy = new CommonProxy();
 	public static Configuration config;
 	public static boolean enableBlockDamage;
