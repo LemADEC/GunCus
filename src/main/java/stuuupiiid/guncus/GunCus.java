@@ -52,6 +52,7 @@ import stuuupiiid.guncus.item.ItemMetadata;
 import stuuupiiid.guncus.item.ItemMine;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.item.ItemScope;
+import stuuupiiid.guncus.network.PacketHandler;
 
 /**
  * @author LemADEC
@@ -85,15 +86,16 @@ public class GunCus {
 	public static int actualIndex = 0;
 
 	public LinkedList<ItemGun> guns = new LinkedList<ItemGun>();
-
+	
 	public static int check = 300;
-
+	
 	private List<String> loadedGuns = new ArrayList();
 	private List<String> loadedBullets = new ArrayList();
 	public static File path;
-
+	
 	@Mod.Instance("GunCus")
 	public static GunCus instance;
+	
 	public GuiHandler guiHandler = new GuiHandler();
 	private boolean enableExplosives;
 	private boolean enableOfficialGuns;
@@ -217,7 +219,9 @@ public class GunCus {
 	}
 	
 	@Mod.EventHandler
-	public void init(FMLInitializationEvent event) {
+	public void onFMLInitialization(FMLInitializationEvent event) {
+		PacketHandler.init();
+		
 		commonProxy.render();
 		instance = this;
 		LanguageRegistry.addName(quickKnife, "Quick Knife");
