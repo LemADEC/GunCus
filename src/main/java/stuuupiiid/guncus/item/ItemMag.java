@@ -8,7 +8,7 @@ public class ItemMag extends GunCusItem {
 	public int bulletType;
 	public String gunName;
 	public String pack;
-
+	
 	public ItemMag(String weaponName, String unlocalized, int magSize, String weaponIcon, int bulletType, String pack) {
 		super(weaponIcon + "magazine", weaponName + " Magazine", unlocalized);
 		setMaxDamage(magSize);
@@ -17,7 +17,7 @@ public class ItemMag extends GunCusItem {
 		this.gunName = weaponName;
 		this.pack = pack;
 	}
-
+	
 	@Override
 	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
 		par2List.add(pack);

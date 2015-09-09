@@ -21,18 +21,18 @@ import stuuupiiid.guncus.render.RenderBullet;
 
 public class ClientProxy extends CommonProxy {
 	private int previousShootTime = 0;
-    private int startedShootTime = 0;
-    
-    private static int colorGradient(float gradient, int start, int end) {
-    	return Math.max(0, Math.min(255, start + Math.round(gradient * (end - start))));
-    }
-
+	private int startedShootTime = 0;
+	
+	private static int colorGradient(float gradient, int start, int end) {
+		return Math.max(0, Math.min(255, start + Math.round(gradient * (end - start))));
+	}
+	
 	@Override
 	public void render() {
 		RenderingRegistry.registerEntityRenderingHandler(EntityBullet.class, new RenderBullet());
 		RenderingRegistry.registerEntityRenderingHandler(EntityGrenade.class, new RenderGrenade());
 	}
-
+	
 	@Override
 	public void sight() {
 		Minecraft client = FMLClientHandler.instance().getClient();
@@ -48,7 +48,7 @@ public class ClientProxy extends CommonProxy {
 			if (hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null)) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 				int scopeId = gun.getZoom(entityPlayer.inventory.getCurrentItem().getItemDamage());
-
+				
 				String path;
 				float newZoom = gun.zoom + 0.1F;
 				if (scopeId > 0) {
@@ -60,7 +60,7 @@ public class ClientProxy extends CommonProxy {
 				} else {
 					path = gun.iconName.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
 				}
-
+				
 				if (GunCus.zoomLevel < newZoom) {
 					GunCus.zoomLevel = (float) (GunCus.zoomLevel + 2.5D);
 				}
@@ -85,7 +85,7 @@ public class ClientProxy extends CommonProxy {
 				}
 				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
 			}
-
+			
 			// draw hit marker
 			if (hasGunInHand && (GunCus.hitmarker > 0) && (client.currentScreen == null)) {
 				GunCus.hitmarker -= 1;
@@ -98,37 +98,37 @@ public class ClientProxy extends CommonProxy {
 				tessellator.addVertexWithUV(xCenter - offset,         0.0D, -100.0D, 0.0D, 0.0D);
 				tessellator.draw();
 			}
-
+			
 			// draw reloading overlay
 			Minecraft	mc = Minecraft.getMinecraft();
 			if (hasGunInHand && (client.currentScreen == null) && GunCus.reloading) {
-		        String text = "Reloading";
-		        int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
-		        float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / 95F));
-		        int color = (colorGradient(progress, 0xFF, 0x00) << 16) + (colorGradient(progress, 0x40, 0xFF) << 8) + colorGradient(progress, 0x00, 0x00);
-
+				String text = "Reloading";
+				int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
+				float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / 95F));
+				int color = (colorGradient(progress, 0xFF, 0x00) << 16) + (colorGradient(progress, 0x40, 0xFF) << 8) + colorGradient(progress, 0x00, 0x00);
+				
 				mc.fontRenderer.drawString(text, textX, scaledHeight / 2 + 8, color, true);
 			}
-
+			
 			// draw delay for long downtime
 			if (hasGunInHand && (client.currentScreen == null) && !GunCus.reloading) {
-		        if (GunCus.shootTime > previousShootTime) {
-		        	previousShootTime = GunCus.shootTime;
-		        	startedShootTime = Math.max(GunCus.shootTime, startedShootTime);
-		        }
-		        if (GunCus.shootTime == 0 && previousShootTime == 0) {
-		        	// go shooting...
-		        	startedShootTime = 0;
-		        } else if (startedShootTime > 20) {
-			        String text = ".............";
-			        int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
-			        float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / (float)startedShootTime));
-
-		        	mc.fontRenderer.drawString(text, textX, scaledHeight / 2 +  8, 0xFF0000, true);
-		        	mc.fontRenderer.drawString(text.substring(0, Math.round(text.length() * progress)), textX, scaledHeight / 2 + 8, 0x40FF00, true);
-		        	
-		        	previousShootTime = GunCus.shootTime;
-		        }
+				if (GunCus.shootTime > previousShootTime) {
+					previousShootTime = GunCus.shootTime;
+					startedShootTime = Math.max(GunCus.shootTime, startedShootTime);
+				}
+				if (GunCus.shootTime == 0 && previousShootTime == 0) {
+					// go shooting...
+					startedShootTime = 0;
+				} else if (startedShootTime > 20) {
+					String text = ".............";
+					int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
+					float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / (float) startedShootTime));
+					
+					mc.fontRenderer.drawString(text, textX, scaledHeight / 2 + 8, 0xFF0000, true);
+					mc.fontRenderer.drawString(text.substring(0, Math.round(text.length() * progress)), textX, scaledHeight / 2 + 8, 0x40FF00, true);
+					
+					previousShootTime = GunCus.shootTime;
+				}
 			}
 		}
 	}
