@@ -191,7 +191,7 @@ public class ContainerGun extends Container {
 				((Slot) this.inventorySlots.get(1)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
-			if ((extra > 0) && (gun.attatchmentFree(metadata))) {
+			if ((extra > 0) && (gun.attachmentFree(metadata))) {
 				metadata += extra * (gun.scopes.length + 1);
 				((Slot) this.inventorySlots.get(0)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));

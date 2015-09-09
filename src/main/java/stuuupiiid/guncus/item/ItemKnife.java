@@ -17,20 +17,21 @@ public class ItemKnife extends GunCusItem {
 		super("guncus:knife", "Knife", "quickKnife");
 		setFull3D();
 	}
-
+	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			doKnife();
 		}
 	}
-
+	
 	@SideOnly(Side.CLIENT)
 	public static void doKnife() {
-		if ((GunCus.knifeTime <= 0) && (FMLClientHandler.instance().getClient().thePlayer != null)
-				&& (FMLClientHandler.instance().getClient().theWorld != null)) {
+		if ( (GunCus.knifeTime <= 0)
+		  && (FMLClientHandler.instance().getClient().thePlayer != null)
+		  && (FMLClientHandler.instance().getClient().theWorld != null)) {
 			if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(33))
-					&& (FMLClientHandler.instance().getClient().currentScreen == null)) {
+			  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
 				GunCus.knifeTime += 25;
 				GunCus.shootTime += 24;
 				PacketHandler.sendToServer_playerAction_knife();

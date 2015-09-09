@@ -43,9 +43,9 @@ public class ItemGun extends Item {
 	public String iconName;
 	public String name;
 	public IIcon icon;
-	public IIcon[] iconAttach;
-	public IIcon[] iconBar;
-	public IIcon iconScp;
+	public IIcon[] iconsAttachment;
+	public IIcon[] iconsBarrel;
+	public IIcon iconScope;
 	public ItemMag mag = null;
 	public int ingotsMag;
 	public int ingots;
@@ -393,7 +393,7 @@ public class ItemGun extends Item {
 		return true;
 	}
 
-	public boolean attatchmentFree(int metadata) {
+	public boolean attachmentFree(int metadata) {
 		for (int v1 = 0; v1 < GunCus.attachment.metadatas.length; v1++) {
 			if (testForAttachId(v1 + 1, metadata)) {
 				return false;
@@ -565,22 +565,37 @@ public class ItemGun extends Item {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister par1IconRegister) {
-		this.icon = par1IconRegister.registerIcon(this.iconName + "gun");
-
-		this.iconAttach = new IIcon[this.attach.length];
-
-		for (int v1 = 0; v1 < this.attach.length; v1++) {
-			this.iconAttach[v1] = par1IconRegister.registerIcon(this.iconName + getAttachIcon("a", this.attach[v1]));
+		GunCus.logger.error("Registering icons for " + this);
+		String iconToRegisterName = iconName + "gun";
+		icon = par1IconRegister.registerIcon(iconToRegisterName);
+		if (icon == null) {
+			GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 		}
-
-		this.iconBar = new IIcon[this.barrel.length];
-
-		for (int v1 = 0; v1 < this.barrel.length; v1++) {
-			this.iconBar[v1] = par1IconRegister.registerIcon(this.iconName + getAttachIcon("b", this.barrel[v1]));
+		
+		iconsAttachment = new IIcon[attach.length];
+		for (int attachIndex = 0; attachIndex < attach.length; attachIndex++) {
+			iconToRegisterName = iconName + getAttachIcon("a", attach[attachIndex]);
+			iconsAttachment[attachIndex] = par1IconRegister.registerIcon(iconToRegisterName);
+			if (iconsAttachment[attachIndex] == null) {
+				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
+			}
 		}
-
-		if (this.scopes.length > 0) {
-			this.iconScp = par1IconRegister.registerIcon(this.iconName + "scp");
+		
+		iconsBarrel = new IIcon[barrel.length];
+		for (int barrelIndex = 0; barrelIndex < barrel.length; barrelIndex++) {
+			iconToRegisterName = iconName + getAttachIcon("b", barrel[barrelIndex]);
+			iconsBarrel[barrelIndex] = par1IconRegister.registerIcon(iconToRegisterName);
+			if (iconsBarrel[barrelIndex] == null) {
+				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
+			}
+		}
+		
+		if (scopes.length > 0) {
+			iconToRegisterName = iconName + "scp";
+			iconScope = par1IconRegister.registerIcon(iconToRegisterName);
+			if (iconScope == null) {
+				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
+			}
 		}
 	}
 
@@ -609,8 +624,12 @@ public class ItemGun extends Item {
 				break;
 			case 7:
 				string = "ptr";
+				break;
+			default:
+				string = "!bad!";
+				break;
 			}
-
+			
 		} else if (type.toLowerCase().startsWith("b")) {
 			switch (attach1) {
 			case 1:
@@ -624,17 +643,20 @@ public class ItemGun extends Item {
 				break;
 			case 4:
 				string = "pbl";
+				break;
+			default:
+				string = "!bad!";
+				break;
 			}
-
 		}
-
+		
 		return string;
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int par1) {
-		return this.icon;
+		return icon;
 	}
 
 	public String getName2(int metadata) {
