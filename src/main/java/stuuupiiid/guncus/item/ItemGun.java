@@ -50,7 +50,7 @@ public class ItemGun extends Item {
 	public int ingotsMag;
 	public int ingots;
 	public int field_redstone;
-	protected double recModify;
+	public double recoilModifier;
 	public double soundModify;
 	public boolean isOfficial;
 	public boolean usingDefault = false;
@@ -89,7 +89,7 @@ public class ItemGun extends Item {
 		ingots = parIngots;
 		field_redstone = parRedstone;
 		pack = parPack;
-		recModify = 1.0D;
+		recoilModifier = 1.0D;
 		soundModify = 1.0D;
 		attach = parAttach;
 		barrel = parBarrel;
@@ -151,7 +151,7 @@ public class ItemGun extends Item {
 	}
 
 	public ItemGun setRecoilModifier(double d) {
-		this.recModify = d;
+		this.recoilModifier = d;
 		return this;
 	}
 
@@ -353,7 +353,7 @@ public class ItemGun extends Item {
 	}
 
 	private void recoil(EntityPlayer entityPlayer, int metadata, boolean scoping, double damage1) {
-		float strength = (float) (damage1 / 6.0F * this.recModify);
+		float strength = (float) (damage1 / 6.0F * this.recoilModifier);
 
 		if (hasBipod(metadata) && canUseBipod(entityPlayer)) {
 			strength /= 3.0F;

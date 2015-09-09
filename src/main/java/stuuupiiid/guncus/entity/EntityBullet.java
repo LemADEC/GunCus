@@ -179,7 +179,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						}
 					}
 					if (!movingobjectposition.entityHit.isDead) {
-						PacketHandler.sendPacket10(entityPlayer);
+						PacketHandler.sendToClient_bulletImpact(entityPlayer);
 					}
 
 					hitEntity(movingobjectposition.entityHit);
