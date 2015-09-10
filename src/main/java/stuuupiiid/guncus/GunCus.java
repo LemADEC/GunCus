@@ -64,6 +64,7 @@ public class GunCus {
 	
 	@SidedProxy(clientSide = "stuuupiiid.guncus.ClientProxy", serverSide = "stuuupiiid.guncus.CommonProxy")
 	public static CommonProxy commonProxy = new CommonProxy();
+	
 	public static Configuration config;
 	public static boolean enableBlockDamage;
 	public static int shootTime = 0;
@@ -210,7 +211,7 @@ public class GunCus {
 		path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
 		
 		if (!path.exists()) {
-		path.mkdirs();
+			path.mkdirs();
 			logger.info("Created the GunCus directory!");
 			logger.info("You should install some gun packs now!");
 		}
@@ -235,7 +236,7 @@ public class GunCus {
 		GameRegistry.registerBlock(blockMag, blockMag.getUnlocalizedName());
 		GameRegistry.registerBlock(blockBullet, blockBullet.getUnlocalizedName());
 		GameRegistry.registerBlock(blockWeapon, blockWeapon.getUnlocalizedName());
-
+		
 		GameRegistry.addShapedRecipe(new ItemStack(part),
 				new Object[] { "ABA", "BCB", "ABA",
 					'A', new ItemStack(Items.iron_ingot),
@@ -427,13 +428,13 @@ public class GunCus {
 	}
 	
 	public static void removeBlockServer(Entity entity, int x, int y, int z) {
-		if ((FMLCommonHandler.instance().getEffectiveSide().isServer()) && (enableBlockDamage)) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer() && enableBlockDamage) {
 			World world = entity.worldObj;
 			world.setBlockToAir(x, y, z);
 		}
 	}
 	
-	private void loadGunPacks(File path1) {
+	private void loadGunPacks(File fileGunCus) {
 		ClassLoader classloader = MinecraftServer.class.getClassLoader();
 		Method method = null;
 		try {
@@ -444,17 +445,19 @@ public class GunCus {
 			exception.printStackTrace();
 		}
 		
-		defaultPack(path1.getAbsolutePath());
+		defaultPack(fileGunCus);
 		
-		for (File pack : path1.listFiles()) {
-			if ((pack.isDirectory()) && (!pack.getName().equals("default"))) {
-				bullets(pack.getAbsolutePath(), pack.getName());
-				guns(pack.getAbsolutePath(), pack.getName());
-				sounds(pack.getAbsolutePath());
+		for (File filePack : fileGunCus.listFiles()) {
+			if ((filePack.isDirectory()) && (!filePack.getName().equals("default"))) {
+				bullets(filePack.getAbsolutePath(), filePack.getName());
+				guns(filePack.getAbsolutePath(), filePack.getName());
+				sounds(filePack.getAbsolutePath());
 				
 				if (method != null) {
 					try {
-						method.invoke(classloader, new Object[] { pack.toURI().toURL() });
+						logger.info("Adding to classloader paths: " + filePack.toURI().toURL());
+						// FIXME: this breaks vanilla sound assets
+						// method.invoke(classloader, new Object[] { filePack.toURI().toURL() });
 					} catch (Exception exception) {
 						logger.info("Failed to add some textures to class path");
 						exception.printStackTrace();
@@ -464,7 +467,7 @@ public class GunCus {
 		}
 		
 		if (this.loadedBullets.size() > 0) {
-			System.out.println("");
+			logger.info("");
 			logger.info("The GunCus addon found the following bullet files:");
 			
 			for (int v1 = 0; v1 < loadedBullets.size(); v1++) {
@@ -473,7 +476,7 @@ public class GunCus {
 		}
 		
 		if (this.loadedGuns.size() > 0) {
-			System.out.println("");
+			logger.info("");
 			logger.info("The GunCus addon found the following gun files:");
 			
 			for (int v1 = 0; v1 < loadedGuns.size(); v1++) {
@@ -486,14 +489,14 @@ public class GunCus {
 		}
 	}
 	
-	private void defaultPack(String pathS) {
-	File path1 = new File(pathS + "/default");
-		if (!path1.exists()) {
-			path1.mkdirs();
+	private void defaultPack(File fileGunCus) {
+		File fileDefault = new File(fileGunCus, "/default");
+		if (!fileDefault.exists()) {
+			fileDefault.mkdirs();
 		}
 		
 		// default bullet configuration
-		File bulletConfigFile = new File(path1.getAbsolutePath() + "/bullets/default.cfg");
+		File bulletConfigFile = new File(fileDefault.getAbsolutePath() + "/bullets/default.cfg");
 		Configuration bulletConfig = new Configuration(bulletConfigFile);
 		Property idProp = bulletConfig.get("general", "ID", 1010);
 		idProp.comment = "Item ID of the bullet";
@@ -543,7 +546,7 @@ public class GunCus {
 		bulletConfig.save();
 		
 		// default gun configuration
-		File gunConfigFile = new File(path1 + "/guns/default.cfg");
+		File gunConfigFile = new File(fileDefault + "/guns/default.cfg");
 		Configuration gunConfig = new Configuration(gunConfigFile);
 		
 		Property idMagProp = gunConfig.get("general", "Mag ID", 1000);
@@ -617,7 +620,7 @@ public class GunCus {
 		damageProp2.comment = "Damage dealt (1 is half a heart)";
 		gunConfig.save();
 		
-		File textures = new File(path1.getAbsolutePath() + "/assets/minecraft/textures");
+		File textures = new File(fileDefault.getAbsolutePath() + "/assets/minecraft/textures");
 		if (!textures.exists()) {
 			textures.mkdirs();
 		}
@@ -629,56 +632,56 @@ public class GunCus {
 		if (!blocks.exists()) {
 			blocks.mkdirs();
 		}
-		File sounds = new File(path1.getAbsolutePath() + "/assets/minecraft/sound");
+		File sounds = new File(fileDefault.getAbsolutePath() + "/assets/minecraft/sounds");
 		if (!sounds.exists()) {
 			sounds.mkdirs();
 		}
 	}
 	
 	private void bullets(String packPath, String pack) {
-		File file = new File(packPath + "/bullets");
-		file.mkdirs();
-		File[] filesFound = file.listFiles();
-		ArrayList files = new ArrayList();
+		File fileBullets = new File(packPath + "/bullets");
+		fileBullets.mkdirs();
+		File[] filesFound = fileBullets.listFiles();
+		ArrayList<File> files = new ArrayList();
 		
-		for (int v1 = 0; v1 < filesFound.length; v1++) {
-			if (filesFound[v1].getAbsolutePath().endsWith(".cfg")) {
-				files.add(filesFound[v1]);
+		for (File fileFound : filesFound) {
+			if (fileFound.getAbsolutePath().endsWith(".cfg")) {
+				files.add(fileFound);
 			}
 		}
 		
-		for (int v1 = 0; v1 < files.size(); v1++) {
-	Configuration config1 = new Configuration((File) files.get(v1));
-			config1.load();
+		for (File file : files) {
+			Configuration configBullet = new Configuration(file);
+			configBullet.load();
 			
-			Property idProp = config1.get("general", "ID", 1010);
+			Property idProp = configBullet.get("general", "ID", 1010);
 			idProp.comment = "Item ID of the bullet";
 			
-			Property bulProp = config1.get("general", "Bullet ID", 1);
-			bulProp.comment = "Bullet ID of the bullet";
+			Property bulletIdProp = configBullet.get("general", "Bullet ID", 1);
+			bulletIdProp.comment = "Bullet ID of the bullet";
 			
-			Property ironProp = config1.get("general", "Iron", 1);
+			Property ironProp = configBullet.get("general", "Iron", 1);
 			ironProp.comment = "How much iron you need to craft this bullet type";
 			
-			Property sulProp = config1.get("general", "Gunpowder", 3);
-			sulProp.comment = "How much gunpowder you need to craft this bullet type";
+			Property gunpowderProp = configBullet.get("general", "Gunpowder", 3);
+			gunpowderProp.comment = "How much gunpowder you need to craft this bullet type";
 			
-			Property stackProp = config1.get("general", "stackSize", 4);
+			Property stackProp = configBullet.get("general", "stackSize", 4);
 			stackProp.comment = "How much bullets you get at a time by crafting this bullet type";
 			
-			Property nameProp = config1.get("general", "Name", "default");
+			Property nameProp = configBullet.get("general", "Name", "default");
 			nameProp.comment = "Name of the bullet";
 			
-			Property iconProp = config1.get("general", "Icon", "");
+			Property iconProp = configBullet.get("general", "Icon", "");
 			iconProp.comment = "Texture of this bullet. Leave blanc for default";
 			
-			Property splitProp = config1.get("general", "Split", 1);
+			Property splitProp = configBullet.get("general", "Split", 1);
 			splitProp.comment = "How much bullets being shot at a time.";
 			
-			Property sprayProp = config1.get("general", "Spray", 100);
+			Property sprayProp = configBullet.get("general", "Spray", 100);
 			sprayProp.comment = "Maximum accuracy by using this bullet. 100 = 100% accuracy. 30 = shotgun spray.";
-
-	Property onImpactProp = config1.get("general", "Impact", "");
+			
+			Property onImpactProp = configBullet.get("general", "Impact", "");
 			onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
 					+ "\n'X' and 'Y' are modifiers."
 					+ "\n1:X = Poison for X seconds"
@@ -691,43 +694,43 @@ public class GunCus {
 					+ "\n8:X = Instant damage (harm) of X damages"
 					+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds.";
 			
-			Property gravityProp = config1.get("general", "GravityModifier", 1.0D);
-			gravityProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
+			Property gravityModifierProp = configBullet.get("general", "GravityModifier", 1.0D);
+			gravityModifierProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
 			
-			Property damageProp = config1.get("general", "Damage Modifier", 1.0D);
-			damageProp.comment = "Applied damage is Gun Damage * Damage Modifier";
+			Property damageModifierProp = configBullet.get("general", "Damage Modifier", 1.0D);
+			damageModifierProp.comment = "Applied damage is Gun Damage * Damage Modifier";
 			
-			float damage = (float) damageProp.getDouble(1.0D);
-			int bul = bulProp.getInt(1);
+			float damageModifier = (float) damageModifierProp.getDouble(1.0D);
+			int bulletId = bulletIdProp.getInt(1);
 			int iron = ironProp.getInt(1);
-			int sul = sulProp.getInt(3);
+			int gunpowder = gunpowderProp.getInt(3);
 			int stack = stackProp.getInt(4);
 			String name = nameProp.getString();
 			String icon = iconProp.getString();
 			String[] effects = onImpactProp.getString().split(";");
 			int split = splitProp.getInt(1);
 			int spray = sprayProp.getInt(100);
-			double gravity = gravityProp.getDouble(1.0D);
+			double gravityModifier = gravityModifierProp.getDouble(1.0D);
 			
 			if (!ItemBullet.bulletsList.containsKey(pack)) {
 				ItemBullet.bulletsList.put(pack, new ArrayList());
 			}
 			
 			if ( (name != null)
-			  && (bul > 0)
+			  && (bulletId > 0)
 			  && (iron >= 0)
-			  && (sul >= 0)
-			  && ((iron > 0) || (sul > 0))
+			  && (gunpowder >= 0)
+			  && ((iron > 0) || (gunpowder > 0))
 			  && (stack > 0)
-			  && ( ( (ItemBullet.bulletsList.get(pack).size() > bul) && (ItemBullet.bulletsList.get(pack).get(bul) == null) )
-				|| (ItemBullet.bulletsList.get(pack).size() <= bul) ) ) {
+			  && ( ( (ItemBullet.bulletsList.get(pack).size() > bulletId) && (ItemBullet.bulletsList.get(pack).get(bulletId) == null) )
+				|| (ItemBullet.bulletsList.get(pack).size() <= bulletId) ) ) {
 				if (icon.equals("") || icon.equals(" ")) {
 					icon = "guncus:bullet";
 				} else {
 					icon = "minecraft:bullets/" + icon;
 				}
 				
-				ItemBullet bullet = new ItemBullet(name, bul, sul, iron, stack, pack, icon, damage).setSplit(split).setGravityModifier(gravity).setSpray(spray);
+				ItemBullet bullet = new ItemBullet(name, bulletId, gunpowder, iron, stack, pack, icon, damageModifier).setSplit(split).setGravityModifier(gravityModifier).setSpray(spray);
 				
 				for (String effect : effects) {
 					try {
@@ -746,35 +749,35 @@ public class GunCus {
 					}
 				}
 				
-				loadedBullets.add(" - " + name + " (Bullet ID:" + bul + ", Pack:" + pack + ")");
+				loadedBullets.add(" - " + name + " (Bullet ID:" + bulletId + ", Pack:" + pack + ")");
 			} else {
 				logger.info("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 			}
 			
-			config1.save();
+			configBullet.save();
 		}
 	}
 	
 	private void guns(String packPath, String path1) {
-		File file = new File(packPath + "/guns");
-		file.mkdirs();
-		File[] filesFound = file.listFiles();
-		ArrayList files = new ArrayList();
+		File fileGuns = new File(packPath + "/guns");
+		fileGuns.mkdirs();
+		File[] filesFound = fileGuns.listFiles();
+		ArrayList<File> files = new ArrayList();
 		
-		for (int v1 = 0; v1 < filesFound.length; v1++) {
-			if (filesFound[v1].getAbsolutePath().endsWith(".cfg")) {
-				files.add(filesFound[v1]);
+		for (File fileFound : filesFound) {
+			if (fileFound.getAbsolutePath().endsWith(".cfg")) {
+				files.add(fileFound);
 			}
 		}
-
-		for (int v1 = 0; v1 < files.size(); v1++) {
-			Configuration gunConfig = new Configuration((File) files.get(v1));
+		
+		for (File file : files) {
+			Configuration gunConfig = new Configuration(file);
 			gunConfig.load();
 			
 			int bullets = -1;
 			
-			Property idMagProp = gunConfig.get("general", "Mag ID", 1000);
-			idMagProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
+			Property magIdProp = gunConfig.get("general", "Mag ID", 1000);
+			magIdProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
 			
 			Property idProp = gunConfig.get("general", "ID", 1001);
 			idProp.comment = "ID of the gun";
@@ -785,50 +788,50 @@ public class GunCus {
 			Property delayProp = gunConfig.get("general", "Delay", 3);
 			delayProp.comment = "Delay between shots of the gun (in ticks)";
 			
-			Property magProp = gunConfig.get("general", "Magsize", 1);
-			magProp.comment = "Size of the magazines";
+			Property magSizeProp = gunConfig.get("general", "Magsize", 1);
+			magSizeProp.comment = "Size of the magazines";
 			
-			Property magIngotProp = gunConfig.get("general", "Mag Ingots", 1);
-			magIngotProp.comment = "Number of iron ingots a mag needs to be crafted";
+			Property magIngotsProp = gunConfig.get("general", "Mag Ingots", 1);
+			magIngotsProp.comment = "Number of iron ingots a mag needs to be crafted";
 			
-			Property ingotProp = gunConfig.get("general", "Iron Ingots", 1);
-			ingotProp.comment = "Number of iron ingots this gun needs to be crafted";
+			Property gunIngotsProp = gunConfig.get("general", "Iron Ingots", 1);
+			gunIngotsProp.comment = "Number of iron ingots this gun needs to be crafted";
 			
-			Property redProp = gunConfig.get("general", "Redstone", 1);
-			redProp.comment = "Number of redstone this gun needs to be crafted";
+			Property redstoneProp = gunConfig.get("general", "Redstone", 1);
+			redstoneProp.comment = "Number of redstone this gun needs to be crafted";
 			
 			Property nameProp = gunConfig.get("general", "Name", "default");
 			nameProp.comment = "Name of the gun";
 			
-			Property bulletProp = gunConfig.get("general", "Bullets", "1");
-			bulletProp.comment = "Semicolon separated list of bullet IDs for this gun."
+			Property bulletsProp = gunConfig.get("general", "Bullets", "1");
+			bulletsProp.comment = "Semicolon separated list of bullet IDs for this gun."
 					+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!";
 			
-			Property usingMagProp = gunConfig.get("general", "UsingMags", true);
-			usingMagProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
+			Property usingMagsProp = gunConfig.get("general", "UsingMags", true);
+			usingMagsProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
 			
 			Property iconProp = gunConfig.get("general", "Texture", "");
 			iconProp.comment = "Texture of the gun. Leave blanc for default";
 			
-			Property recProp = gunConfig.get("general", "RecoilModifier", 1.0D);
-			recProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
+			Property recoilModifierProp = gunConfig.get("general", "RecoilModifier", 1.0D);
+			recoilModifierProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
 			
-			Property sound_normalP = gunConfig.get("general", "NormalSound", "Sound_DERP2");
-			sound_normalP.comment = "Sound played when shooting. Only .ogg or .wav!!! Leave blanc for default";
+			Property sound_normalProp = gunConfig.get("general", "NormalSound", "Sound_DERP2");
+			sound_normalProp.comment = "Sound played when shooting. Only .ogg or .wav!!! Leave blanc for default";
 			
-			Property sound_silencedP = gunConfig.get("general", "SilencedSound", "");
-			sound_silencedP.comment = "Sound played when shooting while gun has a silencer. Only .ogg or .wav!!! Leave blanc for default";
+			Property sound_silencedProp = gunConfig.get("general", "SilencedSound", "");
+			sound_silencedProp.comment = "Sound played when shooting while gun has a silencer. Only .ogg or .wav!!! Leave blanc for default";
 			
-			Property sndProp = gunConfig.get("general", "SoundModifier", 1.0D);
-			sndProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots). | Default Sound Volume x SoundModifier = Used Sound Volume";
+			Property soundModifierProp = gunConfig.get("general", "SoundModifier", 1.0D);
+			soundModifierProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots). | Default Sound Volume x SoundModifier = Used Sound Volume";
 			
-			Property extra1Prop = gunConfig.get("general", "Attachments", "1;3;2;6");
-			extra1Prop.comment = "Semicolon separated list of attachments valid on this gun."
+			Property attachmentsProp = gunConfig.get("general", "Attachments", "1;3;2;6");
+			attachmentsProp.comment = "Semicolon separated list of attachments valid on this gun."
 					+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
 					+ "\n6 = Improved Grip | 7 = Laser Pointer.";
 			
-			Property bar1Prop = gunConfig.get("general", "Barrels", "1;2;3");
-			bar1Prop.comment = "Semicolon separated list of barrels valid on this gun."
+			Property barrelsProp = gunConfig.get("general", "Barrels", "1;2;3");
+			barrelsProp.comment = "Semicolon separated list of barrels valid on this gun."
 					+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.";
 			
 			Property scopesProp = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
@@ -846,127 +849,127 @@ public class GunCus {
 			int id = idProp.getInt(-1);
 			int shootType = shootTypeProp.getInt(2);
 			int delay = delayProp.getInt(3);
-			int magSize = magProp.getInt(1);
-			int magId = idMagProp.getInt(1000);
-			String[] bullets2 = bulletProp.getString().split(";");
-			int ingotsMag = magIngotProp.getInt(1);
-			int ingots = ingotProp.getInt(1);
-			int red = redProp.getInt(1);
+			int magSize = magSizeProp.getInt(1);
+			int magId = magIdProp.getInt(1000);
+			String[] stringBullets = bulletsProp.getString().split(";");
+			int magIngots = magIngotsProp.getInt(1);
+			int gunIngots = gunIngotsProp.getInt(1);
+			int redstone = redstoneProp.getInt(1);
 			String name = nameProp.getString();
-			String icon2 = iconProp.getString();
-			double recModify = recProp.getDouble(1.0D);
-			double sndModify = sndProp.getDouble(1.0D);
-			String snormal = sound_normalP.getString();
-			String ssln = sound_silencedP.getString();
-			String[] attach1 = extra1Prop.getString().split(";");
-			String[] bar1 = bar1Prop.getString().split(";");
-			String[] scopes1 = scopesProp.getString().split(";");
+			String stringIcon = iconProp.getString();
+			double recoilModifier = recoilModifierProp.getDouble(1.0D);
+			double soundModifier = soundModifierProp.getDouble(1.0D);
+			String sound_normal = sound_normalProp.getString();
+			String sound_silenced = sound_silencedProp.getString();
+			String[] stringAttachments = attachmentsProp.getString().split(";");
+			String[] stringBarrels = barrelsProp.getString().split(";");
+			String[] stringScopes = scopesProp.getString().split(";");
 			
 			float zoom = (float) defaultZoomProp.getDouble(1.1D);
-			boolean usingMag = usingMagProp.getBoolean(true);
+			boolean usingMag = usingMagsProp.getBoolean(true);
 			
 			int damage = damageProp.getInt(6);
 			
-			if (sndModify < 1.E-005D) {
-				sndModify = 1.E-005D;
+			if (soundModifier < 1.E-005D) {
+				soundModifier = 1.E-005D;
 			}
 			
-			if (sndModify > 20.0D) {
-				sndModify = 20.0D;
+			if (soundModifier > 20.0D) {
+				soundModifier = 20.0D;
 			}
 			
 			boolean errored = false;
 			String pack = new File(packPath).getName();
-			int[] bulletsArray;
+			int[] intBullets;
 			if (!usingMag) {
 				bullets = -1;
-				bulletsArray = new int[bullets2.length];
+				intBullets = new int[stringBullets.length];
 				magId = -1;
-				for (int v2 = 0; v2 < bullets2.length; v2++) {
+				for (int indexBullet = 0; indexBullet < stringBullets.length; indexBullet++) {
 					try {
-						bulletsArray[v2] = Integer.parseInt(bullets2[v2]);
-					} catch (Exception e) {
+						intBullets[indexBullet] = Integer.parseInt(stringBullets[indexBullet]);
+					} catch (Exception exception) {
 						logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
-								+ "\"! Caused by: \"" + bullets2[v2] + "\"!");
+								+ "\"! Caused by: \"" + stringBullets[indexBullet] + "\"!");
 						errored = true;
 					}
 				}
 			} else {
-				bulletsArray = new int[0];
+				intBullets = new int[0];
 				try {
-					bullets = Integer.parseInt(bullets2[0]);
-				} catch (Exception e) {
+					bullets = Integer.parseInt(stringBullets[0]);
+				} catch (Exception exception) {
 					logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
-							+ "\"! Caused by: \"" + bullets2[0] + "\"!");
+							+ "\"! Caused by: \"" + stringBullets[0] + "\"!");
 					errored = true;
 				}
 			}
 			
 			if ((!errored)
 					&& (name != null)
-					&& (icon2 != null)
+					&& (stringIcon != null)
 					&& (shootType >= 0)
 					&& (shootType < 3)
 					&& (delay >= 0)
 					&& (magSize >= 1)
 					&& (magId != id)
-					&& (ingots > 0)
-					&& (ingotsMag >= 0)
-					&& (red >= 0)
-					&& ((ingots > 0) || (red > 0))
+					&& (gunIngots > 0)
+					&& (magIngots >= 0)
+					&& (redstone >= 0)
+					&& ((gunIngots > 0) || (redstone > 0))
 					&& (usingMag
-							|| ((!usingMag) && (bulletsArray.length >= 1)
+							|| ((!usingMag) && (intBullets.length >= 1)
 									&& (ItemBullet.bulletsList.get(pack) != null)
 									&& (ItemBullet.bulletsList.get(pack).size() > bullets)
 									&& (ItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
-				boolean def = false;
+				boolean defaultTexture = false;
 				String icon;
-				if ((icon2.equals("")) || (icon2.equals(" "))) {
+				if ((stringIcon.equals("")) || (stringIcon.equals(" "))) {
 					logger.info("[" + pack + "] The texture of the gun \"" + name + "\" is missing!");
 					icon = "guncus:gun_default/";
-					def = true;
+					defaultTexture = true;
 				} else {
-					icon = "minecraft:gun_" + icon2 + "/";
+					icon = "minecraft:gun_" + stringIcon + "/";
 				}
 				try {
-					int[] attach;
-					if ((attach1.length > 0) && (!attach1[0].replace(" ", "").equals(""))) {
-						attach = new int[attach1.length];
-						for (int v2 = 0; v2 < attach1.length; v2++) {
-							attach[v2] = Integer.parseInt(attach1[v2]);
+					int[] intAttachments;
+					if ((stringAttachments.length > 0) && (!stringAttachments[0].replace(" ", "").equals(""))) {
+						intAttachments = new int[stringAttachments.length];
+						for (int indexAttachment = 0; indexAttachment < stringAttachments.length; indexAttachment++) {
+							intAttachments[indexAttachment] = Integer.parseInt(stringAttachments[indexAttachment]);
 						}
 					} else {
-						attach = new int[0];
+						intAttachments = new int[0];
 					}
-					int[] bar;
-					if ((bar1.length > 0) && (!bar1[0].replace(" ", "").equals(""))) {
-						bar = new int[bar1.length];
-						for (int v2 = 0; v2 < bar1.length; v2++) {
-							bar[v2] = Integer.parseInt(bar1[v2]);
+					int[] intBarrels;
+					if ((stringBarrels.length > 0) && (!stringBarrels[0].replace(" ", "").equals(""))) {
+						intBarrels = new int[stringBarrels.length];
+						for (int indexBarrel = 0; indexBarrel < stringBarrels.length; indexBarrel++) {
+							intBarrels[indexBarrel] = Integer.parseInt(stringBarrels[indexBarrel]);
 						}
 					} else {
-						bar = new int[0];
+						intBarrels = new int[0];
 					}
-					int[] scopes;
-					if ((scopes1.length > 0) && (!scopes1[0].replace(" ", "").equals(""))) {
-						scopes = new int[scopes1.length];
-						for (int v2 = 0; v2 < scopes1.length; v2++) {
-							scopes[v2] = Integer.parseInt(scopes1[v2]);
+					int[] intScopes;
+					if ((stringScopes.length > 0) && (!stringScopes[0].replace(" ", "").equals(""))) {
+						intScopes = new int[stringScopes.length];
+						for (int indexScope = 0; indexScope < stringScopes.length; indexScope++) {
+							intScopes[indexScope] = Integer.parseInt(stringScopes[indexScope]);
 						}
 					} else {
-						scopes = new int[0];
+						intScopes = new int[0];
 					}
 					
 					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize, magId,
-							bullets, ingotsMag, ingots, red, pack, false, attach, bar, scopes, !usingMag, bulletsArray)
-							.setRecoilModifier(recModify).setSoundModifier(sndModify).defaultTexture(def).setZoom(zoom);
+							bullets, magIngots, gunIngots, redstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
+							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
 					
-					if (!snormal.trim().isEmpty()) {
-						gun.setNormalSound("minecraft:" + snormal);
+					if (!sound_normal.trim().isEmpty()) {
+						gun.setNormalSound("minecraft:" + sound_normal);
 					}
 					
-					if (!ssln.trim().isEmpty()) {
-						gun.setSilencedSound("minecraft:" + ssln);
+					if (!sound_silenced.trim().isEmpty()) {
+						gun.setSilencedSound("minecraft:" + sound_silenced);
 					}
 					guns.add(gun);
 				} catch (Exception exception) {
@@ -986,12 +989,15 @@ public class GunCus {
 		}
 	}
 	
-	private void sounds(String path1) {
-		File file = new File(path1 + "/assets/minecraft/sound");
+	private void sounds(String stringPath) {
+		logger.info("Loading sounds for " + stringPath);
+		File fileSounds = new File(stringPath + "/assets/minecraft/sounds");
+		logger.info("fileSounds " + fileSounds);
 		
-		if (file.exists()) {
-			for (File f : file.listFiles()) {
-				if ((f.getName().endsWith(".ogg")) || ((f.getName().endsWith(".wav")) && (!f.getName().contains(" ")))) {
+		if (fileSounds.exists()) {
+			for (File file : fileSounds.listFiles()) {
+				if (file.getName().endsWith(".ogg") || (file.getName().endsWith(".wav") && (!file.getName().contains(" ")))) {
+					logger.info("(not implemented) Loading sound " + file.getName());
 					// FIXME: GunCusSound.addSound(f.getName());
 				}
 			}

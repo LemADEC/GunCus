@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.item;
 
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -20,7 +19,6 @@ public class GunCusItem extends Item {
 		setCreativeTab(GunCus.gcTab);
 		this.iconName = iconName;
 		setUnlocalizedName(unlocalized);
-		LanguageRegistry.addName(this, name);
 	}
 
 	public GunCusItem() {
