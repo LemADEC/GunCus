@@ -71,6 +71,6 @@ public class ItemBullet extends GunCusItem {
 	
 	@Override
 	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
-		par2List.add(this.pack);
+		par2List.add("Pack: " + pack);
 	}
 }
