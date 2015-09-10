@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 
 public class ItemKnife extends GunCusItem {
 	public ItemKnife() {
-		super("guncus:knife", "Knife", "quickKnife");
+		super("guncus:knife", null, "quickKnife");
 		setFull3D();
 	}
 	
@@ -30,7 +30,7 @@ public class ItemKnife extends GunCusItem {
 		if ( (GunCus.knifeTime <= 0)
 		  && (FMLClientHandler.instance().getClient().thePlayer != null)
 		  && (FMLClientHandler.instance().getClient().theWorld != null)) {
-			if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(33))
+			if ((Keyboard.isKeyDown(29) || Keyboard.isKeyDown(157)) && Keyboard.isKeyDown(33)
 			  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
 				GunCus.knifeTime += 25;
 				GunCus.shootTime += 24;

@@ -69,7 +69,7 @@ public class ItemGun extends Item {
 	public int damage;
 
 	public ItemGun(int parDamage, int parShootType, int parDelay, String parName, String parIconName, int magSize,
-			int magId, int bulletType, int parIngotsMag, int parIngots, int parRedstone, String parPack, boolean parIsOfficial,
+			int bulletType, int parIngotsMag, int parIngots, int parRedstone, String parPack, boolean parIsOfficial,
 			int[] parAttach, int[] parBarrel, int[] parScopes, boolean noMag, int[] parBullets) {
 		super();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -120,20 +120,20 @@ public class ItemGun extends Item {
 			mag.setCreativeTab(tab);
 		}
 
-		int i = this.scopes.length + 1;
+		int i = scopes.length + 1;
 
-		if (this.barrel.length > 0) {
-			i *= (this.barrel.length + 1);
+		if (barrel.length > 0) {
+			i *= (barrel.length + 1);
 		}
 
-		if (this.attach.length > 0) {
-			i *= (this.attach.length + 1);
+		if (attach.length > 0) {
+			i *= (attach.length + 1);
 		}
 
-		this.subs = i;
+		subs = i;
 
-		for (int v1 = 0; v1 < this.subs; v1++) {
-			LanguageRegistry.addName(new ItemStack(this, 1, v1), this.name);
+		for (int metadataIndex = 0; metadataIndex < subs; metadataIndex++) {
+			LanguageRegistry.addName(new ItemStack(this, 1, metadataIndex), name);
 		}
 	}
 
@@ -295,37 +295,42 @@ public class ItemGun extends Item {
 
 		if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(47))
 				&& (GunCus.switchTime <= 0) && (!canHaveStraightPullBolt())) {
-			switch (this.shootType) {
+			switch (shootType) {
 			case 0:
+			default:
 				entityPlayer.addChatComponentMessage(new ChatComponentText("The Fire Mode Of This Gun Can Not Be Changed!"));
 				break;
+				
 			case 1:
-				switch (this.actualType) {
+				switch (actualType) {
 				case 0:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
-					this.actualType = 1;
+					actualType = 1;
 					break;
 				case 1:
+				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
-					this.actualType = 0;
+					actualType = 0;
+					break;
 				}
-
 				break;
+				
 			case 2:
-				switch (this.actualType) {
+				switch (actualType) {
 				case 0:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
-					this.actualType = 1;
+					actualType = 1;
 					break;
 				case 1:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Auto Mode!"));
-					this.actualType = 2;
+					actualType = 2;
 					break;
 				case 2:
+				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
-					this.actualType = 0;
+					actualType = 0;
+					break;
 				}
-
 				break;
 			}
 

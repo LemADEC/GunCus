@@ -47,7 +47,7 @@ import stuuupiiid.guncus.item.ItemAttachment;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemGun;
 import stuuupiiid.guncus.item.ItemKnife;
-import stuuupiiid.guncus.item.ItemMagFill;
+import stuuupiiid.guncus.item.ItemMagFiller;
 import stuuupiiid.guncus.item.ItemMetadata;
 import stuuupiiid.guncus.item.ItemMine;
 import stuuupiiid.guncus.item.ItemRPG;
@@ -101,7 +101,7 @@ public class GunCus {
 	private boolean enableExplosives;
 	private boolean enableOfficialGuns;
 	public static Item quickKnife;
-	public static CreativeTabs gcTab;
+	public static CreativeTabs creativeTabGunCus;
 	public static Block blockWeapon;
 	public static Block blockMag;
 	public static Block blockBullet;
@@ -131,13 +131,13 @@ public class GunCus {
 	@Mod.EventHandler
 	public void onFMLPreInitialization(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
+		instance = this;
 		
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
 		
+		creativeTabGunCus = new GunCusCreativeTab("Gun Customization Modification", null);
 		quickKnife = new ItemKnife();
-		gcTab = new GunCusCreativeTab("Gun Customization Modification", quickKnife);
-		quickKnife.setCreativeTab(gcTab);
 		
 		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true).getBoolean(true);
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
@@ -151,8 +151,8 @@ public class GunCus {
 		blockAmmo = new BlockAmmo();
 		blockGun = new BlockGun();
 		
-		magFill = new ItemMagFill();
-		part = new GunCusItem("guncus:boxpart", "Box Part", "boxpart");
+		magFill = new ItemMagFiller();
+		part = new GunCusItem("guncus:boxpart", null, "boxpart");
 		
 		scope = new ItemScope("scope", "scope",
 				new ScopePart[] {
@@ -185,19 +185,20 @@ public class GunCus {
 					new CustomizationPart("Improved Grip", "-img", 6),
 					new CustomizationPart("Laser Pointer", "-ptr", 7) });
 		
-		ammoM320 = new GunCusItem("guncus:ammoM320", "GC 40x46mm SR Frag", "ammoM320").setMaxStackSize(8);
+		ammoM320 = new GunCusItem("guncus:ammoM320", null, "ammoM320").setMaxStackSize(8);
 		
 		if (enableExplosives) {
 			mineBlock = new BlockMine();
+			GameRegistry.registerBlock(mineBlock, mineBlock.getUnlocalizedName());
+			
 			mineItem = new ItemMine();
 			
-			rpgm = new GunCusItem("guncus:rpgm", "GC PG-7VL Rocket", "gcrpgm");
-			smawm = new GunCusItem("guncus:smawm", "GC HEDP Rocket", "gcsmawm");
+			rpgm = new GunCusItem("guncus:rpgm", null, "explosive.rpgm");
+			smawm = new GunCusItem("guncus:smawm", null, "explosive.smawm");
 			
-			rpg = new ItemRPG("guncus:rpg", "GC RPG-7V2", "gcrpg", rpgm);
-			smaw = new ItemRPG("guncus:smaw", "GC SMAW", "gcsmaw", smawm);
+			rpg = new ItemRPG("guncus:rpg", null, "explosive.rpg", rpgm);
+			smaw = new ItemRPG("guncus:smaw", null, "explosive.smaw", smawm);
 			
-			GameRegistry.registerBlock(mineBlock, mineBlock.getUnlocalizedName());
 		}
 		
 		if (enableOfficialGuns) {
@@ -224,8 +225,7 @@ public class GunCus {
 		PacketHandler.init();
 		
 		commonProxy.render();
-		instance = this;
-		LanguageRegistry.addName(quickKnife, "Quick Knife");
+		
 		EntityRegistry.registerModEntity(EntityBullet.class, "guncusbullet", 200, this, 500, 1, true);
 		
 		EntityRegistry.registerModEntity(EntityGrenade.class, "guncusat", 201, this, 500, 1, true);
@@ -339,7 +339,7 @@ public class GunCus {
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
-
+		
 		GameRegistry.addShapedRecipe(
 				new ItemStack(ammoM320),
 				new Object[] { "GI ", "IGI", " IG",
@@ -438,8 +438,8 @@ public class GunCus {
 		ClassLoader classloader = MinecraftServer.class.getClassLoader();
 		Method method = null;
 		try {
-			method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
-			method.setAccessible(true);
+			// method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+			// method.setAccessible(true);
 		} catch (Exception exception) {
 			logger.info("Failed to get the classloader; the textures wont work!");
 			exception.printStackTrace();
@@ -960,7 +960,7 @@ public class GunCus {
 						intScopes = new int[0];
 					}
 					
-					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize, magId,
+					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize,
 							bullets, magIngots, gunIngots, redstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
 							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
 					
