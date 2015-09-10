@@ -7,9 +7,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class ItemMagFill extends GunCusItem {
-	public ItemMagFill() {
-		super("guncus:magFiller", "Manual Mag Filler", "magFiller");
+public class ItemMagFiller extends GunCusItem {
+	public ItemMagFiller() {
+		super("guncus:magFiller", null, "magFiller");
 	}
 
 	@Override

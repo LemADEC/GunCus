@@ -5,16 +5,19 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
 public class GunCusCreativeTab extends CreativeTabs {
-	private Item item = null;
-
-	public GunCusCreativeTab(String label, Item parItem) {
+	Item item = null;
+	
+	public GunCusCreativeTab(String label, Item item) {
 		super(label);
-		item = parItem;
 		LanguageRegistry.instance().addStringLocalization("itemGroup." + label, label);
 	}
-
+	
 	@Override
 	public Item getTabIconItem() {
-		return item;
+		if (item == null) {
+			return GunCus.quickKnife;
+		} else {
+			return item;
+		}
 	}
 }

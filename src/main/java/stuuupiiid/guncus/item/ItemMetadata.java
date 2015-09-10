@@ -22,7 +22,7 @@ public class ItemMetadata extends GunCusItem {
 		super();
 
 		this.unlocalized = unlocalized;
-		this.iconName = iconName;
+		this.iconString = iconName;
 		this.metadatas = metadatas;
 		setHasSubtypes(true);
 
@@ -45,7 +45,7 @@ public class ItemMetadata extends GunCusItem {
 		this.icons = new IIcon[this.metadatas.length];
 
 		for (int i = 0; i < this.metadatas.length; i++) {
-			this.icons[i] = par1IconRegister.registerIcon("guncus:" + this.iconName + i);
+			this.icons[i] = par1IconRegister.registerIcon("guncus:" + this.iconString + i);
 		}
 	}
 

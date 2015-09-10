@@ -8,30 +8,28 @@ import net.minecraft.world.World;
 
 public class ItemMine extends GunCusItem {
 	public ItemMine() {
-		super("guncus:mine", "Mine", "gcmineitem");
+		super("guncus:mine", null, "mine");
 	}
-
+	
 	@Override
-	public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4,
-			int par5, int par6, int par7, float par8, float par9, float par10) {
+	public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, int x, int y, int z, int par7, float par8, float par9, float par10) {
 		if (par7 != 1) {
 			return false;
 		}
-
-		par5++;
+		
+		y++;
 		Block block = GunCus.mineBlock;
-
-		if ((par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack))
-				&& (par2EntityPlayer.canPlayerEdit(par4, par5 + 1, par6, par7, par1ItemStack))) {
-			if (!block.canPlaceBlockAt(par3World, par4, par5, par6)) {
+		
+		if (entityPlayer.canPlayerEdit(x, y, z, par7, itemStack) && entityPlayer.canPlayerEdit(x, y + 1, z, par7, itemStack)) {
+			if (!block.canPlaceBlockAt(world, x, y, z)) {
 				return false;
 			}
-
-			par3World.setBlock(par4, par5, par6, GunCus.mineBlock);
-			par1ItemStack.stackSize -= 1;
+			
+			world.setBlock(x, y, z, GunCus.mineBlock);
+			itemStack.stackSize -= 1;
 			return true;
 		}
-
+		
 		return false;
 	}
 }

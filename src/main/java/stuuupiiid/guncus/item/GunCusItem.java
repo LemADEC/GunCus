@@ -1,41 +1,37 @@
 package stuuupiiid.guncus.item;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import java.util.List;
 
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
 import stuuupiiid.guncus.GunCus;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class GunCusItem extends Item {
-	String iconName;
-
-	public GunCusItem(String iconName, String name, String unlocalized) {
+	
+	public GunCusItem(String iconName, String name, String unlocalizedName) {
 		super();
-		setCreativeTab(GunCus.gcTab);
-		this.iconName = iconName;
-		setUnlocalizedName(unlocalized);
+		setMaxStackSize(1);
+		setCreativeTab(GunCus.creativeTabGunCus);
+		iconString = iconName;
+		setUnlocalizedName(unlocalizedName);
+		GameRegistry.registerItem(this, unlocalizedName);
+		if (name != null && !name.isEmpty()) {
+			LanguageRegistry.instance().addStringLocalization(unlocalizedName, name);
+		}
 	}
-
+	
 	public GunCusItem() {
 		super();
-		setCreativeTab(GunCus.gcTab);
+		setCreativeTab(GunCus.creativeTabGunCus);
 	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister iconRegister) {
-		this.itemIcon = iconRegister.registerIcon(this.iconName);
-	}
-
+	
 	@Override
 	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
 		String info = "GunCusDebugInfo";
-
+		
 		if (getUnlocalizedName(par1ItemStack).contains("scope")) {
 			info = "Scope (Top)";
 		} else if (getUnlocalizedName(par1ItemStack).contains("attachment")) {
@@ -43,13 +39,9 @@ public class GunCusItem extends Item {
 		} else if (getUnlocalizedName(par1ItemStack).contains("barrel")) {
 			info = "Barrel (Left)";
 		}
-
+		
 		if (!info.equals("GunCusDebugInfo")) {
-			par2List.add(infoLine(info));
+			par2List.add(info);
 		}
-	}
-
-	private String infoLine(String s) {
-		return s;
 	}
 }
