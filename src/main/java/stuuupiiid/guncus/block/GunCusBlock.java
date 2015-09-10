@@ -1,7 +1,5 @@
 package stuuupiiid.guncus.block;
 
-import cpw.mods.fml.common.registry.LanguageRegistry;
-
 import java.util.Random;
 
 import stuuupiiid.guncus.GunCus;
@@ -10,11 +8,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 
 public class GunCusBlock extends Block {
-	public GunCusBlock(Material par2Material, String unlocalized, String name) {
+	public GunCusBlock(Material par2Material, String unlocalized) {
 		super(par2Material);
 		setBlockName(unlocalized);
-		LanguageRegistry.addName(this, name);
-		setCreativeTab(GunCus.gcTab);
+		setCreativeTab(GunCus.creativeTabGunCus);
 		setHardness(2.0F);
 		setResistance(5.0F);
 	}
