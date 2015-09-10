@@ -19,7 +19,7 @@ public class BlockWeapon extends GunCusBlock {
 	private IIcon field_94384_b;
 
 	public BlockWeapon() {
-		super(Material.iron, "blockWeapon", "Weapon Box");
+		super(Material.iron, "blockWeapon");
 	}
 
 	@Override

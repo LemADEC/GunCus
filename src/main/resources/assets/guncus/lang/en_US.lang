@@ -1,0 +1,17 @@
+item.quickKnife.name=Quick Knife
+item.boxpart.name=Box Part
+item.ammoM320.name=GC 40x46mm SR Frag
+item.magFiller.name=Manual Magazine Filler
+item.mine.name=Mine
+
+tile.blockWeapon.name=Weapon box
+tile.blockAmmo.name=Ammo Box
+tile.blockBullet.name=Bullet Box
+tile.blockGun.name=Gun Box
+tile.blockMag.name=Magazine Box
+tile.gcmine.name=Mine
+
+item.explosive.rpgm.name=GC PG-7VL Rocket
+item.explosive.smawm.name=GC HEDP Rocket
+item.explosive.rpg.name=GC RPG-7V2
+item.explosive.smaw.name=GC SMAW

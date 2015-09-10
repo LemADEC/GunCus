@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class BlockMag extends GunCusBlock {
 
 	public BlockMag() {
-		super(Material.iron, "blockMag", "Mag Box");
+		super(Material.iron, "blockMag");
 	}
 
 	@SideOnly(Side.CLIENT)

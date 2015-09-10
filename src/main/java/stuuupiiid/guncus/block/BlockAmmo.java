@@ -19,7 +19,7 @@ public class BlockAmmo extends GunCusBlock {
 	private IIcon field_94384_b;
 
 	public BlockAmmo() {
-		super(Material.iron, "blockAmmo", "Ammo Box");
+		super(Material.iron, "blockAmmo");
 	}
 
 	@Override

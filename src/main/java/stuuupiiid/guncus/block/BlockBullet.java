@@ -19,7 +19,7 @@ public class BlockBullet extends GunCusBlock {
 	private IIcon field_94384_b;
 
 	public BlockBullet() {
-		super(Material.iron, "blockBullet", "Bullet Box");
+		super(Material.iron, "blockBullet");
 	}
 
 	@Override
