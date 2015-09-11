@@ -56,7 +56,7 @@ public class ClientProxy extends CommonProxy {
 					newZoom = scope.zoom + 0.1F;
 					path = "guncus:textures/sights/" + scope.sight + ".png";
 				} else if (gun.usingDefault) {
-						path = "guncus:textures/sights/default.png";
+					path = "guncus:textures/sights/default.png";
 				} else {
 					path = gun.iconName.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
 				}
