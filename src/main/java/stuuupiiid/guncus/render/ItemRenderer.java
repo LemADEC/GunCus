@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.render;
 
-import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.init.Items;
@@ -25,7 +24,6 @@ public class ItemRenderer implements IItemRenderer {
 	public void renderItem(IItemRenderer.ItemRenderType type, ItemStack itemStack, Object... data) {
 		ItemGun gun = (ItemGun) itemStack.getItem();
 		IIcon icon = itemStack.getIconIndex();
-		GunCus.logger.info("icon " + icon + " itemStack " + itemStack + " gun " + gun);
 		if (icon == null) {
 			icon = Items.fire_charge.getIconFromDamage(0);
 		}
