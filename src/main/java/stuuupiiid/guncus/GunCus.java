@@ -8,12 +8,8 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-
 import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,13 +17,13 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -132,6 +128,17 @@ public class GunCus {
 	public void onFMLPreInitialization(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
 		instance = this;
+		
+		GunCusResourceLoader myResourceLoader = new GunCusResourceLoader();
+		Field field = null;
+		try {
+			field = Minecraft.class.getDeclaredField("defaultResourcePacks");
+			field.setAccessible(true);
+			((List) field.get(Minecraft.getMinecraft())).add(myResourceLoader);
+		} catch (Exception exception) {
+			logger.info("Failed to get the classloader; the textures wont work!");
+			exception.printStackTrace();
+		}
 		
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
@@ -435,16 +442,6 @@ public class GunCus {
 	}
 	
 	private void loadGunPacks(File fileGunCus) {
-		ClassLoader classloader = MinecraftServer.class.getClassLoader();
-		Method method = null;
-		try {
-			// method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
-			// method.setAccessible(true);
-		} catch (Exception exception) {
-			logger.info("Failed to get the classloader; the textures wont work!");
-			exception.printStackTrace();
-		}
-		
 		defaultPack(fileGunCus);
 		
 		for (File filePack : fileGunCus.listFiles()) {
@@ -452,17 +449,6 @@ public class GunCus {
 				bullets(filePack.getAbsolutePath(), filePack.getName());
 				guns(filePack.getAbsolutePath(), filePack.getName());
 				sounds(filePack.getAbsolutePath());
-				
-				if (method != null) {
-					try {
-						logger.info("Adding to classloader paths: " + filePack.toURI().toURL());
-						// FIXME: this breaks vanilla sound assets
-						// method.invoke(classloader, new Object[] { filePack.toURI().toURL() });
-					} catch (Exception exception) {
-						logger.info("Failed to add some textures to class path");
-						exception.printStackTrace();
-					}
-				}
 			}
 		}
 		
@@ -727,9 +713,8 @@ public class GunCus {
 				if (icon.equals("") || icon.equals(" ")) {
 					icon = "guncus:bullet";
 				} else {
-					icon = "minecraft:bullets/" + icon;
+					icon = pack + ":bullets/" + icon;
 				}
-				
 				ItemBullet bullet = new ItemBullet(name, bulletId, gunpowder, iron, stack, pack, icon, damageModifier).setSplit(split).setGravityModifier(gravityModifier).setSpray(spray);
 				
 				for (String effect : effects) {
@@ -758,7 +743,7 @@ public class GunCus {
 		}
 	}
 	
-	private void guns(String packPath, String path1) {
+	private void guns(final String packPath, final String pack) {
 		File fileGuns = new File(packPath + "/guns");
 		fileGuns.mkdirs();
 		File[] filesFound = fileGuns.listFiles();
@@ -879,7 +864,6 @@ public class GunCus {
 			}
 			
 			boolean errored = false;
-			String pack = new File(packPath).getName();
 			int[] intBullets;
 			if (!usingMag) {
 				bullets = -1;
@@ -929,7 +913,7 @@ public class GunCus {
 					icon = "guncus:gun_default/";
 					defaultTexture = true;
 				} else {
-					icon = "minecraft:gun_" + stringIcon + "/";
+					icon = pack + ":gun_" + stringIcon + "/";
 				}
 				try {
 					int[] intAttachments;
@@ -965,11 +949,11 @@ public class GunCus {
 							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
 					
 					if (!sound_normal.trim().isEmpty()) {
-						gun.setNormalSound("minecraft:" + sound_normal);
+						gun.setNormalSound(pack  + ":" + sound_normal);
 					}
 					
 					if (!sound_silenced.trim().isEmpty()) {
-						gun.setSilencedSound("minecraft:" + sound_silenced);
+						gun.setSilencedSound(pack  + ":" + sound_silenced);
 					}
 					guns.add(gun);
 				} catch (Exception exception) {
