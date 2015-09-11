@@ -2,6 +2,7 @@ package stuuupiiid.guncus.item;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -26,7 +27,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
-import stuuupiiid.guncus.GunCusCreativeTab;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.network.PacketHandler;
 import stuuupiiid.guncus.render.ItemRenderer;
@@ -105,9 +105,6 @@ public class ItemGun extends Item {
 		}
 		soundSilenced = "guncus:shoot_silenced";
 		
-		GunCusCreativeTab tab = new GunCusCreativeTab(parName, this);
-		setCreativeTab(tab);
-		
 		actualBullet = 0;
 		
 		if (noMag) {
@@ -116,7 +113,6 @@ public class ItemGun extends Item {
 		} else {
 			mag = new ItemMag(parName, getName(0), magSize, parIconName, bulletType, parPack);
 			ingotsMag = parIngotsMag;
-			mag.setCreativeTab(tab);
 		}
 		
 		int i = scopes.length + 1;
@@ -131,6 +127,9 @@ public class ItemGun extends Item {
 		
 		subs = i;
 		
+		GameRegistry.registerItem(this, name);
+		
+		// Force all names
 		for (int metadataIndex = 0; metadataIndex < subs; metadataIndex++) {
 			LanguageRegistry.addName(new ItemStack(this, 1, metadataIndex), name);
 		}
@@ -644,7 +643,7 @@ public class ItemGun extends Item {
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int par1) {
+	public IIcon getIconFromDamage(int metadata) {
 		return icon;
 	}
 	
@@ -695,11 +694,11 @@ public class ItemGun extends Item {
 		return getName(par1ItemStack.getItemDamage()).toLowerCase().replace(" ", "_");
 	}
 	
-	public float zoomToFloat(int scope) {
+	public float getZoomFromScope(int scope) {
 		float newZoom = 1.0F;
 		if (scope > 0) {
-			ScopePart scope2 = (ScopePart) GunCus.scope.metadatas[(scope - 1)];
-			newZoom = scope2.zoom;
+			ScopePart scopePart = (ScopePart) GunCus.scope.metadatas[(scope - 1)];
+			newZoom = scopePart.zoom;
 		}
 		
 		return newZoom;
@@ -707,14 +706,11 @@ public class ItemGun extends Item {
 	
 	@Override
 	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
-		par2List.add("Pack: " + pack);
 		int metadata = par1ItemStack.getItemDamage();
 		
 		if (metadata > 0) {
-			par2List.add("");
-			
 			String front = null;
-			String attatchment = null;
+			String attachment = null;
 			String scope = null;
 			
 			for (int v1 = 1; v1 <= GunCus.barrel.metadatas.length; v1++) {
@@ -725,7 +721,7 @@ public class ItemGun extends Item {
 			
 			for (int v1 = 1; v1 <= GunCus.attachment.metadatas.length; v1++) {
 				if (testForAttachId(v1, metadata)) {
-					attatchment = GunCus.attachment.metadatas[(v1 - 1)].localized;
+					attachment = GunCus.attachment.metadatas[(v1 - 1)].localized;
 				}
 			}
 			
@@ -736,12 +732,15 @@ public class ItemGun extends Item {
 			if (front != null) {
 				par2List.add(front);
 			}
-			if (attatchment != null) {
-				par2List.add(attatchment);
+			if (attachment != null) {
+				par2List.add(attachment);
 			}
 			if (scope != null) {
 				par2List.add(scope);
 			}
+			
+			par2List.add("");
 		}
+		par2List.add("Pack: " + pack);
 	}
 }

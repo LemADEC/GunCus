@@ -131,10 +131,10 @@ public class TickHandler {
 						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					GunCus.breathCounter = 0;
 					int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
-					float maxX = 0.05475F / (gun.zoomToFloat(gun.getZoom(metadata)) / 3.0F * 2.0F);
-					float maxY = 0.0975F / (gun.zoomToFloat(gun.getZoom(metadata)) / 3.0F * 2.0F);
-					float plusX = 0.005F / (gun.zoomToFloat(gun.getZoom(metadata)) / 3.0F * 2.0F);
-					float plusY = 0.005F / (gun.zoomToFloat(gun.getZoom(metadata)) / 3.0F * 2.0F);
+					float maxX = 0.05475F / (gun.getZoomFromScope(gun.getZoom(metadata)) / 3.0F * 2.0F);
+					float maxY = 0.0975F / (gun.getZoomFromScope(gun.getZoom(metadata)) / 3.0F * 2.0F);
+					float plusX = 0.005F / (gun.getZoomFromScope(gun.getZoom(metadata)) / 3.0F * 2.0F);
+					float plusY = 0.005F / (gun.getZoomFromScope(gun.getZoom(metadata)) / 3.0F * 2.0F);
 
 					if (GunCus.scopingX) {
 						GunCus.maxX += plusX;

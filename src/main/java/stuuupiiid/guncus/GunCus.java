@@ -8,6 +8,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -916,6 +917,7 @@ public class GunCus {
 					icon = pack + ":gun_" + stringIcon + "/";
 				}
 				try {
+					// Create customization parts
 					int[] intAttachments;
 					if ((stringAttachments.length > 0) && (!stringAttachments[0].replace(" ", "").equals(""))) {
 						intAttachments = new int[stringAttachments.length];
@@ -944,10 +946,17 @@ public class GunCus {
 						intScopes = new int[0];
 					}
 					
+					// Create gun and magazine items
 					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize,
 							bullets, magIngots, gunIngots, redstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
 							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
+					GunCusCreativeTab tab = new GunCusCreativeTab(name, gun);
+					gun.setCreativeTab(tab);
+					if (gun.mag != null) {
+						gun.mag.setCreativeTab(tab);
+					}
 					
+					// Add sounds
 					if (!sound_normal.trim().isEmpty()) {
 						gun.setNormalSound(pack  + ":" + sound_normal);
 					}
@@ -955,6 +964,8 @@ public class GunCus {
 					if (!sound_silenced.trim().isEmpty()) {
 						gun.setSilencedSound(pack  + ":" + sound_silenced);
 					}
+					
+					// Add to gun list unless it failed
 					guns.add(gun);
 				} catch (Exception exception) {
 					logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
