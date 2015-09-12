@@ -8,10 +8,10 @@ import net.minecraft.item.ItemStack;
 
 public class ItemBullet extends GunCusItem {
 	public int bulletType;
+	public int texture;
 	public int sulphur;
 	public int iron;
 	public int stackOnCreate;
-	public String name;
 	public String pack;
 	public float damage;
 	public int spray = 100;
@@ -22,7 +22,7 @@ public class ItemBullet extends GunCusItem {
 	
 	public static HashMap<String, List<ItemBullet>> bulletsList = new HashMap();
 	
-	public ItemBullet(String name, int bulletType, int sulphur, int iron, int stackOnCreate, String pack, String icon, float damage) {
+	public ItemBullet(String name, int bulletType, int texture, int sulphur, int iron, int stackOnCreate, String pack, String icon, float damage) {
 		super(icon, name, pack + ".bullet" + bulletType);
 		
 		if (!bulletsList.containsKey(pack)) {
@@ -31,10 +31,10 @@ public class ItemBullet extends GunCusItem {
 		
 		this.damage = damage;
 		this.bulletType = bulletType;
+		this.texture = texture;
 		this.sulphur = sulphur;
 		this.iron = iron;
 		this.stackOnCreate = stackOnCreate;
-		this.name = name;
 		this.pack = pack;
 		if (bulletsList.get(pack).size() <= bulletType) {
 			for (int bulletIndex = bulletsList.get(pack).size(); bulletIndex <= bulletType; bulletIndex++) {

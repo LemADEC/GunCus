@@ -435,13 +435,6 @@ public class GunCus {
 		}
 	}
 	
-	public static void removeBlockServer(Entity entity, int x, int y, int z) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer() && enableBlockDamage) {
-			World world = entity.worldObj;
-			world.setBlockToAir(x, y, z);
-		}
-	}
-	
 	private void loadGunPacks(File fileGunCus) {
 		defaultPack(fileGunCus);
 		
@@ -641,11 +634,8 @@ public class GunCus {
 			Configuration configBullet = new Configuration(file);
 			configBullet.load();
 			
-			Property idProp = configBullet.get("general", "ID", 1010);
-			idProp.comment = "Item ID of the bullet";
-			
 			Property bulletIdProp = configBullet.get("general", "Bullet ID", 1);
-			bulletIdProp.comment = "Bullet ID of the bullet";
+			bulletIdProp.comment = "Bullet ID of the bullet (guns refer to bullet by this ID)";
 			
 			Property ironProp = configBullet.get("general", "Iron", 1);
 			ironProp.comment = "How much iron you need to craft this bullet type";
@@ -663,10 +653,13 @@ public class GunCus {
 			iconProp.comment = "Texture of this bullet. Leave blanc for default";
 			
 			Property splitProp = configBullet.get("general", "Split", 1);
-			splitProp.comment = "How much bullets being shot at a time.";
+			splitProp.comment = "How much bullets are being shot at a time (only one ammo is consumed)";
 			
 			Property sprayProp = configBullet.get("general", "Spray", 100);
-			sprayProp.comment = "Maximum accuracy by using this bullet. 100 = 100% accuracy. 30 = shotgun spray.";
+			sprayProp.comment = "Maximum accuracy by using this bullet in %. 100 is perfect accuracy while 30 is a shotgun spray.";
+			
+			Property textureProp = configBullet.get("general", "Texture", 0);
+			textureProp.comment = "Texture variation of the bullet (0 to 5). 0 is normal, 1 is poison/rust, 2 is purple, 3 is red, 4 is fat metal, 5 is needle green.";
 			
 			Property onImpactProp = configBullet.get("general", "Impact", "");
 			onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
@@ -679,16 +672,18 @@ public class GunCus {
 					+ "\n6:X = Heal of X points"
 					+ "\n7:X = Blindness for X seconds"
 					+ "\n8:X = Instant damage (harm) of X damages"
-					+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds.";
+					+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds"
+					+ "\n10:X:Y = knockback +X horizontally +Y vertically.";
 			
 			Property gravityModifierProp = configBullet.get("general", "GravityModifier", 1.0D);
-			gravityModifierProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
+			gravityModifierProp.comment = "Modifies the applied gravity of a bullet.\nApplied gravity is Gravity x GravityModifier";
 			
 			Property damageModifierProp = configBullet.get("general", "Damage Modifier", 1.0D);
 			damageModifierProp.comment = "Applied damage is Gun Damage * Damage Modifier";
 			
 			float damageModifier = (float) damageModifierProp.getDouble(1.0D);
 			int bulletId = bulletIdProp.getInt(1);
+			int texture = textureProp.getInt(0);
 			int iron = ironProp.getInt(1);
 			int gunpowder = gunpowderProp.getInt(3);
 			int stack = stackProp.getInt(4);
@@ -716,7 +711,7 @@ public class GunCus {
 				} else {
 					icon = pack + ":bullets/" + icon;
 				}
-				ItemBullet bullet = new ItemBullet(name, bulletId, gunpowder, iron, stack, pack, icon, damageModifier).setSplit(split).setGravityModifier(gravityModifier).setSpray(spray);
+				ItemBullet bullet = new ItemBullet(name, bulletId, texture, gunpowder, iron, stack, pack, icon, damageModifier).setSplit(split).setGravityModifier(gravityModifier).setSpray(spray);
 				
 				for (String effect : effects) {
 					try {

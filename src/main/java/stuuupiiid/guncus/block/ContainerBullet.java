@@ -82,7 +82,7 @@ public class ContainerBullet extends Container {
 					&& (mid != null)
 					&& (mid.getItem() != null)
 					&& (mid.getItem() == Items.gunpowder)
-					&& ((right == null) || ((right != null) && (right.getItem() != null)
+					&& ((right == null) || ((right.getItem() != null)
 							&& (right.getItem() == bullet) && (right.stackSize + bullet.stackOnCreate <= 64)))
 					&& (bullet.stackOnCreate >= 1) && (left.stackSize >= iron) && (mid.stackSize >= sulphur)) {
 				int sizeIr = left.stackSize;
@@ -113,15 +113,15 @@ public class ContainerBullet extends Container {
 		}
 
 		if (gun != null) {
-			ItemBullet bullet = (ItemBullet) ((List) ItemBullet.bulletsList.get(gun.pack))
-					.get(gun.bulletType);
+			ItemBullet bullet = ItemBullet.bulletsList.get(gun.pack).get(gun.bulletType);
 
 			String name = "<none>";
 			int sulphur = -1;
 			int iron = -1;
 
 			if (bullet != null) {
-				name = bullet.name;
+				ItemStack itemStackBullet = new ItemStack(bullet);
+				name = itemStackBullet.getDisplayName();
 				sulphur = bullet.sulphur;
 				iron = bullet.iron;
 			}

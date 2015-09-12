@@ -21,13 +21,13 @@ public class OfficialGuns {
 	public static String pack = "official";
 
 	public static void load() {
-		acp = new ItemBullet("GC .45 ACP", 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_0", 5.0F);
-		nato = new ItemBullet("GC 5.56x45mm NATO", 1, 1, 1, 4, pack, "guncusofficial:bullets/bullet_1", 5.0F);
-		wp = new ItemBullet("GC 5.45x39mm WP", 2, 1, 1, 4, pack, "guncusofficial:bullets/bullet_2", 5.0F);
-		parabellum = new ItemBullet("GC 9x19mm Parabellum", 3, 1, 1, 4, pack, "guncusofficial:bullets/bullet_3", 4.0F);
-		natoHeavy = new ItemBullet("GC 7.62x51mm NATO", 4, 2, 3, 4, pack, "guncusofficial:bullets/bullet_4", 17.0F);
-		wpHeavy = new ItemBullet("GC 7.62x39mm WP", 5, 2, 3, 4, pack, "guncusofficial:bullets/bullet_5", 17.0F);
-		rHeavy = new ItemBullet("GC 7.62x54mm R", 6, 2, 3, 4, pack, "guncusofficial:bullets/bullet_6", 17.0F);
+		acp = new ItemBullet("GC .45 ACP", 0, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_0", 5.0F);
+		nato = new ItemBullet("GC 5.56x45mm NATO", 1, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_1", 5.0F);
+		wp = new ItemBullet("GC 5.45x39mm WP", 2, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_2", 5.0F);
+		parabellum = new ItemBullet("GC 9x19mm Parabellum", 3, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_3", 4.0F);
+		natoHeavy = new ItemBullet("GC 7.62x51mm NATO", 4, 0, 2, 3, 4, pack, "guncusofficial:bullets/bullet_4", 17.0F);
+		wpHeavy = new ItemBullet("GC 7.62x39mm WP", 5, 0, 2, 3, 4, pack, "guncusofficial:bullets/bullet_5", 17.0F);
+		rHeavy = new ItemBullet("GC 7.62x54mm R", 6, 0, 2, 3, 4, pack, "guncusofficial:bullets/bullet_6", 17.0F);
 		
 		int[] scopes = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 		

@@ -337,7 +337,8 @@ public class ItemGun extends Item {
 			if (actualBullet >= bullets.length) {
 				actualBullet = 0;
 			}
-			entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using \"" + ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]).name + "\" ammunition!"));
+			ItemStack itemStackBullet = new ItemStack(ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]));
+			entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using " + itemStackBullet.getDisplayName() + " ammunition!"));
 		}
 	}
 	

@@ -5,83 +5,95 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderArrow;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.MathHelper;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import stuuupiiid.guncus.entity.EntityBullet;
 
 @SideOnly(Side.CLIENT)
 public class RenderBullet extends RenderArrow {
-	public void renderArrow(EntityBullet par1EntityArrow, double par2, double par4, double par6, float par8, float par9) {
+	private static final ResourceLocation bulletTextures = new ResourceLocation("guncus:textures/entity/bullet.png");
+	
+	private static final float scale = 0.05625F / 5F;
+	private static final float uSideMin  =  0 / 32.0F;
+	private static final float uSideMax  = 17 / 32.0F;
+	private static final float uBackMin  = 17 / 32.0F;
+	private static final float uBackMax  = 22 / 32.0F;
+	private static final float uFrontMin = 22 / 32.0F;
+	private static final float uFrontMax = 27 / 32.0F;
+	private static final float vOffset   =  5 / 32.0F;
+	public void renderBullet(EntityBullet entityBullet, double x, double y, double z, float par8, float par9) {
+		bindEntityTexture(entityBullet);
 		GL11.glPushMatrix();
-		GL11.glTranslatef((float) par2, (float) par4, (float) par6);
-		GL11.glRotatef(par1EntityArrow.prevRotationYaw
-				+ (par1EntityArrow.rotationYaw - par1EntityArrow.prevRotationYaw) * par9 - 90.0F, 0.0F, 1.0F, 0.0F);
-		GL11.glRotatef(par1EntityArrow.prevRotationPitch
-				+ (par1EntityArrow.rotationPitch - par1EntityArrow.prevRotationPitch) * par9, 0.0F, 0.0F, 1.0F);
+		GL11.glTranslatef((float) x, (float) y, (float) z);
+		GL11.glRotatef(entityBullet.prevRotationYaw + (entityBullet.rotationYaw - entityBullet.prevRotationYaw) * par9 - 90.0F, 0.0F, 1.0F, 0.0F);
+		GL11.glRotatef(entityBullet.prevRotationPitch + (entityBullet.rotationPitch - entityBullet.prevRotationPitch) * par9, 0.0F, 0.0F, 1.0F);
 		Tessellator tessellator = Tessellator.instance;
-		byte b0 = 0;
-		float f2 = 0.0F;
-		float f3 = 0.5F;
-		float f4 = (0 + b0 * 10) / 32.0F;
-		float f5 = (5 + b0 * 10) / 32.0F;
-		float f6 = 0.0F;
-		float f7 = 0.15625F;
-		float f8 = (5 + b0 * 10) / 32.0F;
-		float f9 = (10 + b0 * 10) / 32.0F;
-		float f10 = 0.05625F;
-		GL11.glEnable(32826);
-		float f11 = par1EntityArrow.arrowShake - par9;
-
-		if (f11 > 0.0F) {
-			float f12 = -MathHelper.sin(f11 * 3.0F) * f11;
-			GL11.glRotatef(f12, 0.0F, 0.0F, 1.0F);
+		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+		
+		if (entityBullet.state == entityBullet.STATE_FLYING) {
+			GL11.glRotatef((entityBullet.ticksExisted * 20 + par9) * 0.1F, 1.0F, 0.0F, 0.0F);
 		}
-
+		
+		final float vMin =  (entityBullet.bullet != null) ? entityBullet.bullet.texture * vOffset : 0F;
+		final float vMax =  vMin + vOffset;
+		
 		GL11.glRotatef(45.0F, 1.0F, 0.0F, 0.0F);
-		GL11.glScalef(f10, f10, f10);
+		GL11.glScalef(scale, scale, scale);
 		GL11.glTranslatef(-4.0F, 0.0F, 0.0F);
-		GL11.glNormal3f(f10, 0.0F, 0.0F);
+		
+		// tail back face
+		GL11.glNormal3f(scale, 0.0F, 0.0F);
 		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, f6, f8);
-		tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, f7, f8);
-		tessellator.addVertexWithUV(-7.0D, 2.0D, 2.0D, f7, f9);
-		tessellator.addVertexWithUV(-7.0D, 2.0D, -2.0D, f6, f9);
+		tessellator.addVertexWithUV(-8.0D, -2.0D, -2.0D, uBackMin, vMin);
+		tessellator.addVertexWithUV(-8.0D, -2.0D,  2.0D, uBackMax, vMin);
+		tessellator.addVertexWithUV(-8.0D,  2.0D,  2.0D, uBackMax, vMax);
+		tessellator.addVertexWithUV(-8.0D,  2.0D, -2.0D, uBackMin, vMax);
 		tessellator.draw();
-		GL11.glNormal3f(-f10, 0.0F, 0.0F);
+		
+		// tail front face
+		GL11.glNormal3f(-scale, 0.0F, 0.0F);
 		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(-7.0D, 2.0D, -2.0D, f6, f8);
-		tessellator.addVertexWithUV(-7.0D, 2.0D, 2.0D, f7, f8);
-		tessellator.addVertexWithUV(-7.0D, -2.0D, 2.0D, f7, f9);
-		tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, f6, f9);
+		tessellator.addVertexWithUV( 4.0D,  2.0D, -2.0D, uFrontMin, vMin);
+		tessellator.addVertexWithUV( 4.0D,  2.0D,  2.0D, uFrontMax, vMin);
+		tessellator.addVertexWithUV( 4.0D, -2.0D,  2.0D, uFrontMax, vMax);
+		tessellator.addVertexWithUV( 4.0D, -2.0D, -2.0D, uFrontMin, vMax);
 		tessellator.draw();
-
+		
+		// 4 sides
 		for (int i = 0; i < 4; i++) {
 			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
-			GL11.glNormal3f(0.0F, 0.0F, f10);
+			GL11.glNormal3f(0.0F, 0.0F, scale);
 			tessellator.startDrawingQuads();
-			tessellator.addVertexWithUV(-8.0D, -2.0D, 0.0D, f2, f4);
-			tessellator.addVertexWithUV(8.0D, -2.0D, 0.0D, f3, f4);
-			tessellator.addVertexWithUV(8.0D, 2.0D, 0.0D, f3, f5);
-			tessellator.addVertexWithUV(-8.0D, 2.0D, 0.0D, f2, f5);
+			tessellator.addVertexWithUV(-8.0D, -2.0D, 0.0D, uSideMin, vMin);
+			tessellator.addVertexWithUV( 8.0D, -2.0D, 0.0D, uSideMax, vMin);
+			tessellator.addVertexWithUV( 8.0D,  2.0D, 0.0D, uSideMax, vMax);
+			tessellator.addVertexWithUV(-8.0D,  2.0D, 0.0D, uSideMin, vMax);
 			tessellator.draw();
 		}
-
-		GL11.glDisable(32826);
+		
+		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		GL11.glPopMatrix();
 	}
-
+	
 	@Override
-	protected ResourceLocation getEntityTexture(Entity par1Entity) {
-		return new ResourceLocation("guncus:textures/entity/bullet.png");
+	protected ResourceLocation getEntityTexture(Entity entity) {
+		return bulletTextures;
 	}
-
+	
 	@Override
-	public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9) {
-		if (((EntityBullet) par1Entity).ticks >= 2) {
-			renderArrow((EntityBullet) par1Entity, par2, par4, par6, par8, par9);
+	protected ResourceLocation getEntityTexture(EntityArrow entityArrow) {
+		return bulletTextures;
+	}
+	
+	@Override
+	public void doRender(Entity entity, double x, double y, double z, float par8, float par9) {
+		if (((EntityBullet) entity).ticksExisted >= 2) {
+			renderBullet((EntityBullet) entity, x, y, z, par8, par9);
 		}
 	}
+	
 }
