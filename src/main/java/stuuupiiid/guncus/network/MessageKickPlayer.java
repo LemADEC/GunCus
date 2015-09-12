@@ -49,7 +49,7 @@ public class MessageKickPlayer implements IMessage, IMessageHandler<MessageKickP
 	public IMessage onMessage(MessageKickPlayer kickPlayerMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
-			GunCus.logger.error("WorldObj is null, ignoring cloak packet");
+			GunCus.logger.error("WorldObj is null, ignoring kickPlayer packet");
 			return null;
 		}
 		

@@ -38,7 +38,7 @@ public class MessageBulletImpact implements IMessage, IMessageHandler<MessageBul
 	public IMessage onMessage(MessageBulletImpact bulletImpactMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
-			GunCus.logger.error("WorldObj is null, ignoring cloak packet");
+			GunCus.logger.error("WorldObj is null, ignoring bulletImpact packet");
 			return null;
 		}
 		

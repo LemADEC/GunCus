@@ -39,7 +39,7 @@ public class MessageReloading implements IMessage, IMessageHandler<MessageReload
 	public IMessage onMessage(MessageReloading reloadingMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
-			GunCus.logger.error("WorldObj is null, ignoring cloak packet");
+			GunCus.logger.error("WorldObj is null, ignoring reloading packet");
 			return null;
 		}
 		

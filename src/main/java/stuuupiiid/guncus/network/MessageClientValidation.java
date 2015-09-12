@@ -101,12 +101,12 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	public IMessage onMessage(MessageClientValidation bulletImpactMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
-			GunCus.logger.error("WorldObj is null, ignoring cloak packet");
+			GunCus.logger.error("WorldObj is null, ignoring clientValidation packet");
 			return null;
 		}
 		
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received bulletImpact packet");
+			GunCus.logger.info("Received clientValidation packet");
 		}
 		
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
