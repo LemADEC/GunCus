@@ -68,7 +68,7 @@ public class ItemGun extends Item {
 	public String soundSilenced;
 	public int damage;
 	
-	public ItemGun(int parDamage, int parShootType, int parDelay, String parName, String parIconName, int magSize, int bulletType, int parIngotsMag, int parIngots, int parRedstone, String parPack,
+	public ItemGun(int parDamage, int parShootType, int parDelay, String parName, String parIconName, int magSize, int intMagBulletId, int parIngotsMag, int parIngots, int parRedstone, String parPack,
 			boolean parIsOfficial, int[] parAttach, int[] parBarrel, int[] parScopes, boolean noMag, int[] parBullets) {
 		super();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -111,7 +111,7 @@ public class ItemGun extends Item {
 			bullets = parBullets;
 			mag = null;
 		} else {
-			mag = new ItemMag(parName, getName(0), magSize, parIconName, bulletType, parPack);
+			mag = new ItemMag(parName, getName(0), magSize, parIconName, intMagBulletId, parPack);
 			ingotsMag = parIngotsMag;
 		}
 		

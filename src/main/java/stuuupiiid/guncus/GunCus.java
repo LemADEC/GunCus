@@ -755,7 +755,7 @@ public class GunCus {
 			Configuration gunConfig = new Configuration(file);
 			gunConfig.load();
 			
-			int bullets = -1;
+			int intMagBulletId = -1;
 			
 			Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
 			shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
@@ -772,8 +772,8 @@ public class GunCus {
 			Property gunIngotsProp = gunConfig.get("general", "Iron Ingots", 1);
 			gunIngotsProp.comment = "Number of iron ingots this gun needs to be crafted";
 			
-			Property redstoneProp = gunConfig.get("general", "Redstone", 1);
-			redstoneProp.comment = "Number of redstone this gun needs to be crafted";
+			Property gunRedstoneProp = gunConfig.get("general", "Redstone", 1);
+			gunRedstoneProp.comment = "Number of redstone this gun needs to be crafted";
 			
 			Property nameProp = gunConfig.get("general", "Name", "default");
 			nameProp.comment = "Name of the gun";
@@ -827,7 +827,7 @@ public class GunCus {
 			String[] stringBullets = bulletsProp.getString().split(";");
 			int magIngots = magIngotsProp.getInt(1);
 			int gunIngots = gunIngotsProp.getInt(1);
-			int redstone = redstoneProp.getInt(1);
+			int gunRedstone = gunRedstoneProp.getInt(1);
 			String name = nameProp.getString();
 			String stringIcon = iconProp.getString();
 			double recoilModifier = recoilModifierProp.getDouble(1.0D);
@@ -852,9 +852,26 @@ public class GunCus {
 			}
 			
 			boolean errored = false;
+			if (shootType < 0 || shootType > 2) {
+				logger.error("[" + pack + "] [" + name + "] Invalid shootType '" + shootType + "', expecting 0, 1 or 2");
+				errored = true;
+			}
+			if (delay < 0) {
+				logger.error("[" + pack + "] [" + name + "] Invalid delay '" + delay + "', expecting a positive or nul value");
+				errored = true;
+			}
+			if (gunIngots <= 0) {
+				logger.error("[" + pack + "] [" + name + "] Invalid Iron Ingots '" + gunIngots + "', expecting at least 1");
+				errored = true;
+			}
+			if (gunRedstone < 0) {
+				logger.error("[" + pack + "] [" + name + "] Invalid Redstone '" + gunRedstone + "', expecting a positive or nul value");
+				errored = true;
+			}
+			
 			int[] intBullets;
 			if (!usingMag) {
-				bullets = -1;
+				intMagBulletId = -1;
 				intBullets = new int[stringBullets.length];
 				for (int indexBullet = 0; indexBullet < stringBullets.length; indexBullet++) {
 					try {
@@ -864,34 +881,43 @@ public class GunCus {
 								+ "\"! Caused by: \"" + stringBullets[indexBullet] + "\"!");
 						errored = true;
 					}
+					
+					if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intBullets[indexBullet]) == null) {
+						logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intBullets[indexBullet] + "");
+						errored = true;
+					}
+				}
+				
+				if (stringBullets.length <= 0) {
+					logger.error("[" + pack + "] [" + name + "] No bullets are defined?");
+					errored = true;
 				}
 			} else {
 				intBullets = new int[0];
 				try {
-					bullets = Integer.parseInt(stringBullets[0]);
+					intMagBulletId = Integer.parseInt(stringBullets[0]);
 				} catch (Exception exception) {
-					logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
-							+ "\"! Caused by: \"" + stringBullets[0] + "\"!");
+					logger.info("[" + pack + "] [" + name + "] Invalid Bullets " + stringBullets[0] + ", expecting a single integer");
+					errored = true;
+				}
+				
+				if (magSize < 1) {
+					logger.error("[" + pack + "] [" + name + "] Invalid Delay '" + delay + "', expecting at least 1");
+					errored = true;
+				}
+				
+				if (magIngots < 0) {
+					logger.error("[" + pack + "] [" + name + "] Invalid Mag Ingots '" + magIngots + "', expecting at least 0");
+					errored = true;
+				}
+				
+				if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intMagBulletId) == null) {
+					logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intMagBulletId + "");
 					errored = true;
 				}
 			}
 			
-			if ((!errored)
-					&& (name != null)
-					&& (stringIcon != null)
-					&& (shootType >= 0)
-					&& (shootType < 3)
-					&& (delay >= 0)
-					&& (magSize >= 1)
-					&& (gunIngots > 0)
-					&& (magIngots >= 0)
-					&& (redstone >= 0)
-					&& ((gunIngots > 0) || (redstone > 0))
-					&& (usingMag
-							|| ((!usingMag) && (intBullets.length >= 1)
-									&& (ItemBullet.bulletsList.get(pack) != null)
-									&& (ItemBullet.bulletsList.get(pack).size() > bullets)
-									&& (ItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
+			if ( (!errored) && (name != null) && (stringIcon != null) ) {
 				boolean defaultTexture = false;
 				String icon;
 				if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
@@ -933,7 +959,7 @@ public class GunCus {
 					
 					// Create gun and magazine items
 					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize,
-							bullets, magIngots, gunIngots, redstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
+							intMagBulletId, magIngots, gunIngots, gunRedstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
 							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
 					GunCusCreativeTab tab = new GunCusCreativeTab(name, gun);
 					gun.setCreativeTab(tab);
@@ -959,9 +985,9 @@ public class GunCus {
 				
 				loadedGuns.add(" - " + name + " (Pack:" + pack + ")");
 			} else if ( (!ItemBullet.bulletsList.containsKey(pack))
-					|| (ItemBullet.bulletsList.get(pack).size() <= bullets)
-					|| (ItemBullet.bulletsList.get(pack).get(bullets) == null) ) {
-				logger.info("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + bullets + ")! Ignoring this gun!");
+					|| (ItemBullet.bulletsList.get(pack).size() <= intMagBulletId)
+					|| (ItemBullet.bulletsList.get(pack).get(intMagBulletId) == null) ) {
+				logger.info("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + intMagBulletId + ")! Ignoring this gun!");
 			} else {
 				logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 			}
