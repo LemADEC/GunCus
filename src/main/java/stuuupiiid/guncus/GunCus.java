@@ -757,12 +757,6 @@ public class GunCus {
 			
 			int bullets = -1;
 			
-			Property magIdProp = gunConfig.get("general", "Mag ID", 1000);
-			magIdProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
-			
-			Property idProp = gunConfig.get("general", "ID", 1001);
-			idProp.comment = "ID of the gun";
-			
 			Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
 			shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
 			
@@ -827,11 +821,9 @@ public class GunCus {
 			Property damageProp = gunConfig.get("general", "Damage", 6);
 			damageProp.comment = "Damage dealth (1 is half a heart)";
 			
-			int id = idProp.getInt(-1);
 			int shootType = shootTypeProp.getInt(2);
 			int delay = delayProp.getInt(3);
 			int magSize = magSizeProp.getInt(1);
-			int magId = magIdProp.getInt(1000);
 			String[] stringBullets = bulletsProp.getString().split(";");
 			int magIngots = magIngotsProp.getInt(1);
 			int gunIngots = gunIngotsProp.getInt(1);
@@ -864,7 +856,6 @@ public class GunCus {
 			if (!usingMag) {
 				bullets = -1;
 				intBullets = new int[stringBullets.length];
-				magId = -1;
 				for (int indexBullet = 0; indexBullet < stringBullets.length; indexBullet++) {
 					try {
 						intBullets[indexBullet] = Integer.parseInt(stringBullets[indexBullet]);
@@ -892,7 +883,6 @@ public class GunCus {
 					&& (shootType < 3)
 					&& (delay >= 0)
 					&& (magSize >= 1)
-					&& (magId != id)
 					&& (gunIngots > 0)
 					&& (magIngots >= 0)
 					&& (redstone >= 0)
@@ -904,7 +894,7 @@ public class GunCus {
 									&& (ItemBullet.bulletsList.get(pack).get(bullets) != null) ) ) ) {
 				boolean defaultTexture = false;
 				String icon;
-				if ((stringIcon.equals("")) || (stringIcon.equals(" "))) {
+				if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
 					logger.info("[" + pack + "] The texture of the gun \"" + name + "\" is missing!");
 					icon = "guncus:gun_default/";
 					defaultTexture = true;
@@ -967,7 +957,7 @@ public class GunCus {
 					exception.printStackTrace();
 				}
 				
-				loadedGuns.add(" - " + name + " (ID:" + id + ", Pack:" + pack + ")");
+				loadedGuns.add(" - " + name + " (Pack:" + pack + ")");
 			} else if ( (!ItemBullet.bulletsList.containsKey(pack))
 					|| (ItemBullet.bulletsList.get(pack).size() <= bullets)
 					|| (ItemBullet.bulletsList.get(pack).get(bullets) == null) ) {

@@ -126,7 +126,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 	@Override
 	public IMessage onMessage(MessageGunShoot gunShootMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received gunShoot packet: (accuracy " + gunShootMessage.accuracy + " bulletType " + gunShootMessage.bulletType);
+			GunCus.logger.info("Received gunShoot packet: accuracy " + gunShootMessage.accuracy + " bulletType " + gunShootMessage.bulletType);
 		}
 		
 		gunShootMessage.handle(context.getServerHandler().playerEntity);
