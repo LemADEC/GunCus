@@ -6,6 +6,7 @@ import java.util.List;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemBullet;
+import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -29,7 +30,7 @@ import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class EntityBullet extends EntityArrow implements IProjectile {
+public class EntityBullet extends EntityArrow implements IProjectile, ISynchronisingEntity {
 	private static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
 	private static double dRadToDegFactor = 180.0D / Math.PI;
 	
@@ -57,6 +58,8 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 	private boolean lowerGravity = false;
 	private String pack = null;
 	private int bulletId = -1;
+	
+	private boolean needResync = true;
 	
 	public EntityBullet(World world) {
 		super(world);
@@ -142,6 +145,11 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 			return;
 		}
 		
+		if (needResync) {
+			PacketHandler.sendToClient_syncEntity(this);
+			needResync = false;
+		}
+		
 		if (state == STATE_BLOCKHIT) {
 			// get collided block
 			Block block = worldObj.getBlock(blockX, blockY, blockZ);
@@ -160,6 +168,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 				motionZ *= rand.nextFloat() * 0.2F;
 				state = STATE_BOUNCING;
 				stateTicks = 0;
+				needResync = true;
 			}
 			
 		} else if (state == STATE_ENTITYHIT) {
@@ -286,6 +295,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						posZ -= motionZ / speed * 0.05D;
 						state = STATE_ENTITYHIT;
 						stateTicks = 0;
+						needResync = true;
 					} else {
 						// (not a valid target) Bouncing
 						motionX *= -0.1D;
@@ -295,6 +305,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						prevRotationYaw += 180.0F;
 						state = STATE_BOUNCING;
 						stateTicks = 0;
+						needResync = true;
 					}
 					
 				} else if (mopCollision.entityHit == null) {
@@ -323,6 +334,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 								prevRotationYaw += 180.0F;
 								state = STATE_BOUNCING;
 								stateTicks = 0;
+								needResync = true;
 							} else {
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
 								onBlockHit(mopCollision.hitVec);
@@ -339,6 +351,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						posZ -= motionZ / speed * 0.05D;
 						state = STATE_BLOCKHIT;
 						stateTicks = 0;
+						needResync = true;
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
 						onBlockHit(mopCollision.hitVec);
 					}
@@ -537,5 +550,17 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		lowerGravity = nbttagcompound.getBoolean("lowerGravity");
 		pack = nbttagcompound.getString("pack");
 		bulletId = nbttagcompound.getInteger("bulletId");
+	}
+
+	@Override
+	public NBTTagCompound getSyncDataCompound() {
+		NBTTagCompound syncDataCompound = new NBTTagCompound();
+		writeEntityToNBT(syncDataCompound);
+		return syncDataCompound;
+	}
+
+	@Override
+	public void setSyncDataCompound(NBTTagCompound syncDataCompound) {
+		readEntityFromNBT(syncDataCompound);
 	}
 }

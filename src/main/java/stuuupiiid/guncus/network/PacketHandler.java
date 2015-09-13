@@ -3,8 +3,10 @@ package stuuupiiid.guncus.network;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemMag;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
@@ -20,6 +22,7 @@ public class PacketHandler {
 		simpleNetworkManager.registerMessage(MessageShowHitMarker.class , MessageShowHitMarker.class , 10, Side.CLIENT);	// legacy 10
 		simpleNetworkManager.registerMessage(MessageClientValidation.class , MessageClientValidation.class , 14, Side.CLIENT);	// legacy 14
 		simpleNetworkManager.registerMessage(MessageWeaponBoxSelection.class , MessageWeaponBoxSelection.class , 15, Side.CLIENT);	// legacy 15
+		simpleNetworkManager.registerMessage(MessageSyncEntity.class , MessageSyncEntity.class , 20, Side.CLIENT);
 		
 		simpleNetworkManager.registerMessage(MessageGunShoot.class , MessageGunShoot.class , 101, Side.SERVER);	// legacy 1
 		simpleNetworkManager.registerMessage(MessageGUIaction.class , MessageGUIaction.class , 103, Side.SERVER);	// legacy 3 to 7
@@ -55,5 +58,10 @@ public class PacketHandler {
 	public static void sendToServer_playerAction_knife() {
 		MessageKnife knifeMessage = new MessageKnife();
 		simpleNetworkManager.sendToServer(knifeMessage);
+	}
+	
+	public static void sendToClient_syncEntity(Entity entity) {
+		MessageSyncEntity syncEntityMessage = new MessageSyncEntity((ISynchronisingEntity)entity);
+		simpleNetworkManager.sendToAllAround(syncEntityMessage, new TargetPoint(entity.worldObj.provider.dimensionId, entity.posX, entity.posY, entity.posZ, 60));
 	}
 }
