@@ -428,13 +428,6 @@ public class GunCus {
 		}
 	}
 	
-	public static void createExplosionServer(Entity entity, double x, double y, double z, float str) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			World world = entity.worldObj;
-			world.createExplosion(entity, x, y, z, str, enableBlockDamage);
-		}
-	}
-	
 	private void loadGunPacks(File fileGunCus) {
 		defaultPack(fileGunCus);
 		

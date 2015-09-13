@@ -40,7 +40,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				if (gun.hasM320(metadata)
 						&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320) && entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))
 								|| entityPlayer.capabilities.isCreativeMode)) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, 2);
+					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}
@@ -49,7 +49,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				if (entityPlayer.capabilities.isCreativeMode
 						|| (	entityPlayer.inventory.hasItem(GunCus.ammoM320)
 								&& entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, 2);
+					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}
@@ -58,7 +58,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				if ((entityPlayer.capabilities.isCreativeMode)
 						|| ((entityPlayer.inventory.hasItem(rpg.ammo)) && (entityPlayer.inventory
 								.consumeInventoryItem(rpg.ammo)))) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, 1);
+					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, true);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}

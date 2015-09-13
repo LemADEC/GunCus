@@ -1,13 +1,22 @@
 package stuuupiiid.guncus.entity;
 
-import java.util.HashMap;
+import io.netty.buffer.ByteBuf;
+
 import java.util.List;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import stuuupiiid.guncus.GunCus;
+import stuuupiiid.guncus.network.ISynchronisingEntity;
+import stuuupiiid.guncus.network.PacketHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -16,233 +25,383 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldSettings.GameType;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.world.BlockEvent;
 
-public class EntityGrenade extends EntityArrow implements IProjectile {
-	private int blockX = -1;
-	private int blockY = -1;
-	private int blockZ = -1;
-	private Block collision_block = Blocks.air;
-	private boolean field_70254_i = false;
-	public EntityPlayer field_70250_c;
-	private int field_70252_j;
-	private int field_70257_an = 0;
-	// private int field_70256_ap;
-	private int liveTime = 300;
+public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
+	private static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
+	private static double dRadToDegFactor = 180.0D / Math.PI;
 	
-	private int type = 1;
-	public List<Integer> effects;
-	public HashMap<Integer, Float> effectModifiers;
-	public int ticks = 0;
+	private final static float slowMotionFactor = 100F;
+	private final static int MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
+	private final static int MAX_BOUNCING_DURATION_TICKS = Math.round(600 * slowMotionFactor);	// 30 s bouncing around
+	private final static int MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
+	private final static int MAX_BLOCKHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on the ground
+	private final static int MAX_LIFE_DURATION_TICKS = Math.round(6000 * slowMotionFactor);	// 5 mn max total time
+	
+	public final static int STATE_FLYING = 0;
+	public final static int STATE_BOUNCING = 1;
+	public final static int STATE_ENTITYHIT = 2;
+	public final static int STATE_BLOCKHIT = 3;
+	public int state = STATE_FLYING;
+	private int stateTicks = 0;
+	private int blockX = -1;	// field_145791_d
+	private int blockY = -1;	// field_145792_e
+	private int blockZ = -1;	// field_145789_f
+	private Block blockCollided = Blocks.air;
+	private int blockCollidedMetadata = -1;	// field inData
+	
+	private boolean isRocket = false;
 	
 	public EntityGrenade(World world) {
 		super(world);
 		setSize(0.5F, 0.5F);
+		// canBePickedUp = 0;
 	}
 	
-	public EntityGrenade(World par1World, EntityPlayer par2EntityPlayer, int accuracy, int type) {
+	public EntityGrenade(World par1World, EntityPlayer parEntityPlayer, int accuracy, boolean isRocket) {
 		super(par1World);
-		this.renderDistanceWeight = 10.0D;
-		this.field_70250_c = par2EntityPlayer;
 		setSize(0.5F, 0.5F);
-		setLocationAndAngles(par2EntityPlayer.posX, par2EntityPlayer.posY + par2EntityPlayer.getEyeHeight(), par2EntityPlayer.posZ, par2EntityPlayer.rotationYaw, par2EntityPlayer.rotationPitch);
-		this.posX -= MathHelper.cos(this.rotationYaw / 180.0F * 3.141593F) * 0.16F;
-		this.posY -= 0.1000000014901161D;
-		this.posZ -= MathHelper.sin(this.rotationYaw / 180.0F * 3.141593F) * 0.16F;
-		setPosition(par2EntityPlayer.posX, par2EntityPlayer.posY + par2EntityPlayer.getEyeHeight(), par2EntityPlayer.posZ);
+		renderDistanceWeight = 10.0D;
+		shootingEntity = parEntityPlayer;
+		setLocationAndAngles(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ, parEntityPlayer.rotationYaw, parEntityPlayer.rotationPitch);
+		posX -= MathHelper.cos(rotationYaw * fDegToRadFactor) * 0.16F;
+		posY -= 0.1000000014901161D;
+		posZ -= MathHelper.sin(rotationYaw * fDegToRadFactor) * 0.16F;
+		setPosition(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ);
 		this.yOffset = 0.0F;
-		this.motionX = (-MathHelper.sin(this.rotationYaw / 180.0F * 3.141593F) * MathHelper.cos(this.rotationPitch / 180.0F * 3.141593F));
-		this.motionZ = (MathHelper.cos(this.rotationYaw / 180.0F * 3.141593F) * MathHelper.cos(this.rotationPitch / 180.0F * 3.141593F));
-		this.motionY = (-MathHelper.sin(this.rotationPitch / 180.0F * 3.141593F));
+		this.motionX = -MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+		this.motionZ =  MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+		this.motionY = -MathHelper.sin(rotationPitch * fDegToRadFactor);
 		if (accuracy < 100) {
-			int accX1 = this.rand.nextInt(101 - accuracy);
-			int accY1 = this.rand.nextInt(101 - accuracy);
-			int accZ1 = this.rand.nextInt(101 - accuracy);
-			double accX2 = accX1 - this.rand.nextInt(accX1 + 1) * 2;
-			double accY2 = accY1 - this.rand.nextInt(accY1 + 1) * 2;
-			double accZ2 = accZ1 - this.rand.nextInt(accZ1 + 1) * 2;
-			this.motionX += accX2 / 370.0D;
-			this.motionY += accY2 / 370.0D;
-			this.motionZ += accZ2 / 370.0D;
+			int accX1 = rand.nextInt(101 - accuracy);
+			int accY1 = rand.nextInt(101 - accuracy);
+			int accZ1 = rand.nextInt(101 - accuracy);
+			double accX2 = accX1 - rand.nextInt(accX1 + 1) * 2;
+			double accY2 = accY1 - rand.nextInt(accY1 + 1) * 2;
+			double accZ2 = accZ1 - rand.nextInt(accZ1 + 1) * 2;
+			GunCus.logger.info("initial motion " + motionX + " " + motionY + " " + motionZ);
+			motionX += accX2 / 370.0D;
+			motionY += accY2 / 370.0D;
+			motionZ += accZ2 / 370.0D;
+			GunCus.logger.info("adjusted motion " + motionX + " " + motionY + " " + motionZ);
 		}
-		// this.field_70256_ap = 0;
-		setThrowableHeading(this.motionX, this.motionY, this.motionZ, type == 1 ? 3.0F : 4.2F, 1.0F);
-		this.type = type;
+		this.isRocket = isRocket;
+		setThrowableHeading(motionX, motionY, motionZ, (isRocket ? 3.0F : 4.2F) / slowMotionFactor, 1.0F);
 	}
 	
 	@Override
 	public void onUpdate() {
+		// skip the arrow computation
 		super.onEntityUpdate();
 		
-		this.ticks += 1;
-		
-		this.liveTime -= 1;
-		
-		if ((this.posY > 300.0D) || (this.liveTime <= 0)) {
+		if ((posY > 300.0D) || (ticksExisted >= MAX_LIFE_DURATION_TICKS)) {
 			setDead();
 		}
 		
-		if ((this.prevRotationPitch == 0.0F) && (this.prevRotationYaw == 0.0F)) {
-			float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.prevRotationYaw = (this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / 3.141592653589793D));
-			this.prevRotationPitch = (this.rotationPitch = (float) (Math.atan2(this.motionY, f) * 180.0D / 3.141592653589793D));
+		// (EntityArrow) Re-orient bullet depending on motion vector - only used after recovering?)
+		if ((prevRotationPitch == 0.0F) && (prevRotationYaw == 0.0F)) {
+			float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+			prevRotationYaw = (rotationYaw = (float) (Math.atan2(motionX, motionZ) * dRadToDegFactor));
+			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f) * dRadToDegFactor));
 		}
 		
-		Block block = this.worldObj.getBlock(this.blockX, this.blockY, this.blockZ);
-		
-		if (block != Blocks.air) {
-			block.setBlockBoundsBasedOnState(this.worldObj, this.blockX, this.blockY, this.blockZ);
-			AxisAlignedBB axisalignedbb = block.getCollisionBoundingBoxFromPool(this.worldObj, this.blockX, this.blockY, this.blockZ);
-			
-			if ((axisalignedbb != null) && (axisalignedbb.isVecInside(Vec3.createVectorHelper(this.posX, this.posY, this.posZ)))) {
-				this.field_70254_i = true;
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			Minecraft mc = Minecraft.getMinecraft();
+			double dX = mc.renderViewEntity.posX - posX;
+			double dY = mc.renderViewEntity.posY - posY;
+			double dZ = mc.renderViewEntity.posZ - posZ;
+			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+			if (dX * dX + dY * dY + dZ * dZ < range * range) {
+				double tailX = posX + 2 * width * - MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailZ = posZ + 2 * width *   MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailY = posY + 2 * width * - MathHelper.sin(rotationPitch * fDegToRadFactor);
+				
+				for (int smokeIndex = 0; smokeIndex < (4 - mc.gameSettings.particleSetting); smokeIndex++) {
+					double factor = 0.0000020 * smokeIndex;
+					// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
+					mc.effectRenderer.addEffect(new EntitySmokeFX(
+							worldObj,
+							tailX - motionX * factor,
+							tailY - motionY * factor,
+							tailZ - motionZ * factor,
+							motionX, motionY /*+ 0.3/**/, motionZ,
+							1.5F));
+				}
 			}
+			
+			// Do collision resolution on server side only
+			return;
 		}
-		double f3 = 0.25D;
 		
-		this.worldObj.spawnParticle("largesmoke", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, 0.0D, 0.0D, 0.0D);
-		this.worldObj.spawnParticle("largesmoke", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, 0.0D, 0.0D, 0.0D);
-		this.worldObj.spawnParticle("largesmoke", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, 0.0D, 0.0D, 0.0D);
-		this.worldObj.spawnParticle("largesmoke", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, 0.0D, 0.0D, 0.0D);
-		
-		if (this.field_70254_i) {
-			this.motionY -= (this.type == 1 ? 0.007D : 0.15D);
-			setPosition(this.posX, this.posY, this.posZ);
-			func_145775_I();	// doBlockCollisions();
-			this.field_70252_j += 1;
-			if (this.field_70252_j > 100) {
+		if (state == STATE_BLOCKHIT) {
+			// get collided block
+			Block block = worldObj.getBlock(blockX, blockY, blockZ);
+			int blockMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
+			
+			if (block == blockCollided && blockMetadata == blockCollidedMetadata) {
+				stateTicks++;
+				
+				if (stateTicks >= MAX_BLOCKHIT_DURATION_TICKS) {
+					explode();
+					setDead();
+				}
+			} else {
+				motionX *= rand.nextFloat() * 0.2F;
+				motionY *= rand.nextFloat() * 0.2F;
+				motionZ *= rand.nextFloat() * 0.2F;
+				state = STATE_BOUNCING;
+				stateTicks = 0;
+				PacketHandler.sendToClient_syncEntity(this);
+			}
+			
+		} else if (state == STATE_ENTITYHIT) {
+			stateTicks++;
+			
+			if (stateTicks >= MAX_ENTITYHIT_DURATION_TICKS) {
 				explode();
 				setDead();
 			}
+			
 		} else {
-			this.field_70257_an += 1;
-			Vec3 vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-			Vec3 vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-			MovingObjectPosition movingobjectposition = this.worldObj.func_147447_a(vec3, vec31, false, true, false);
-			vec3 = Vec3.createVectorHelper(posX, posY, posZ);
-			vec31 = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-			
-			if (movingobjectposition != null) {
-				vec31 = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+			stateTicks++;
+			if (state == STATE_FLYING) {
+				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
+					// explode();
+					// setDead();
+				}
+			} else if (state == STATE_BOUNCING) {
+				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
+					explode();
+					setDead();
+				}
+			} else {
+				GunCus.logger.error("Killing grenade with invalid state " + state + " " + this);
+				setDead();
 			}
 			
-			Entity entity = null;
-			List list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
-			double d0 = 0.0D;
+			// Check for block collision
+			Vec3 vecCurrent = Vec3.createVectorHelper(posX, posY, posZ);
+			Vec3 vecNextTick = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
+			MovingObjectPosition mopCollision = worldObj.func_147447_a(vecCurrent, vecNextTick, false, true, false); // rayTraceBlocks_do_do
+			vecCurrent = Vec3.createVectorHelper(posX, posY, posZ);
+			vecNextTick = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
 			
-			for (int l = 0; l < list.size(); l++) {
-				Entity entity1 = (Entity) list.get(l);
-				
-				if ((entity1.canBeCollidedWith()) && ((entity1 != this.field_70250_c) || (this.field_70257_an >= 5))) {
-					float f1 = 0.3F;
-					AxisAlignedBB axisalignedbb1 = entity1.boundingBox.expand(f1, f1, f1);
-					MovingObjectPosition movingobjectposition1 = axisalignedbb1.calculateIntercept(vec3, vec31);
+			if (mopCollision != null) {
+				vecNextTick = Vec3.createVectorHelper(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
+			}
+			
+			List<Entity> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+			double distance2Closest = 0.0D;
+			
+			for (Entity entityInRange : list) {
+				// Check for no-PvP attributes
+				if (entityInRange instanceof EntityPlayer) {
+					EntityPlayer entityPlayerHit = (EntityPlayer) entityInRange;
 					
-					if (movingobjectposition1 != null) {
-						double d1 = vec3.distanceTo(movingobjectposition1.hitVec);
-						
-						if ((d1 < d0) || (d0 == 0.0D)) {
-							entity = entity1;
-							d0 = d1;
-						}
+					if (entityPlayerHit.capabilities.disableDamage || ((shootingEntity instanceof EntityPlayer) && (!((EntityPlayer)shootingEntity).canAttackPlayer(entityPlayerHit)))) {
+						continue;
+					}
+				}
+				
+				// Prevent immediate self-shooting
+				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < 5))) {
+					continue;
+				}
+				
+				float tolerance = 0.1F;
+				AxisAlignedBB axisalignedbb1 = entityInRange.boundingBox.expand(tolerance, tolerance, tolerance);
+				MovingObjectPosition mopEntityInRange = axisalignedbb1.calculateIntercept(vecCurrent, vecNextTick);
+				
+				if (mopEntityInRange != null) {
+					double distance2InRange = vecCurrent.squareDistanceTo(mopEntityInRange.hitVec);
+					
+					if ((distance2InRange < distance2Closest) || (distance2Closest == 0.0D)) {
+						mopCollision = mopEntityInRange;
+						mopCollision.entityHit = entityInRange;
+						distance2Closest = distance2InRange;
 					}
 				}
 			}
 			
-			if (entity != null) {
-				movingobjectposition = new MovingObjectPosition(entity);
-			}
-			
-			if ((movingobjectposition != null) && (movingobjectposition.entityHit != null) && ((movingobjectposition.entityHit instanceof EntityPlayer))) {
-				EntityPlayer entityplayer = (EntityPlayer) movingobjectposition.entityHit;
-				
-				if ((entityplayer.capabilities.disableDamage) || ((this.field_70250_c != null) && (!this.field_70250_c.canAttackPlayer(entityplayer)))) {
-					movingobjectposition = null;
-				}
-			}
-			
-			if (movingobjectposition != null) {
-				if (movingobjectposition.entityHit != null) {
-					this.field_70254_i = true;
+			// Resolve collision
+			if (mopCollision != null) {
+				if (ticksExisted < 5) {
+					// Fix the grenade on collision point
+					setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
+					state = STATE_ENTITYHIT;
+					stateTicks = 0;
+					PacketHandler.sendToClient_syncEntity(this);
+				} else if (mopCollision.entityHit != null) {
+					// (entity is too close) Bouncing
+					motionX *= -0.1D;
+					motionY *= -0.1D;
+					motionZ *= -0.1D;
+					rotationYaw += 180.0F;
+					prevRotationYaw += 180.0F;
+					state = STATE_BOUNCING;
+					stateTicks = 0;
+					PacketHandler.sendToClient_syncEntity(this);
 				} else {
-					blockX = movingobjectposition.blockX;
-					blockY = movingobjectposition.blockY;
-					blockZ = movingobjectposition.blockZ;
-					collision_block = worldObj.getBlock(blockX, blockY, blockZ);
-					motionX = ((float) (movingobjectposition.hitVec.xCoord - posX));
-					motionY = ((float) (movingobjectposition.hitVec.yCoord - posY));
-					motionZ = ((float) (movingobjectposition.hitVec.zCoord - posZ));
-					float f2 = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-					posX -= motionX / f2 * 0.0500000007450581D;
-					posY -= motionY / f2 * 0.0500000007450581D;
-					posZ -= motionZ / f2 * 0.0500000007450581D;
-					field_70254_i = true;
-					setIsCritical(false);
-					
-					if (collision_block != Blocks.air) {
-						collision_block.onEntityCollidedWithBlock(this.worldObj, this.blockX, this.blockY, this.blockZ, this);
+					blockX = mopCollision.blockX;
+					blockY = mopCollision.blockY;
+					blockZ = mopCollision.blockZ;
+					blockCollided = worldObj.getBlock(blockX, blockY, blockZ);
+					blockCollidedMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
+					// break weak blocks and pass through them 
+					if ( GunCus.enableBlockDamage && (
+					     (blockCollided == Blocks.glass_pane) || (blockCollided == Blocks.stained_glass_pane) 
+					  || (blockCollided == Blocks.web) || (blockCollided == Blocks.glowstone)) ) {
+						if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+							boolean isCanceled = true;
+							if (shootingEntity instanceof EntityPlayerMP) {
+								BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(worldObj, GameType.SURVIVAL, (EntityPlayerMP)shootingEntity, blockX, blockY, blockZ);
+								isCanceled = event.isCanceled();
+							}
+							if (isCanceled) {
+								// (protected block) Bouncing
+								motionX *= -0.1D;
+								motionY *= -0.1D;
+								motionZ *= -0.1D;
+								rotationYaw += 180.0F;
+								prevRotationYaw += 180.0F;
+								state = STATE_BOUNCING;
+								stateTicks = 0;
+								PacketHandler.sendToClient_syncEntity(this);
+							} else {
+								worldObj.setBlockToAir(blockX, blockY, blockZ);
+								// onBlockHit(mopCollision.hitVec);
+							}
+						}
+					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
+						// (not in air) Fix the grenade 5% in the block
+						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
+						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
+						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
+						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+						posX -= motionX / speed * 0.05D;
+						posY -= motionY / speed * 0.05D;
+						posZ -= motionZ / speed * 0.05D;
+						state = STATE_BLOCKHIT;
+						stateTicks = 0;
+						PacketHandler.sendToClient_syncEntity(this);
+						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
+						// onBlockHit(mopCollision.hitVec);
 					}
 				}
-				field_70254_i = true;
 			}
 			
+			// apply movement
 			posX += motionX;
 			posY += motionY;
 			posZ += motionZ;
-			float f2 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			this.rotationYaw = ((float) (Math.atan2(this.motionX, this.motionZ) * 180.0D / 3.141592653589793D));
 			
-			for (this.rotationPitch = ((float) (Math.atan2(this.motionY, f2) * 180.0D / 3.141592653589793D)); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
+			// clamp angulations
+			float f2 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+			rotationYaw = ((float) (Math.atan2(motionX, motionZ) * dRadToDegFactor));
+			
+			for (rotationPitch = ((float) (Math.atan2(motionY, f2) * dRadToDegFactor)); rotationPitch - prevRotationPitch < -180.0F; prevRotationPitch -= 360.0F) {
 				;
-			while (this.rotationPitch - this.prevRotationPitch >= 180.0F) {
-				this.prevRotationPitch += 360.0F;
+			}
+			while (rotationPitch - prevRotationPitch >= 180.0F) {
+				prevRotationPitch += 360.0F;
 			}
 			
-			while (this.rotationYaw - this.prevRotationYaw < -180.0F) {
-				this.prevRotationYaw -= 360.0F;
+			while (rotationYaw - prevRotationYaw < -180.0F) {
+				prevRotationYaw -= 360.0F;
 			}
 			
-			while (this.rotationYaw - this.prevRotationYaw >= 180.0F) {
-				this.prevRotationYaw += 360.0F;
+			while (rotationYaw - prevRotationYaw >= 180.0F) {
+				prevRotationYaw += 360.0F;
 			}
 			
-			this.rotationPitch = (this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F);
-			this.rotationYaw = (this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F);
-			float f4 = 0.99F;
-			// float f1 = 0.05F;
+			rotationPitch = (prevRotationPitch + (rotationPitch - prevRotationPitch) * 0.2F);
+			rotationYaw = (prevRotationYaw + (rotationYaw - prevRotationYaw) * 0.2F);
+			double friction = 0.01;
 			
 			if (isInWater()) {
-				for (int j1 = 0; j1 < 4; j1++) {
-					this.worldObj.spawnParticle("bubble", this.posX - this.motionX * f3, this.posY - this.motionY * f3, this.posZ - this.motionZ * f3, this.motionX, this.motionY, this.motionZ);
+				for (int bubleIndex = 0; bubleIndex < 4; bubleIndex++) {
+					double factor = 0.20 * bubleIndex;
+					worldObj.spawnParticle("bubble",
+							posX - motionX * factor,
+							posY - motionY * factor,
+							posZ - motionZ * factor,
+							motionX, motionY, motionZ);
 				}
 				
-				f4 = 0.8F;
+				friction = 0.2;
 			}
 			
-			this.motionX *= f4;
-			this.motionY *= f4;
-			this.motionZ *= f4;
-			this.motionY -= (this.type == 1 ? 0.0122D : 0.15D);
-			setPosition(this.posX, this.posY, this.posZ);
+			double motionFactor = 1.0D - friction / slowMotionFactor;
+			motionX *= motionFactor;
+			motionY *= motionFactor;
+			motionZ *= motionFactor;
+			// apply gravity when applicable
+			if (state == STATE_FLYING || state == STATE_BOUNCING) { 
+				motionY -= (isRocket ? 0.0122D : 0.15D) / slowMotionFactor;
+			} else if (state == STATE_BLOCKHIT) {
+				motionY -= (isRocket ? 0.007D : 0.15D) / slowMotionFactor;
+			}
+			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
-			
-			if ((this.field_70254_i) && (this.ticks >= 5)) {
-				explode();
-				setDead();
-			}
 		}
 	}
 	
 	public void explode() {
-		GunCus.createExplosionServer(this.field_70250_c, this.posX, this.posY, this.posZ, 7.0F / this.type);
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+			shootingEntity.worldObj.createExplosion(shootingEntity, posX, posY, posZ, isRocket ? 7.0F : 3.5F, GunCus.enableBlockDamage);
+		}
 	}
 	
 	@Override
-	public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
-		setDead();
+	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+		// (ancestor fully replaced, not calling it)
+		nbttagcompound.setByte("state", (byte)state);
+		nbttagcompound.setInteger("stateTicks", stateTicks);
+		nbttagcompound.setInteger("blockX", blockX);
+		nbttagcompound.setInteger("blockY", blockY);
+		nbttagcompound.setInteger("blockZ", blockZ);
+		nbttagcompound.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
+		nbttagcompound.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
+		nbttagcompound.setBoolean("isRocket", isRocket);
 	}
 	
 	@Override
-	public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
-		setDead();
+	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+		state = nbttagcompound.getByte("state");
+		stateTicks = nbttagcompound.getInteger("stateTicks");
+		blockX = nbttagcompound.getInteger("blockX");
+		blockY = nbttagcompound.getInteger("blockY");
+		blockZ = nbttagcompound.getInteger("blockZ");
+		blockCollided = Block.getBlockById(nbttagcompound.getInteger("blockCollided"));
+		blockCollidedMetadata = nbttagcompound.getByte("blockCollidedMetadata");
+		isRocket = nbttagcompound.getBoolean("isRocket");
+	}
+	
+	@Override
+	public NBTTagCompound writeSyncDataCompound() {
+		NBTTagCompound syncDataCompound = new NBTTagCompound();
+		syncDataCompound.setByte("state", (byte)state);
+		syncDataCompound.setInteger("stateTicks", stateTicks);
+		return syncDataCompound;
+	}
+	
+	@Override
+	public void readSyncDataCompound(NBTTagCompound syncDataCompound) {
+		state = syncDataCompound.getByte("state");
+		stateTicks = syncDataCompound.getInteger("stateTicks");
+	}
+	
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		NBTTagCompound nbttagcompound = new NBTTagCompound();
+		writeEntityToNBT(nbttagcompound);
+		ByteBufUtils.writeTag(buffer, nbttagcompound);
+	}
+	
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		readEntityFromNBT(ByteBufUtils.readTag(buffer));
 	}
 }
