@@ -236,7 +236,7 @@ public class ItemGun extends Item {
 			PacketHandler.sendToServer_playerAction_shoot(entityPlayer, mag, bullets, actualBullet);
 			ItemBullet bulletItem;
 			if (mag != null) {
-				bulletItem = ItemBullet.bulletsList.get(pack).get(mag.bulletType);
+				bulletItem = ItemBullet.bulletsList.get(pack).get(mag.bulletId);
 			} else {
 				bulletItem = ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]);
 			}

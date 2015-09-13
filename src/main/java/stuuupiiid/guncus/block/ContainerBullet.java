@@ -69,7 +69,7 @@ public class ContainerBullet extends Container {
 
 		if ((down != null) && (down.getItem() != null) && ((down.getItem() instanceof ItemMag))) {
 			mag = (ItemMag) down.getItem();
-			bullet = (ItemBullet) ((List) ItemBullet.bulletsList.get(mag.pack)).get(mag.bulletType);
+			bullet = (ItemBullet) ((List) ItemBullet.bulletsList.get(mag.pack)).get(mag.bulletId);
 
 			iron = bullet.iron;
 			sulphur = bullet.sulphur;
@@ -104,16 +104,16 @@ public class ContainerBullet extends Container {
 	public String[] info() {
 		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
 
-		ItemMag gun = null;
+		ItemMag itemMag = null;
 		String rtn = "Oops! Something went wrong!";
 		String rtn2 = null;
 
-		if ((down != null) && (down.getItem() != null) && ((down.getItem() instanceof ItemMag))) {
-			gun = (ItemMag) down.getItem();
+		if ((down != null) && (down.getItem() instanceof ItemMag)) {
+			itemMag = (ItemMag) down.getItem();
 		}
 
-		if (gun != null) {
-			ItemBullet bullet = ItemBullet.bulletsList.get(gun.pack).get(gun.bulletType);
+		if (itemMag != null) {
+			ItemBullet bullet = ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
 
 			String name = "<none>";
 			int sulphur = -1;
@@ -127,7 +127,7 @@ public class ContainerBullet extends Container {
 			}
 
 			if ((iron >= 0) && (sulphur >= 0) && ((iron > 0) || (sulphur > 0))) {
-				rtn = "Gun = \"" + gun.gunName + "\", Bullets = \"" + name + "\", Pack = \"" + gun.pack + "\"";
+				rtn = "Gun = \"" + itemMag.gunName + "\", Bullets = \"" + name + "\", Pack = \"" + itemMag.pack + "\"";
 				rtn2 = "-> " + (iron > 0 ? iron + " iron ingot" + (iron > 1 ? "s, " : ", ") : "")
 						+ (sulphur > 0 ? sulphur + " gunpowder" : "");
 			}

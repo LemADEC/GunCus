@@ -55,7 +55,8 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 	
 	private float damage = 0.0F;
 	private boolean lowerGravity = false;
-	public ItemBullet bullet = null;
+	private String pack = null;
+	private int bulletId = -1;
 	
 	public EntityBullet(World world) {
 		super(world);
@@ -100,9 +101,24 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		return this;
 	}
 	
-	public EntityBullet setBullet(ItemBullet parBullet) {
-		bullet = parBullet;
+	public EntityBullet setBullet(final String pack, final int bulletId) {
+		this.pack = pack;
+		this.bulletId = bulletId;
 		return this;
+	}
+	
+	public EntityBullet setBullet(final ItemBullet bullet) {
+		pack = bullet.pack;
+		bulletId = bullet.bulletId;
+		return this;
+	}
+	
+	public ItemBullet getBullet() {
+		if (pack != null) {
+			return ItemBullet.bulletsList.get(pack).get(bulletId);
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -376,7 +392,8 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 			motionZ *= motionFactor;
 			// apply gravity when applicable
 			if (state == STATE_FLYING || state == STATE_BOUNCING) { 
-				motionY -= (lowerGravity ? 0.014D : 0.02D) * (bullet == null ? 1.0D : bullet.gravity) / slowMotionFactor;
+				ItemBullet itemBullet = getBullet();
+				motionY -= (lowerGravity ? 0.014D : 0.02D) * (itemBullet == null ? 1.0D : itemBullet.gravity) / slowMotionFactor;
 			}
 			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
@@ -422,41 +439,42 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		
 		EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
 		
-		if (bullet.effectModifiers.containsKey(1)) {
-			entityLivingBase.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(bullet.effectModifiers.get(1) * 20F), 0));
+		ItemBullet itemBullet = getBullet();
+		if (itemBullet.effectModifiers.containsKey(1)) {
+			entityLivingBase.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(itemBullet.effectModifiers.get(1) * 20F), 0));
 		}
 		
-		if (bullet.effectModifiers.containsKey(2)) {
-			entityLivingBase.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)Math.floor(bullet.effectModifiers.get(2) * 20F), 0));
+		if (itemBullet.effectModifiers.containsKey(2)) {
+			entityLivingBase.addPotionEffect(new PotionEffect(Potion.confusion.id, (int)Math.floor(itemBullet.effectModifiers.get(2) * 20F), 0));
 		}
 		
-		if (bullet.effectModifiers.containsKey(3)) {
-			entityLivingBase.setFire((int)Math.floor(bullet.effectModifiers.get(3)));
+		if (itemBullet.effectModifiers.containsKey(3)) {
+			entityLivingBase.setFire((int)Math.floor(itemBullet.effectModifiers.get(3)));
 		}
 		
-		if (bullet.effectModifiers.containsKey(7)) {
-			entityLivingBase.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)Math.floor(bullet.effectModifiers.get(7) * 20F), 0));
+		if (itemBullet.effectModifiers.containsKey(7)) {
+			entityLivingBase.addPotionEffect(new PotionEffect(Potion.blindness.id, (int)Math.floor(itemBullet.effectModifiers.get(7) * 20F), 0));
 		}
 		
-		if (bullet.effectModifiers.containsKey(6)) {
-			entityLivingBase.heal(bullet.effectModifiers.get(6).floatValue());
+		if (itemBullet.effectModifiers.containsKey(6)) {
+			entityLivingBase.heal(itemBullet.effectModifiers.get(6).floatValue());
 		}
 		
-		if (bullet.effectModifiers.containsKey(8)) {// instant damage / harm
-			entityLivingBase.addPotionEffect(new PotionEffect(Potion.harm.id, 1, (int)Math.floor(bullet.effectModifiers.get(8))));
+		if (itemBullet.effectModifiers.containsKey(8)) {// instant damage / harm
+			entityLivingBase.addPotionEffect(new PotionEffect(Potion.harm.id, 1, (int)Math.floor(itemBullet.effectModifiers.get(8))));
 		}
 		
-		if (bullet.effectModifiers.containsKey(9)) {// weaken / negative resistance (20% damage increased per level)
-			entityLivingBase.addPotionEffect(new PotionEffect(Potion.resistance.id, (int)Math.floor(bullet.effectModifiers.get(9) * 20F), - bullet.effectAmplifiers.get(9)));
+		if (itemBullet.effectModifiers.containsKey(9)) {// weaken / negative resistance (20% damage increased per level)
+			entityLivingBase.addPotionEffect(new PotionEffect(Potion.resistance.id, (int)Math.floor(itemBullet.effectModifiers.get(9) * 20F), - itemBullet.effectAmplifiers.get(9)));
 		}
 		
-		if (bullet.effectModifiers.containsKey(10)) {// knockback
+		if (itemBullet.effectModifiers.containsKey(10)) {// knockback
 			double speed = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
 			if (speed > 0.0F) {
 				entityLivingBase.addVelocity(
-						motionX * bullet.effectModifiers.get(9) / speed,
-						Math.max(0.1D, motionY * bullet.effectAmplifiers.get(9) / speed),
-						motionZ * bullet.effectModifiers.get(9) / speed);
+						motionX * itemBullet.effectModifiers.get(9) / speed,
+						Math.max(0.1D, motionY * itemBullet.effectAmplifiers.get(9) / speed),
+						motionZ * itemBullet.effectModifiers.get(9) / speed);
 			}
 		}
 	}
@@ -470,15 +488,16 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		}
 		isFirstHit = false;
 		
-		if (bullet.effectModifiers.containsKey(4)) {
-			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, bullet.effectModifiers.get(4), GunCus.enableBlockDamage);
+		ItemBullet itemBullet = getBullet();
+		if (itemBullet.effectModifiers.containsKey(4)) {
+			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(4), GunCus.enableBlockDamage);
 		}
 		
-		if (bullet.effectModifiers.containsKey(5)) {
-			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, bullet.effectModifiers.get(5), false);
+		if (itemBullet.effectModifiers.containsKey(5)) {
+			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(5), false);
 		}
 		
-		if ((bullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
+		if ((itemBullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
 			if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
 				worldObj.setBlock(blockX, blockY + 1, blockZ, Blocks.fire);
 			} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {

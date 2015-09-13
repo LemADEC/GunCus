@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import stuuupiiid.guncus.entity.EntityBullet;
+import stuuupiiid.guncus.item.ItemBullet;
 
 @SideOnly(Side.CLIENT)
 public class RenderBullet extends RenderArrow {
@@ -38,7 +39,8 @@ public class RenderBullet extends RenderArrow {
 			GL11.glRotatef((entityBullet.ticksExisted * 20 + par9) * 0.1F, 1.0F, 0.0F, 0.0F);
 		}
 		
-		final float vMin =  (entityBullet.bullet != null) ? entityBullet.bullet.texture * vOffset : 0F;
+		ItemBullet itemBullet = entityBullet.getBullet();
+		final float vMin =  (itemBullet != null) ? itemBullet.texture * vOffset : 0F;
 		final float vMax =  vMin + vOffset;
 		
 		GL11.glRotatef(45.0F, 1.0F, 0.0F, 0.0F);

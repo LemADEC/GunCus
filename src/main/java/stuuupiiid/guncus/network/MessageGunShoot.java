@@ -13,27 +13,27 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoot, IMessage> {
 	private int accuracy;
-	private int bulletType;
+	private int bulletId;
 	
 	public MessageGunShoot() {
 		// required on receiving side
 	}
 	
-	public MessageGunShoot(final int accuracy, final int bulletType) {
+	public MessageGunShoot(final int accuracy, final int bulletId) {
 		this.accuracy = accuracy;
-		this.bulletType = bulletType;
+		this.bulletId = bulletId;
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
 		accuracy = buffer.readInt();
-		bulletType = buffer.readInt();
+		bulletId = buffer.readInt();
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
 		buffer.writeInt(accuracy);
-		buffer.writeInt(bulletType);
+		buffer.writeInt(bulletId);
 	}
 	
 	private void handle(EntityPlayerMP playerEntity) {
@@ -69,16 +69,16 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 			}
 			
 			if (gun.mag != null) {
-				assert bulletType == -1;
+				assert bulletId == -1;
 			}
 			
 			if ( ((mag != null) && (gun.mag != null))
-					|| ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bulletsList.get(gun.pack).get(bulletType))))
+					|| ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bulletsList.get(gun.pack).get(bulletId))))
 					|| (playerEntity.capabilities.isCreativeMode)) {
 				if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag != null) && (mag != null)) {
 					mag.damageItem(1, playerEntity);
 				} else if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag == null)) {
-					playerEntity.inventory.consumeInventoryItem(ItemBullet.bulletsList.get(gun.pack).get(bulletType));
+					playerEntity.inventory.consumeInventoryItem(ItemBullet.bulletsList.get(gun.pack).get(bulletId));
 				}
 
 				if (gun.hasSilencer(metadata)) {
@@ -88,9 +88,9 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				}
 				ItemBullet bulletItem;
 				if (gun.mag != null) {
-					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletType);
+					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletId);
 				} else {
-					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(bulletType);
+					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(bulletId);
 				}
 				
 				if (accuracy > bulletItem.spray) {
@@ -126,7 +126,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 	@Override
 	public IMessage onMessage(MessageGunShoot gunShootMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received gunShoot packet: accuracy " + gunShootMessage.accuracy + " bulletType " + gunShootMessage.bulletType);
+			GunCus.logger.info("Received gunShoot packet: accuracy " + gunShootMessage.accuracy + " bulletId " + gunShootMessage.bulletId);
 		}
 		
 		gunShootMessage.handle(context.getServerHandler().playerEntity);

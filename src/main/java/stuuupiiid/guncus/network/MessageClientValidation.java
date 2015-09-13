@@ -35,7 +35,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			shootType = gun.shootType;
 			delay = gun.delay;
 			magName = gun.mag.getUnlocalizedName();
-			bullets = gun.mag.bulletType;
+			bullets = gun.mag.bulletId;
 			recoilModifier = gun.recoilModifier;
 		}
 	}
@@ -85,7 +85,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			  || (shootType != gun.shootType)
 			  || (delay != gun.delay)
 			  || (!encoded_magName.equals(magName))
-			  || (bullets != gun.mag.bulletType)
+			  || (bullets != gun.mag.bulletId)
 			  || (recoilModifier != gun.recoilModifier)) {
 				MessageKickPlayer kickPlayerMessage = new MessageKickPlayer(gunIndex, 1);
 				PacketHandler.simpleNetworkManager.sendToServer(kickPlayerMessage);

@@ -5,16 +5,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 public class ItemMag extends GunCusItem {
-	public int bulletType;
+	public int bulletId;
 	public String gunName;
 	public String pack;
 	
-	public ItemMag(String weaponName, String unlocalized, int magSize, String weaponIcon, int bulletType, String pack) {
-		super(weaponIcon + "magazine", weaponName + " Magazine", unlocalized + ".magazine");
+	public ItemMag(String gunName, String unlocalized, int magSize, String weaponIcon, int bulletId, String pack) {
+		super(weaponIcon + "magazine", gunName + " Magazine", unlocalized + ".magazine");
 		setMaxDamage(magSize);
 		setMaxStackSize(1);
-		this.bulletType = bulletType;
-		this.gunName = weaponName;
+		this.bulletId = bulletId;
+		this.gunName = gunName;
 		this.pack = pack;
 	}
 	
