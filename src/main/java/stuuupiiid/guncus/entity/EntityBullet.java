@@ -507,13 +507,35 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 	}
 	
 	@Override
-	public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
-		// FIXME: not implemented
+	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+		// (ancestor fully replaced, not calling it)
+		nbttagcompound.setByte("state", (byte)state);
+		nbttagcompound.setInteger("stateTicks", stateTicks);
+		nbttagcompound.setBoolean("isFirstHit", isFirstHit);
+		nbttagcompound.setInteger("blockX", blockX);
+		nbttagcompound.setInteger("blockY", blockY);
+		nbttagcompound.setInteger("blockZ", blockZ);
+		nbttagcompound.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
+		nbttagcompound.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
+		nbttagcompound.setFloat("damage", damage);
+		nbttagcompound.setBoolean("lowerGravity", lowerGravity);
+		nbttagcompound.setString("pack", pack);
+		nbttagcompound.setInteger("bulletId", bulletId);
 	}
 	
 	@Override
-	public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
-		// FIXME: not implemented
-		setDead();
+	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+		state = nbttagcompound.getByte("state");
+		stateTicks = nbttagcompound.getInteger("stateTicks");
+		isFirstHit = nbttagcompound.getBoolean("isFirstHit");
+		blockX = nbttagcompound.getInteger("blockX");
+		blockY = nbttagcompound.getInteger("blockY");
+		blockZ = nbttagcompound.getInteger("blockZ");
+		blockCollided = Block.getBlockById(nbttagcompound.getInteger("blockCollided"));
+		blockCollidedMetadata = nbttagcompound.getByte("blockCollidedMetadata");
+		damage = nbttagcompound.getFloat("damage");
+		lowerGravity = nbttagcompound.getBoolean("lowerGravity");
+		pack = nbttagcompound.getString("pack");
+		bulletId = nbttagcompound.getInteger("bulletId");
 	}
 }
