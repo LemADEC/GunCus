@@ -207,7 +207,7 @@ public class ItemGun extends Item {
 		}
 		
 		if ((GunCus.shootTime <= 0) && (Mouse.isButtonDown(0)) && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-				&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320)) || (entityPlayer.capabilities.isCreativeMode)) && (this.tubing)) {
+				&& (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) && tubing) {
 			GunCus.shootTime += 95;
 			PacketHandler.sendToServer_playerAction_tube();
 			recoilTube(entityPlayer);
@@ -322,7 +322,10 @@ public class ItemGun extends Item {
 			}
 			
 			GunCus.switchTime = 20;
-		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(46)) && (GunCus.switchTime <= 0) && (hasM320(itemStack.getItemDamage()))) {
+		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
+			     && Keyboard.isKeyDown(Keyboard.KEY_C)
+			     && (GunCus.switchTime <= 0)
+			     && hasM320(itemStack.getItemDamage()) ) {
 			GunCus.switchTime = 20;
 			if (this.tubing) {
 				entityPlayer.addChatComponentMessage(new ChatComponentText("You are no longer using the M320!"));
@@ -331,7 +334,11 @@ public class ItemGun extends Item {
 				entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using the M320!"));
 				this.tubing = true;
 			}
-		} else if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(34)) && (GunCus.switchTime <= 0) && (this.bullets != null) && (this.bullets.length > 1)) {
+		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
+			     && Keyboard.isKeyDown(Keyboard.KEY_G)
+			     && (GunCus.switchTime <= 0)
+			     && (this.bullets != null)
+			     && (this.bullets.length > 1) ) {
 			GunCus.switchTime = 20;
 			actualBullet += 1;
 			if (actualBullet >= bullets.length) {
