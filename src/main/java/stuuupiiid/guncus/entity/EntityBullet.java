@@ -179,7 +179,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
 					setDead();
 				}
-			} else if (state == STATE_BOUNCING) {// BOUNCING or default
+			} else if (state == STATE_BOUNCING) {// BOUNCING
 				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
 					setDead();
 				}
@@ -277,14 +277,14 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							// setDead();
 						}
 						
-						// Fix the bullet 5% in the entity
+						// Fix the bullet 25% in the entity
 						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
 						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
 						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
 						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-						posX -= motionX / speed * 0.05D;
-						posY -= motionY / speed * 0.05D;
-						posZ -= motionZ / speed * 0.05D;
+						posX -= motionX / speed * 0.25D;
+						posY -= motionY / speed * 0.25D;
+						posZ -= motionZ / speed * 0.25D;
 						state = STATE_ENTITYHIT;
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
@@ -306,7 +306,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 					blockZ = mopCollision.blockZ;
 					blockCollided = worldObj.getBlock(blockX, blockY, blockZ);
 					blockCollidedMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
-					// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
+					// break weak blocks and pass through them 
 					if ( GunCus.enableBlockDamage && (
 					     (blockCollided == Blocks.glass) || (blockCollided == Blocks.stained_glass)
 					  || (blockCollided == Blocks.glass_pane) || (blockCollided == Blocks.stained_glass_pane) 
