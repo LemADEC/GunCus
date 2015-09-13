@@ -33,7 +33,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 	private static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
 	private static double dRadToDegFactor = 180.0D / Math.PI;
 	
-	private final static float slowMotionFactor = 100F;
+	private final static float slowMotionFactor = 1F;
 	private final static int MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
 	private final static int MAX_BOUNCING_DURATION_TICKS = Math.round(600 * slowMotionFactor);	// 30 s bouncing around
 	private final static int MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
@@ -114,19 +114,19 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 			double dZ = mc.renderViewEntity.posZ - posZ;
 			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 			if (dX * dX + dY * dY + dZ * dZ < range * range) {
-				double tailX = posX + 2 * width * - MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailZ = posZ + 2 * width *   MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailY = posY + 2 * width * - MathHelper.sin(rotationPitch * fDegToRadFactor);
+				double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
 				
 				for (int smokeIndex = 0; smokeIndex < (4 - mc.gameSettings.particleSetting); smokeIndex++) {
-					double factor = 0.0000020 * smokeIndex;
+					double factor = 0.20 * smokeIndex;
 					// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
 					mc.effectRenderer.addEffect(new EntitySmokeFX(
 							worldObj,
 							tailX - motionX * factor,
 							tailY - motionY * factor,
 							tailZ - motionZ * factor,
-							motionX, motionY /*+ 0.3/**/, motionZ,
+							motionX, motionY + 0.3, motionZ,
 							1.5F));
 				}
 			}
@@ -168,8 +168,8 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 			stateTicks++;
 			if (state == STATE_FLYING) {
 				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
-					// explode();
-					// setDead();
+					explode();
+					setDead();
 				}
 			} else if (state == STATE_BOUNCING) {
 				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
@@ -350,7 +350,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 	
 	public void explode() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			shootingEntity.worldObj.createExplosion(shootingEntity, posX, posY, posZ, isRocket ? 7.0F : 3.5F, GunCus.enableBlockDamage);
+			worldObj.createExplosion(shootingEntity, posX, posY, posZ, isRocket ? 7.0F : 3.5F, GunCus.enableBlockDamage);
 		}
 	}
 	
