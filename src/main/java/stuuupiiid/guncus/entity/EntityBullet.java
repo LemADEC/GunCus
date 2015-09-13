@@ -155,7 +155,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 				stateTicks++;
 				
 				if (stateTicks >= MAX_BLOCKHIT_DURATION_TICKS) {
-					GunCus.logger.info("BlockHit elapsed");
 					setDead();
 				}
 			} else {
@@ -171,7 +170,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			stateTicks++;
 			
 			if (stateTicks >= MAX_ENTITYHIT_DURATION_TICKS) {
-				GunCus.logger.info("EntityHit elapsed");
 				setDead();
 			}
 			
@@ -179,12 +177,10 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			stateTicks++;
 			if (state == STATE_FLYING) {
 				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
-					GunCus.logger.info("Flight elapsed");
 					setDead();
 				}
 			} else if (state == STATE_BOUNCING) {// BOUNCING or default
 				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
-					GunCus.logger.info("Bouncing elapsed");
 					setDead();
 				}
 			} else {
