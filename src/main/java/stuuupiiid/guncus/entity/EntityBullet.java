@@ -1,6 +1,9 @@
 package stuuupiiid.guncus.entity;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 
@@ -30,7 +33,7 @@ import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class EntityBullet extends EntityArrow implements IProjectile, ISynchronisingEntity {
+public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	private static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
 	private static double dRadToDegFactor = 180.0D / Math.PI;
 	
@@ -58,8 +61,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 	private boolean lowerGravity = false;
 	private String pack = null;
 	private int bulletId = -1;
-	
-	private boolean needResync = true;
 	
 	public EntityBullet(World world) {
 		super(world);
@@ -145,11 +146,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 			return;
 		}
 		
-		if (needResync) {
-			PacketHandler.sendToClient_syncEntity(this);
-			needResync = false;
-		}
-		
 		if (state == STATE_BLOCKHIT) {
 			// get collided block
 			Block block = worldObj.getBlock(blockX, blockY, blockZ);
@@ -168,7 +164,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 				motionZ *= rand.nextFloat() * 0.2F;
 				state = STATE_BOUNCING;
 				stateTicks = 0;
-				needResync = true;
+				PacketHandler.sendToClient_syncEntity(this);
 			}
 			
 		} else if (state == STATE_ENTITYHIT) {
@@ -295,7 +291,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 						posZ -= motionZ / speed * 0.05D;
 						state = STATE_ENTITYHIT;
 						stateTicks = 0;
-						needResync = true;
+						PacketHandler.sendToClient_syncEntity(this);
 					} else {
 						// (not a valid target) Bouncing
 						motionX *= -0.1D;
@@ -305,7 +301,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 						prevRotationYaw += 180.0F;
 						state = STATE_BOUNCING;
 						stateTicks = 0;
-						needResync = true;
+						PacketHandler.sendToClient_syncEntity(this);
 					}
 					
 				} else if (mopCollision.entityHit == null) {
@@ -334,7 +330,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 								prevRotationYaw += 180.0F;
 								state = STATE_BOUNCING;
 								stateTicks = 0;
-								needResync = true;
+								PacketHandler.sendToClient_syncEntity(this);
 							} else {
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
 								onBlockHit(mopCollision.hitVec);
@@ -351,7 +347,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 						posZ -= motionZ / speed * 0.05D;
 						state = STATE_BLOCKHIT;
 						stateTicks = 0;
-						needResync = true;
+						PacketHandler.sendToClient_syncEntity(this);
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
 						onBlockHit(mopCollision.hitVec);
 					}
@@ -551,16 +547,30 @@ public class EntityBullet extends EntityArrow implements IProjectile, ISynchroni
 		pack = nbttagcompound.getString("pack");
 		bulletId = nbttagcompound.getInteger("bulletId");
 	}
-
+	
 	@Override
-	public NBTTagCompound getSyncDataCompound() {
+	public NBTTagCompound writeSyncDataCompound() {
 		NBTTagCompound syncDataCompound = new NBTTagCompound();
-		writeEntityToNBT(syncDataCompound);
+		syncDataCompound.setByte("state", (byte)state);
+		syncDataCompound.setInteger("stateTicks", stateTicks);
 		return syncDataCompound;
 	}
-
+	
 	@Override
-	public void setSyncDataCompound(NBTTagCompound syncDataCompound) {
-		readEntityFromNBT(syncDataCompound);
+	public void readSyncDataCompound(NBTTagCompound syncDataCompound) {
+		state = syncDataCompound.getByte("state");
+		stateTicks = syncDataCompound.getInteger("stateTicks");
+	}
+	
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		NBTTagCompound nbttagcompound = new NBTTagCompound();
+		writeEntityToNBT(nbttagcompound);
+		ByteBufUtils.writeTag(buffer, nbttagcompound);
+	}
+	
+	@Override
+	public void readSpawnData(ByteBuf buffer) {
+		readEntityFromNBT(ByteBufUtils.readTag(buffer));
 	}
 }

@@ -22,7 +22,7 @@ public class MessageSyncEntity implements IMessage, IMessageHandler<MessageSyncE
 	
 	public MessageSyncEntity(final ISynchronisingEntity entity) {
 		this.entityId = entity.getEntityId();
-		this.entitySyncDataCompound = entity.getSyncDataCompound();
+		this.entitySyncDataCompound = entity.writeSyncDataCompound();
 	}
 	
 	@Override
@@ -40,7 +40,7 @@ public class MessageSyncEntity implements IMessage, IMessageHandler<MessageSyncE
 	@SideOnly(Side.CLIENT)
 	private void handle(EntityPlayer player) {
 		ISynchronisingEntity entity = (ISynchronisingEntity)player.worldObj.getEntityByID(entityId);
-		entity.setSyncDataCompound(entitySyncDataCompound);
+		entity.readSyncDataCompound(entitySyncDataCompound);
 	}
 	
 	@Override
