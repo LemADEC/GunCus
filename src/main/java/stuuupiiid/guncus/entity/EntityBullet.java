@@ -36,7 +36,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 	private final static float slowMotionFactor = 1F;
 	private final static int MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
 	private final static int MAX_BOUNCING_DURATION_TICKS = Math.round(600 * slowMotionFactor);	// 30 s bouncing around
-	private final static int MAX_ENTITYHIT_DURATION_TICKS = Math.round(20 * slowMotionFactor);	// 1 s on an entity
+	private final static int MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
 	private final static int MAX_BLOCKHIT_DURATION_TICKS = Math.round(400 * slowMotionFactor);	// 20 s on the ground
 	private final static int MAX_LIFE_DURATION_TICKS = Math.round(6000 * slowMotionFactor);	// 5 mn max total time
 	
@@ -200,8 +200,8 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 					continue;
 				}
 				
-				float f1 = 0.3F;
-				AxisAlignedBB axisalignedbb1 = entityInRange.boundingBox.expand(f1, f1, f1);
+				float tolerance = 0.1F;
+				AxisAlignedBB axisalignedbb1 = entityInRange.boundingBox.expand(tolerance, tolerance, tolerance);
 				MovingObjectPosition mopEntityInRange = axisalignedbb1.calculateIntercept(vecCurrent, vecNextTick);
 				
 				if (mopEntityInRange != null) {
@@ -209,6 +209,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 					
 					if ((distance2InRange < distance2Closest) || (distance2Closest == 0.0D)) {
 						mopCollision = mopEntityInRange;
+						mopCollision.entityHit = entityInRange;
 						distance2Closest = distance2InRange;
 					}
 				}
@@ -258,6 +259,17 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						if (!(mopCollision.entityHit instanceof EntityPlayer)) {
 							// setDead();
 						}
+						
+						// Fix the bullet 5% in the entity
+						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
+						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
+						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
+						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+						posX -= motionX / speed * 0.05D;
+						posY -= motionY / speed * 0.05D;
+						posZ -= motionZ / speed * 0.05D;
+						state = STATE_ENTITYHIT;
+						stateTicks = 0;
 					} else {
 						// (not a valid target) Bouncing
 						motionX *= -0.1D;
@@ -276,8 +288,11 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 					blockCollided = worldObj.getBlock(blockX, blockY, blockZ);
 					blockCollidedMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
 					// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
-					if ((blockCollided == Blocks.glass) && (blockCollided == Blocks.web) && (blockCollided == Blocks.glowstone) && (blockCollided == Blocks.glass_pane)) {
-						if (FMLCommonHandler.instance().getEffectiveSide().isServer() && GunCus.enableBlockDamage) {
+					if ( GunCus.enableBlockDamage && (
+					     (blockCollided == Blocks.glass) || (blockCollided == Blocks.stained_glass)
+					  || (blockCollided == Blocks.glass_pane) || (blockCollided == Blocks.stained_glass_pane) 
+					  || (blockCollided == Blocks.web) || (blockCollided == Blocks.glowstone)) ) {
+						if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 							boolean isCanceled = true;
 							if (shootingEntity instanceof EntityPlayerMP) {
 								BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(worldObj, GameType.SURVIVAL, (EntityPlayerMP)shootingEntity, blockX, blockY, blockZ);
@@ -294,7 +309,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 								stateTicks = 0;
 							} else {
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
-								onBlockHit();
+								onBlockHit(mopCollision.hitVec);
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
@@ -302,14 +317,14 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
 						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
 						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
-						float f2 = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-						posX -= motionX / f2 * 0.05D;
-						posY -= motionY / f2 * 0.05D;
-						posZ -= motionZ / f2 * 0.05D;
+						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
+						posX -= motionX / speed * 0.05D;
+						posY -= motionY / speed * 0.05D;
+						posZ -= motionZ / speed * 0.05D;
 						state = STATE_BLOCKHIT;
 						stateTicks = 0;
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
-						onBlockHit();
+						onBlockHit(mopCollision.hitVec);
 					}
 				}
 			}
@@ -359,8 +374,10 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 			motionX *= motionFactor;
 			motionY *= motionFactor;
 			motionZ *= motionFactor;
-			// apply gravity
-			motionY -= (lowerGravity ? 0.014D : 0.02D) * (bullet == null ? 1.0D : bullet.gravity) / slowMotionFactor;
+			// apply gravity when applicable
+			if (state == STATE_FLYING || state == STATE_BOUNCING) { 
+				motionY -= (lowerGravity ? 0.014D : 0.02D) * (bullet == null ? 1.0D : bullet.gravity) / slowMotionFactor;
+			}
 			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
 		}
@@ -444,7 +461,7 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		}
 	}
 	
-	public void onBlockHit() {
+	public void onBlockHit(Vec3 vecHit) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
@@ -454,11 +471,11 @@ public class EntityBullet extends EntityArrow implements IProjectile {
 		isFirstHit = false;
 		
 		if (bullet.effectModifiers.containsKey(4)) {
-			worldObj.createExplosion(shootingEntity, posX, posY, posZ, bullet.effectModifiers.get(4), GunCus.enableBlockDamage);
+			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, bullet.effectModifiers.get(4), GunCus.enableBlockDamage);
 		}
 		
 		if (bullet.effectModifiers.containsKey(5)) {
-			worldObj.createExplosion(shootingEntity, posX, posY, posZ, bullet.effectModifiers.get(5), false);
+			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, bullet.effectModifiers.get(5), false);
 		}
 		
 		if ((bullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
