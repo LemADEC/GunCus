@@ -57,8 +57,8 @@ public class ItemGun extends Item {
 	public float zoom = 1.0F;
 	public int[] bullets;
 	public int actualBullet;
-	public int[] attach;
-	public int[] barrel;
+	public int[] attachments;
+	public int[] barrels;
 	public int[] scopes;
 	public int factor;
 	public int subs;
@@ -90,11 +90,11 @@ public class ItemGun extends Item {
 		pack = parPack;
 		recoilModifier = 1.0D;
 		soundModify = 1.0D;
-		attach = parAttach;
-		barrel = parBarrel;
+		attachments = parAttach;
+		barrels = parBarrel;
 		scopes = parScopes;
 		
-		factor = ((attach.length + 1) * (scopes.length + 1));
+		factor = ((attachments.length + 1) * (scopes.length + 1));
 		
 		if (canHaveStraightPullBolt()) {
 			soundNormal = "guncus:shoot_sniper";
@@ -117,12 +117,12 @@ public class ItemGun extends Item {
 		
 		int i = scopes.length + 1;
 		
-		if (barrel.length > 0) {
-			i *= (barrel.length + 1);
+		if (barrels.length > 0) {
+			i *= (barrels.length + 1);
 		}
 		
-		if (attach.length > 0) {
-			i *= (attach.length + 1);
+		if (attachments.length > 0) {
+			i *= (attachments.length + 1);
 		}
 		
 		subs = i;
@@ -281,11 +281,17 @@ public class ItemGun extends Item {
 			}
 		}
 		
-		if (((Keyboard.isKeyDown(29)) || (Keyboard.isKeyDown(157))) && (Keyboard.isKeyDown(47)) && (GunCus.switchTime <= 0) && (!canHaveStraightPullBolt())) {
+		// Switching Fire mode
+		if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
+		  && Keyboard.isKeyDown(Keyboard.KEY_V)
+		  && (GunCus.switchTime <= 0)
+		  && (!canHaveStraightPullBolt()) ) {
 			switch (shootType) {
 			case 0:
 			default:
-				entityPlayer.addChatComponentMessage(new ChatComponentText("The Fire Mode Of This Gun Can Not Be Changed!"));
+				entityPlayer.addChatComponentMessage(new ChatComponentText("The Fire mode of this gun can't be changed!"));
+				shootType = 0;
+				actualType = 0;
 				break;
 			
 			case 1:
@@ -294,6 +300,7 @@ public class ItemGun extends Item {
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
 					actualType = 1;
 					break;
+					
 				case 1:
 				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
@@ -308,10 +315,12 @@ public class ItemGun extends Item {
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
 					actualType = 1;
 					break;
+					
 				case 1:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Auto Mode!"));
 					actualType = 2;
 					break;
+					
 				case 2:
 				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
@@ -322,6 +331,8 @@ public class ItemGun extends Item {
 			}
 			
 			GunCus.switchTime = 20;
+			
+			// Switching with grenades
 		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
 			     && Keyboard.isKeyDown(Keyboard.KEY_C)
 			     && (GunCus.switchTime <= 0)
@@ -334,6 +345,8 @@ public class ItemGun extends Item {
 				entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using the M320!"));
 				this.tubing = true;
 			}
+			
+			// Switching bullets
 		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
 			     && Keyboard.isKeyDown(Keyboard.KEY_G)
 			     && (GunCus.switchTime <= 0)
@@ -373,16 +386,16 @@ public class ItemGun extends Item {
 	}
 	
 	@Override
-	public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+	public void getSubItems(Item item, CreativeTabs creativeTabs, List list) {
 		for (int j = 0; j < subs; j++) {
-			ItemStack itemStack = new ItemStack(par1, 1, j);
-			par3List.add(itemStack);
+			ItemStack itemStack = new ItemStack(item, 1, j);
+			list.add(itemStack);
 		}
 	}
 	
-	public boolean barrelFree(int metadata) {
+	public boolean hasNoBarrel(int metadata) {
 		for (int v1 = 0; v1 < GunCus.barrel.metadatas.length; v1++) {
-			if (testForBarrelId(v1 + 1, metadata)) {
+			if (hasBarrel(v1 + 1, metadata)) {
 				return false;
 			}
 		}
@@ -390,9 +403,9 @@ public class ItemGun extends Item {
 		return true;
 	}
 	
-	public boolean attachmentFree(int metadata) {
-		for (int v1 = 0; v1 < GunCus.attachment.metadatas.length; v1++) {
-			if (testForAttachId(v1 + 1, metadata)) {
+	public boolean hasNoAttachment(int metadata) {
+		for (int attachmentIndex = 0; attachmentIndex < GunCus.attachment.metadatas.length; attachmentIndex++) {
+			if (hasAttachment(attachmentIndex + 1, metadata)) {
 				return false;
 			}
 		}
@@ -400,9 +413,9 @@ public class ItemGun extends Item {
 		return true;
 	}
 	
-	public boolean testIfCanHaveScope(int scope) {
-		for (int v1 = 0; v1 < this.scopes.length; v1++) {
-			if (this.scopes[v1] == scope) {
+	public boolean canHaveScope(int scope) {
+		for (int scopeIndex = 0; scopeIndex < scopes.length; scopeIndex++) {
+			if (scopes[scopeIndex] == scope) {
 				return true;
 			}
 		}
@@ -410,11 +423,11 @@ public class ItemGun extends Item {
 		return false;
 	}
 	
-	public boolean testForBarrelId(int barrel1, int metadata) {
+	public boolean hasBarrel(int barrel, int metadata) {
 		boolean flag = false;
 		
-		for (int v1 = 0; v1 < this.barrel.length; v1++) {
-			if ((this.barrel[v1] == barrel1) && (metadata >= this.factor * (v1 + 1)) && (metadata < this.factor * (v1 + 2))) {
+		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
+			if ((barrels[barrelIndex] == barrel) && (metadata >= factor * (barrelIndex + 1)) && (metadata < factor * (barrelIndex + 2))) {
 				return true;
 			}
 		}
@@ -423,27 +436,28 @@ public class ItemGun extends Item {
 	}
 	
 	public boolean hasSilencer(int metadata) {
-		return testForBarrelId(1, metadata);
+		return hasBarrel(1, metadata);
 	}
 	
 	public boolean hasHeavyBarrel(int metadata) {
-		return testForBarrelId(2, metadata);
+		return hasBarrel(2, metadata);
 	}
 	
 	public boolean hasRifledBarrel(int metadata) {
-		return testForBarrelId(3, metadata);
+		return hasBarrel(3, metadata);
 	}
 	
 	public boolean hasPolygonalBarrel(int metadata) {
-		return testForBarrelId(4, metadata);
+		return hasBarrel(4, metadata);
 	}
 	
-	public boolean testForAttachId(int attachToTest, int metadata) {
-		for (int attachIndex = 0; attachIndex < this.attach.length; attachIndex++) {
-			if (this.attach[attachIndex] == attachToTest) {
-				for (int scopeIndex = (this.scopes.length + 1) * (attachIndex + 1); scopeIndex < (this.scopes.length + 1) * (attachIndex + 2); scopeIndex++) {
-					for (int barrelIndex = 0; barrelIndex <= this.barrel.length; barrelIndex++) {
-						if (metadata == scopeIndex + barrelIndex * this.factor) {
+	public boolean hasAttachment(int attachment, int metadata) {
+		for (int attachmentIndex = 0; attachmentIndex < attachments.length; attachmentIndex++) {
+			if (attachments[attachmentIndex] == attachment) {
+				// TODO: check the logic here
+				for (int scopeIndex = (scopes.length + 1) * (attachmentIndex + 1); scopeIndex < (scopes.length + 1) * (attachmentIndex + 2); scopeIndex++) {
+					for (int barrelIndex = 0; barrelIndex <= barrels.length; barrelIndex++) {
+						if (metadata == scopeIndex + barrelIndex * factor) {
 							return true;
 						}
 					}
@@ -454,9 +468,9 @@ public class ItemGun extends Item {
 		return false;
 	}
 	
-	public boolean testIfCanHaveE(int attach1) {
-		for (int v1 = 0; v1 < this.attach.length; v1++) {
-			if (this.attach[v1] == attach1) {
+	public boolean canHaveExtra(int attachment) {
+		for (int v1 = 0; v1 < attachments.length; v1++) {
+			if (attachments[v1] == attachment) {
 				return true;
 			}
 		}
@@ -464,74 +478,74 @@ public class ItemGun extends Item {
 	}
 	
 	public boolean hasStraightPullBolt(int metadata) {
-		return testForAttachId(1, metadata);
+		return hasAttachment(1, metadata);
 	}
 	
 	public boolean hasBipod(int metadata) {
-		return testForAttachId(2, metadata);
+		return hasAttachment(2, metadata);
 	}
 	
 	public boolean hasGrip(int metadata) {
-		return testForAttachId(3, metadata);
+		return hasAttachment(3, metadata);
 	}
 	
 	public boolean hasM320(int metadata) {
-		return testForAttachId(4, metadata);
+		return hasAttachment(4, metadata);
 	}
 	
 	public boolean hasStrongSpiralSpring(int metadata) {
-		return testForAttachId(5, metadata);
+		return hasAttachment(5, metadata);
 	}
 	
 	public boolean hasImprovedGrip(int metadata) {
-		return testForAttachId(6, metadata);
+		return hasAttachment(6, metadata);
 	}
 	
 	public boolean hasLaserPointer(int metadata) {
-		return testForAttachId(7, metadata);
+		return hasAttachment(7, metadata);
 	}
 	
 	public boolean canHaveStraightPullBolt() {
-		return testIfCanHaveE(1);
+		return canHaveExtra(1);
 	}
 	
 	public boolean canHaveBipod() {
-		return testIfCanHaveE(2);
+		return canHaveExtra(2);
 	}
 	
 	public boolean canHaveGrip() {
-		return testIfCanHaveE(3);
+		return canHaveExtra(3);
 	}
 	
 	public boolean canHaveM320() {
-		return testIfCanHaveE(4);
+		return canHaveExtra(4);
 	}
 	
 	public boolean canHaveStrongSpiralString() {
-		return testIfCanHaveE(5);
+		return canHaveExtra(5);
 	}
 	
 	public boolean canHaveImprovedGrip() {
-		return testIfCanHaveE(6);
+		return canHaveExtra(6);
 	}
 	
 	public boolean canHaveLaserPointer() {
-		return testIfCanHaveE(7);
+		return canHaveExtra(7);
 	}
 	
-	public int barrelAsMetadataFactor(int barrel1) {
-		for (int v1 = 0; v1 < this.barrel.length; v1++) {
-			if (this.barrel[v1] == barrel1) {
-				return v1 + 1;
+	public int barrelAsMetadataFactor(int barrel) {
+		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
+			if (barrels[barrelIndex] == barrel) {
+				return barrelIndex + 1;
 			}
 		}
 		return 0;
 	}
 	
-	public int attachAsMetadataFactor(int attach1) {
-		for (int v1 = 0; v1 < this.attach.length; v1++) {
-			if (this.attach[v1] == attach1) {
-				return v1 + 1;
+	public int attachAsMetadataFactor(int attachment) {
+		for (int attachmentIndex = 0; attachmentIndex < attachments.length; attachmentIndex++) {
+			if (attachments[attachmentIndex] == attachment) {
+				return attachmentIndex + 1;
 			}
 		}
 		return 0;
@@ -540,18 +554,20 @@ public class ItemGun extends Item {
 	public int getZoom(int metadata) {
 		int v1 = metadata;
 		
-		while (v1 >= this.scopes.length + 1) {
-			v1 -= this.scopes.length + 1;
+		while (v1 >= scopes.length + 1) {
+			v1 -= scopes.length + 1;
 		}
 		if (v1 == 0) {
 			return 0;
 		}
 		
-		return this.scopes[(v1 - 1)];
+		return scopes[(v1 - 1)];
 	}
 	
 	public boolean canUseBipod(EntityPlayer entityPlayer) {
-		if ((entityPlayer.isSneaking()) && (entityPlayer.motionX == 0.0D) && (entityPlayer.motionZ == 0.0D)) {
+		if ( entityPlayer.isSneaking()
+		  && entityPlayer.motionX == 0.0D
+		  && entityPlayer.motionZ == 0.0D) {
 			return true;
 		}
 		
@@ -568,18 +584,18 @@ public class ItemGun extends Item {
 			GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 		}
 		
-		iconsAttachment = new IIcon[attach.length];
-		for (int attachIndex = 0; attachIndex < attach.length; attachIndex++) {
-			iconToRegisterName = iconName + getAttachIcon("a", attach[attachIndex]);
+		iconsAttachment = new IIcon[attachments.length];
+		for (int attachIndex = 0; attachIndex < attachments.length; attachIndex++) {
+			iconToRegisterName = iconName + getAttachIcon("a", attachments[attachIndex]);
 			iconsAttachment[attachIndex] = par1IconRegister.registerIcon(iconToRegisterName);
 			if (iconsAttachment[attachIndex] == null) {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 			}
 		}
 		
-		iconsBarrel = new IIcon[barrel.length];
-		for (int barrelIndex = 0; barrelIndex < barrel.length; barrelIndex++) {
-			iconToRegisterName = iconName + getAttachIcon("b", barrel[barrelIndex]);
+		iconsBarrel = new IIcon[barrels.length];
+		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
+			iconToRegisterName = iconName + getAttachIcon("b", barrels[barrelIndex]);
 			iconsBarrel[barrelIndex] = par1IconRegister.registerIcon(iconToRegisterName);
 			if (iconsBarrel[barrelIndex] == null) {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
@@ -722,13 +738,13 @@ public class ItemGun extends Item {
 			String scope = null;
 			
 			for (int v1 = 1; v1 <= GunCus.barrel.metadatas.length; v1++) {
-				if (testForBarrelId(v1, metadata)) {
+				if (hasBarrel(v1, metadata)) {
 					front = GunCus.barrel.metadatas[(v1 - 1)].localized;
 				}
 			}
 			
 			for (int v1 = 1; v1 <= GunCus.attachment.metadatas.length; v1++) {
-				if (testForAttachId(v1, metadata)) {
+				if (hasAttachment(v1, metadata)) {
 					attachment = GunCus.attachment.metadatas[(v1 - 1)].localized;
 				}
 			}

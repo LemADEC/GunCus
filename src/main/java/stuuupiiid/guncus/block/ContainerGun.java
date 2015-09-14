@@ -84,7 +84,7 @@ public class ContainerGun extends Container {
 			int extra1 = 0;
 
 			for (int v1 = 1; v1 <= GunCus.attachment.metadatas.length; v1++) {
-				if (gun.testForAttachId(v1, metadata)) {
+				if (gun.hasAttachment(v1, metadata)) {
 					extra1 = v1;
 					break;
 				}
@@ -97,7 +97,7 @@ public class ContainerGun extends Container {
 			int bar1 = 0;
 
 			for (int v1 = 1; v1 <= GunCus.barrel.metadatas.length; v1++) {
-				if (gun.testForBarrelId(v1, metadata)) {
+				if (gun.hasBarrel(v1, metadata)) {
 					bar1 = v1;
 					break;
 				}
@@ -186,17 +186,17 @@ public class ContainerGun extends Container {
 
 			int metadata = mid.getItemDamage();
 
-			if ((scope > 0) && (gun.getZoom(metadata) <= 0) && (gun.testIfCanHaveScope(scope))) {
+			if ((scope > 0) && (gun.getZoom(metadata) <= 0) && (gun.canHaveScope(scope))) {
 				metadata += scope;
 				((Slot) this.inventorySlots.get(1)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
-			if ((extra > 0) && (gun.attachmentFree(metadata))) {
+			if ((extra > 0) && (gun.hasNoAttachment(metadata))) {
 				metadata += extra * (gun.scopes.length + 1);
 				((Slot) this.inventorySlots.get(0)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
-			if ((bar > 0) && (gun.barrelFree(metadata))) {
+			if ((bar > 0) && (gun.hasNoBarrel(metadata))) {
 				metadata += bar * gun.factor;
 				((Slot) this.inventorySlots.get(2)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));

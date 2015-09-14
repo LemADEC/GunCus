@@ -29,8 +29,8 @@ public class ItemRenderer implements IItemRenderer {
 		}
 		renderItem.renderIcon(0, 0, icon, 16, 16);
 		
-		for (int v1 = 0; v1 < gun.barrel.length; v1++) {
-			if ((gun.testForBarrelId(gun.barrel[v1], itemStack.getItemDamage())) && (gun.iconsBarrel[v1] != null)) {
+		for (int v1 = 0; v1 < gun.barrels.length; v1++) {
+			if ((gun.hasBarrel(gun.barrels[v1], itemStack.getItemDamage())) && (gun.iconsBarrel[v1] != null)) {
 				renderItem.renderIcon(0, 0, gun.iconsBarrel[v1], 16, 16);
 			}
 		}
@@ -39,8 +39,8 @@ public class ItemRenderer implements IItemRenderer {
 			renderItem.renderIcon(0, 0, gun.iconScope, 16, 16);
 		}
 		
-		for (int v1 = 0; v1 < gun.attach.length; v1++) {
-			if ((gun.testForAttachId(gun.attach[v1], itemStack.getItemDamage())) && (gun.iconsAttachment[v1] != null)) {
+		for (int v1 = 0; v1 < gun.attachments.length; v1++) {
+			if ((gun.hasAttachment(gun.attachments[v1], itemStack.getItemDamage())) && (gun.iconsAttachment[v1] != null)) {
 				renderItem.renderIcon(0, 0, gun.iconsAttachment[v1], 16, 16);
 			}
 		}
