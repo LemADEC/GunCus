@@ -379,16 +379,14 @@ public class ItemGun extends Item {
 	}
 	
 	private void recoilTube(EntityPlayer entityPlayer) {
-		float strength = 1.5F;
-		
-		entityPlayer.rotationPitch -= strength;
-		entityPlayer.rotationYaw -= (Item.itemRand.nextBoolean() ? strength / 2.0F : -strength / 2.0F);
+		entityPlayer.rotationPitch -= 1.25F + Item.itemRand.nextFloat() * 0.5F;
+		entityPlayer.rotationYaw += Item.itemRand.nextFloat() * 4.0F - 2.0F;
 	}
 	
 	@Override
 	public void getSubItems(Item item, CreativeTabs creativeTabs, List list) {
-		for (int j = 0; j < subs; j++) {
-			ItemStack itemStack = new ItemStack(item, 1, j);
+		for (int subsIndex = 0; subsIndex < subs; subsIndex++) {
+			ItemStack itemStack = new ItemStack(item, 1, subsIndex);
 			list.add(itemStack);
 		}
 	}
