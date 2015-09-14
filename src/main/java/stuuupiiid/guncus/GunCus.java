@@ -130,15 +130,21 @@ public class GunCus {
 		logger = event.getModLog();
 		instance = this;
 		
-		GunCusResourceLoader myResourceLoader = new GunCusResourceLoader();
-		Field field = null;
-		try {
-			field = Minecraft.class.getDeclaredField("defaultResourcePacks");
-			field.setAccessible(true);
-			((List) field.get(Minecraft.getMinecraft())).add(myResourceLoader);
-		} catch (Exception exception) {
-			logger.info("Failed to get the classloader; the textures wont work!");
-			exception.printStackTrace();
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			GunCusResourceLoader myResourceLoader = new GunCusResourceLoader();
+			Field field = null;
+			try {
+				try {
+					field = Minecraft.class.getDeclaredField("defaultResourcePacks");
+				} catch (Exception exception) {
+					field = Minecraft.class.getDeclaredField("field_110449_ao");
+				}
+				field.setAccessible(true);
+				((List) field.get(Minecraft.getMinecraft())).add(myResourceLoader);
+			} catch (Exception exception) {
+				logger.info("Failed to get the classloader; the textures wont work!");
+				exception.printStackTrace();
+			}
 		}
 		
 		config = new Configuration(event.getSuggestedConfigurationFile());
