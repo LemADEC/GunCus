@@ -60,7 +60,7 @@ public class ItemGun extends Item {
 	public int[] attachments;
 	public int[] barrels;
 	public int[] scopes;
-	public int factor;
+	public int barrelFactor;
 	public int subs;
 	public boolean tubing = false;
 	public String pack;
@@ -94,7 +94,7 @@ public class ItemGun extends Item {
 		barrels = parBarrel;
 		scopes = parScopes;
 		
-		factor = ((attachments.length + 1) * (scopes.length + 1));
+		barrelFactor = (attachments.length + 1) * (scopes.length + 1);
 		
 		if (canHaveStraightPullBolt()) {
 			soundNormal = "guncus:shoot_sniper";
@@ -425,7 +425,7 @@ public class ItemGun extends Item {
 		boolean flag = false;
 		
 		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
-			if ((barrels[barrelIndex] == barrel) && (metadata >= factor * (barrelIndex + 1)) && (metadata < factor * (barrelIndex + 2))) {
+			if ((barrels[barrelIndex] == barrel) && (metadata >= barrelFactor * (barrelIndex + 1)) && (metadata < barrelFactor * (barrelIndex + 2))) {
 				return true;
 			}
 		}
@@ -455,7 +455,7 @@ public class ItemGun extends Item {
 				// TODO: check the logic here
 				for (int scopeIndex = (scopes.length + 1) * (attachmentIndex + 1); scopeIndex < (scopes.length + 1) * (attachmentIndex + 2); scopeIndex++) {
 					for (int barrelIndex = 0; barrelIndex <= barrels.length; barrelIndex++) {
-						if (metadata == scopeIndex + barrelIndex * factor) {
+						if (metadata == scopeIndex + barrelIndex * barrelFactor) {
 							return true;
 						}
 					}

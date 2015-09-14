@@ -116,7 +116,7 @@ public class ContainerGun extends Container {
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
 			if (left == null) {
-				metadata -= bar2 * gun.factor;
+				metadata -= bar2 * gun.barrelFactor;
 				((Slot) this.inventorySlots.get(2)).putStack(attatch);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
@@ -197,7 +197,7 @@ public class ContainerGun extends Container {
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
 			if ((bar > 0) && (gun.hasNoBarrel(metadata))) {
-				metadata += bar * gun.factor;
+				metadata += bar * gun.barrelFactor;
 				((Slot) this.inventorySlots.get(2)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
