@@ -362,25 +362,25 @@ public class ItemGun extends Item {
 		}
 	}
 	
-	private void recoil(EntityPlayer entityPlayer, int metadata, boolean scoping, double damage1) {
-		float strength = (float) (damage1 / 6.0F * this.recoilModifier);
+	private void recoil(EntityPlayer entityPlayer, int metadata, boolean scoping, double parDamage) {
+		float strength = (float) (parDamage / 12.0F * recoilModifier);
 		
 		if (hasBipod(metadata) && canUseBipod(entityPlayer)) {
 			strength /= 3.0F;
 		} else if (hasGrip(metadata)) {
 			strength *= 0.8F;
-		} else if ((!hasImprovedGrip(metadata)) && (canHaveImprovedGrip())) {
+		} else if ((!hasImprovedGrip(metadata)) && canHaveImprovedGrip()) {
 			strength *= 1.5F;
 		}
 		
 		// scoping has no effect
-		entityPlayer.rotationPitch = entityPlayer.rotationPitch - strength * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
-		entityPlayer.rotationYaw = entityPlayer.rotationYaw - strength * (entityPlayer.worldObj.rand.nextBoolean() ? -0.5F : +0.5F) * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
+		entityPlayer.rotationPitch -= strength * (0.8F + 0.4F * itemRand.nextFloat());
+		entityPlayer.rotationYaw -= strength * (itemRand.nextBoolean() ? -1.0F : +1.0F) * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
 	}
 	
 	private void recoilTube(EntityPlayer entityPlayer) {
-		entityPlayer.rotationPitch -= 1.25F + Item.itemRand.nextFloat() * 0.5F;
-		entityPlayer.rotationYaw += Item.itemRand.nextFloat() * 4.0F - 2.0F;
+		entityPlayer.rotationPitch -= 1.25F + itemRand.nextFloat() * 0.5F;
+		entityPlayer.rotationYaw += itemRand.nextFloat() * 4.0F - 2.0F;
 	}
 	
 	@Override
