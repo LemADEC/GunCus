@@ -3,6 +3,8 @@ package stuuupiiid.guncus.item;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import stuuupiiid.guncus.GunCus;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -18,12 +20,13 @@ public class ItemBullet extends GunCusItem {
 	public int split = 1;
 	public HashMap<Integer, Float> effectModifiers = new HashMap();
 	public HashMap<Integer, Integer> effectAmplifiers = new HashMap();
-	public double gravity = 1.0D;
+	public double gravityModifier = 1.0D;
 	
 	public static HashMap<String, List<ItemBullet>> bulletsList = new HashMap();
 	
-	public ItemBullet(String pack, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
-		super(iconName, pack + ".bullet" + bulletId);
+	public ItemBullet(String pack, String name, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
+		super(iconName, pack + ".bullet." + name);
+		setCreativeTab(GunCus.creativeTabBullets);
 		
 		if (!bulletsList.containsKey(pack)) {
 			bulletsList.put(pack, new ArrayList());
@@ -44,8 +47,8 @@ public class ItemBullet extends GunCusItem {
 		bulletsList.get(pack).set(bulletId, this);
 	}
 	
-	public ItemBullet setGravityModifier(double modify) {
-		this.gravity = modify;
+	public ItemBullet setGravityModifier(double gravityModifier) {
+		this.gravityModifier = gravityModifier;
 		return this;
 	}
 	

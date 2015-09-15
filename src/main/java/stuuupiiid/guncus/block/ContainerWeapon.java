@@ -19,23 +19,23 @@ public class ContainerWeapon extends Container {
 	public int posZ;
 	public ItemGun actualGunItem;
 	public int actualGunIndex;
-
+	
 	public ContainerWeapon(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
 		actualGunIndex = 0;
 		actualGunItem = null;
 		if (GunCus.instance.guns.size() > 0) {
 			actualGunItem = GunCus.instance.guns.get(0);
 		}
-
+		
 		worldObj = par2World;
 		posX = par3;
 		posY = par4;
 		posZ = par5;
-
+		
 		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
 		addSlotToContainer(new Slot(craftMatrix, 1, 80, 35));
 		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
-
+		
 		for (int var6 = 0; var6 < 3; var6++) {
 			for (int var7 = 0; var7 < 9; var7++) {
 				addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
@@ -46,7 +46,7 @@ public class ContainerWeapon extends Container {
 		}
 		onCraftMatrixChanged(this.craftMatrix);
 	}
-
+	
 	@Override
 	public void onContainerClosed(EntityPlayer par1EntityPlayer) {
 		super.onContainerClosed(par1EntityPlayer);
@@ -59,18 +59,18 @@ public class ContainerWeapon extends Container {
 			}
 		}
 	}
-
+	
 	public String[] info() {
 		if (GunCus.instance.guns.size() > 0) {
 			String rtn = "Oops! Something went wrong!";
 			String rtn2 = null;
-
+			
 			if (actualGunItem != null) {
-				int iron = actualGunItem.ingots;
-				int redst = actualGunItem.field_redstone;
-				rtn = "Gun = \"" + actualGunItem.name + "\", Pack = \"" + actualGunItem.pack + "\"";
-				rtn2 = "-> " + (iron > 0 ? iron + " iron ingot" + (iron > 1 ? "s, " : ", ") : "")
-						+ (redst > 0 ? redst + " redstone" : "");
+				int ironIngots = actualGunItem.gunIronIngots;
+				int redstone = actualGunItem.gunRedstone;
+				rtn = "Gun '" + actualGunItem.getItemStackDisplayName(null) + "', Pack '" + actualGunItem.pack + "'";
+				rtn2 = "-> " + (ironIngots > 0 ? ironIngots + " iron ingot" + (ironIngots > 1 ? "s, " : ", ") : "")
+						+ (redstone > 0 ? redstone + " redstone" : "");
 			}
 			return new String[] { rtn, rtn2 };
 		}
@@ -83,8 +83,8 @@ public class ContainerWeapon extends Container {
 			ItemStack re = ((Slot) this.inventorySlots.get(1)).getStack();
 
 			if (actualGunItem != null) {
-				int reqIr = actualGunItem.ingots;
-				int reqRe = actualGunItem.field_redstone;
+				int reqIr = actualGunItem.gunIronIngots;
+				int reqRe = actualGunItem.gunRedstone;
 
 				if (((ir != null) && (ir.stackSize >= reqIr) && (ir.getItem() == Items.iron_ingot))
 						|| ((reqIr <= 0) && (((re != null) && (re.stackSize >= reqRe) && (re.getItem() == Items.redstone)) || (reqRe <= 0)))) {

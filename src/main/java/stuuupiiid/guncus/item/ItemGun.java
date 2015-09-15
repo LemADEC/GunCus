@@ -3,7 +3,6 @@ package stuuupiiid.guncus.item;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -40,19 +39,17 @@ public class ItemGun extends Item {
 	protected int burstCounter = 0;
 	protected int reloadBurst = 0;
 	protected boolean shot = false;
-	public String iconName;
-	public String name;
+	public String iconBasePath;
 	public IIcon icon;
 	public IIcon[] iconsAttachment;
 	public IIcon[] iconsBarrel;
 	public IIcon iconScope;
 	public ItemMag mag = null;
-	public int ingotsMag;
-	public int ingots;
-	public int field_redstone;
+	public int magIronIngots;
+	public int gunIronIngots;
+	public int gunRedstone;
 	public double recoilModifier;
 	public double soundModifier;
-	public boolean isOfficial;
 	public boolean usingDefault = false;
 	public float zoom = 1.0F;
 	public int[] bullets;
@@ -68,13 +65,15 @@ public class ItemGun extends Item {
 	public String soundSilenced;
 	public int damage;
 	
-	public ItemGun(int parDamage, int parShootType, int parDelay, String parName, String parIconName, int magSize, int intMagBulletId, int parIngotsMag, int parIngots, int parRedstone, String parPack,
-			boolean parIsOfficial, int[] parAttach, int[] parBarrel, int[] parScopes, boolean noMag, int[] parBullets) {
+	public ItemGun(String parPack, boolean parIsOfficial, String parName, String parIconBasePath,
+			int parDamage, int parShootType, int parDelay,
+			int magSize, int intMagBulletId, int parMagIronIngots, int parGunIronIngots, int parGunRedstone,
+			int[] parAttach, int[] parBarrel, int[] parScopes,
+			boolean noMag, int[] parBullets) {
 		super();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			MinecraftForgeClient.registerItemRenderer(this, new ItemRenderer());
 		}
-		isOfficial = parIsOfficial;
 		damage = parDamage;
 		setHasSubtypes(true);
 		maxStackSize = 1;
@@ -83,10 +82,10 @@ public class ItemGun extends Item {
 		actualType = parShootType;
 		delay = parDelay;
 		setMaxDamage(0);
-		name = parName;
-		iconName = parIconName;
-		ingots = parIngots;
-		field_redstone = parRedstone;
+		setUnlocalizedName((parPack + "." + parName).replace(" ", "_"));
+		iconBasePath = parIconBasePath;
+		gunIronIngots = parGunIronIngots;
+		gunRedstone = parGunRedstone;
 		pack = parPack;
 		recoilModifier = 1.0D;
 		soundModifier = 1.0D;
@@ -111,18 +110,13 @@ public class ItemGun extends Item {
 			bullets = parBullets;
 			mag = null;
 		} else {
-			mag = new ItemMag(parPack, name, parIconName, magSize, intMagBulletId);
-			ingotsMag = parIngotsMag;
+			mag = new ItemMag(parPack, parName, parIconBasePath, magSize, intMagBulletId);
+			magIronIngots = parMagIronIngots;
 		}
 		
 		subs = (scopes.length + 1) * (barrels.length + 1) * (attachments.length + 1);
 		
-		GameRegistry.registerItem(this, name);
-		
-		// Force all names
-		for (int metadataIndex = 0; metadataIndex < subs; metadataIndex++) {
-			LanguageRegistry.addName(new ItemStack(this, 1, metadataIndex), name);
-		}
+		GameRegistry.registerItem(this, getUnlocalizedName());
 	}
 	
 	public ItemGun setZoom(float zoom) {
@@ -536,16 +530,19 @@ public class ItemGun extends Item {
 		return 0;
 	}
 	
-	public int getZoom(int metadata) {
+	// get the glocal scope index
+	public int getScopeIndex(int metadata) {
 		int scopeIndex = metadata;
 		
+		// find scope in the gun's accepted list
 		while (scopeIndex >= scopes.length + 1) {
 			scopeIndex -= scopes.length + 1;
 		}
 		if (scopeIndex == 0) {
 			return 0;
 		}
-		GunCus.logger.info("Scope for " + metadata + " is " + scopeIndex + " = " + scopes[scopeIndex - 1]);
+		
+		// return the global index of that scope
 		return scopes[scopeIndex - 1];
 	}
 	
@@ -563,7 +560,7 @@ public class ItemGun extends Item {
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister par1IconRegister) {
 		GunCus.logger.error("Registering icons for " + this);
-		String iconToRegisterName = iconName + "gun";
+		String iconToRegisterName = iconBasePath + "gun";
 		icon = par1IconRegister.registerIcon(iconToRegisterName);
 		if (icon == null) {
 			GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
@@ -571,7 +568,7 @@ public class ItemGun extends Item {
 		
 		iconsAttachment = new IIcon[attachments.length];
 		for (int attachIndex = 0; attachIndex < attachments.length; attachIndex++) {
-			iconToRegisterName = iconName + getAttachIcon("a", attachments[attachIndex]);
+			iconToRegisterName = iconBasePath + getAttachIcon("a", attachments[attachIndex]);
 			iconsAttachment[attachIndex] = par1IconRegister.registerIcon(iconToRegisterName);
 			if (iconsAttachment[attachIndex] == null) {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
@@ -580,7 +577,7 @@ public class ItemGun extends Item {
 		
 		iconsBarrel = new IIcon[barrels.length];
 		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
-			iconToRegisterName = iconName + getAttachIcon("b", barrels[barrelIndex]);
+			iconToRegisterName = iconBasePath + getAttachIcon("b", barrels[barrelIndex]);
 			iconsBarrel[barrelIndex] = par1IconRegister.registerIcon(iconToRegisterName);
 			if (iconsBarrel[barrelIndex] == null) {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
@@ -588,7 +585,7 @@ public class ItemGun extends Item {
 		}
 		
 		if (scopes.length > 0) {
-			iconToRegisterName = iconName + "scp";
+			iconToRegisterName = iconBasePath + "scp";
 			iconScope = par1IconRegister.registerIcon(iconToRegisterName);
 			if (iconScope == null) {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
@@ -656,49 +653,6 @@ public class ItemGun extends Item {
 		return icon;
 	}
 	
-	public String getName(int metadata) {
-		String barrel = "";
-		String attachment = "";
-		String scope = "";
-		
-		if (hasSilencer(metadata)) {
-			barrel = "-sln";
-		} else if (hasHeavyBarrel(metadata)) {
-			barrel = "-hbl";
-		} else if (hasRifledBarrel(metadata)) {
-			barrel = "-rbl";
-		} else if (hasPolygonalBarrel(metadata)) {
-			barrel = "-pbl";
-		}
-		
-		if (hasStraightPullBolt(metadata)) {
-			attachment = "-spb";
-		} else if (hasBipod(metadata)) {
-			attachment = "-bpd";
-		} else if (hasGrip(metadata)) {
-			attachment = "-grp";
-		} else if (hasM320(metadata)) {
-			attachment = "-320";
-		} else if (hasStrongSpiralSpring(metadata)) {
-			attachment = "-sss";
-		} else if (hasImprovedGrip(metadata)) {
-			attachment = "-img";
-		} else if (hasLaserPointer(metadata)) {
-			attachment = "-ptr";
-		}
-		
-		if (getZoom(metadata) > 0) {
-			scope = "-scp";
-		}
-		
-		return pack + "." + name + barrel + attachment + scope;
-	}
-	
-	@Override
-	public String getUnlocalizedName(ItemStack itemStack) {
-		return getName(itemStack.getItemDamage()).toLowerCase().replace(" ", "_");
-	}
-	
 	public float getZoomFromScope(int scope) {
 		float newZoom = 1.0F;
 		if (scope > 0) {
@@ -730,8 +684,8 @@ public class ItemGun extends Item {
 				}
 			}
 			
-			if (getZoom(metadata) > 0) {
-				scope = GunCus.scope.metadatas[(getZoom(metadata) - 1)].localized;
+			if (getScopeIndex(metadata) > 0) {
+				scope = GunCus.scope.metadatas[(getScopeIndex(metadata) - 1)].localized;
 			}
 			
 			if (front != null) {

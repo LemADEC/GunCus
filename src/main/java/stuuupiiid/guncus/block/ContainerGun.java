@@ -73,8 +73,8 @@ public class ContainerGun extends Container {
 
 			int scope1 = 0;
 
-			if (gun.getZoom(metadata) > 0) {
-				scope1 = gun.getZoom(metadata);
+			if (gun.getScopeIndex(metadata) > 0) {
+				scope1 = gun.getScopeIndex(metadata);
 			}
 
 			if (scope1 > 0) {
@@ -186,7 +186,7 @@ public class ContainerGun extends Container {
 
 			int metadata = mid.getItemDamage();
 
-			if ((scope > 0) && (gun.getZoom(metadata) <= 0) && (gun.canHaveScope(scope))) {
+			if ((scope > 0) && (gun.getScopeIndex(metadata) <= 0) && (gun.canHaveScope(scope))) {
 				metadata += scope;
 				((Slot) this.inventorySlots.get(1)).decrStackSize(1);
 				((Slot) this.inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));

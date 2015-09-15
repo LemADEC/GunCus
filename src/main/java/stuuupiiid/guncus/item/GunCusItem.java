@@ -13,15 +13,15 @@ public class GunCusItem extends Item {
 	public GunCusItem(String iconName, String unlocalizedName) {
 		super();
 		setMaxStackSize(1);
-		setCreativeTab(GunCus.creativeTabGunCus);
+		setCreativeTab(GunCus.creativeTabModifications);
 		iconString = iconName;
-		setUnlocalizedName(unlocalizedName);
+		setUnlocalizedName(unlocalizedName.replace(" ", "_"));
 		GameRegistry.registerItem(this, unlocalizedName);
 	}
 	
 	public GunCusItem() {
 		super();
-		setCreativeTab(GunCus.creativeTabGunCus);
+		setCreativeTab(GunCus.creativeTabModifications);
 	}
 	
 	@Override

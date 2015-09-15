@@ -47,7 +47,7 @@ public class ClientProxy extends CommonProxy {
 			// draw sight
 			if (hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null)) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-				int scopeId = gun.getZoom(entityPlayer.inventory.getCurrentItem().getItemDamage());
+				int scopeId = gun.getScopeIndex(entityPlayer.inventory.getCurrentItem().getItemDamage());
 				
 				String path;
 				float newZoom = gun.zoom + 0.1F;
@@ -58,7 +58,7 @@ public class ClientProxy extends CommonProxy {
 				} else if (gun.usingDefault) {
 					path = "guncus:textures/sights/default.png";
 				} else {
-					path = gun.iconName.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
+					path = gun.iconBasePath.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
 				}
 				
 				if (GunCus.zoomLevel < newZoom) {

@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 
 public class BlockMine extends GunCusBlock {
 	public BlockMine() {
-		super(Material.iron, "gcmine");
+		super(Material.iron, "mine");
 		setHardness(1.0F);
 		setResistance(1.0F);
 	}

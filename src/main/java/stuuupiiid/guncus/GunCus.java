@@ -54,7 +54,7 @@ import stuuupiiid.guncus.network.PacketHandler;
  */
 @Mod(modid = GunCus.MODID, name = "Gun Customization", version = GunCus.VERSION, dependencies = "")
 public class GunCus {
-	public static final String MODID = "GunCus";
+	public static final String MODID = "guncus";
 	public static final String VERSION = "@version@";
 	
 	@SidedProxy(clientSide = "stuuupiiid.guncus.ClientProxy", serverSide = "stuuupiiid.guncus.CommonProxy")
@@ -80,7 +80,7 @@ public class GunCus {
 	public static String cameraZoom = "Y";
 	public static Item actualItem = null;
 	public static int actualIndex = 0;
-
+	
 	public LinkedList<ItemGun> guns = new LinkedList<ItemGun>();
 	
 	public static int check = 300;
@@ -89,14 +89,15 @@ public class GunCus {
 	private List<String> loadedBullets = new ArrayList();
 	public static File path;
 	
-	@Mod.Instance("GunCus")
+	@Mod.Instance(GunCus.MODID)
 	public static GunCus instance;
 	
 	public GuiHandler guiHandler = new GuiHandler();
 	private boolean enableExplosives;
 	private boolean enableOfficialGuns;
 	public static Item quickKnife;
-	public static CreativeTabs creativeTabGunCus;
+	public static CreativeTabs creativeTabModifications;
+	public static CreativeTabs creativeTabBullets;
 	public static Block blockWeapon;
 	public static Block blockMag;
 	public static Block blockBullet;
@@ -148,12 +149,14 @@ public class GunCus {
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		config.load();
 		
-		creativeTabGunCus = new GunCusCreativeTab("Gun Customization Modification", null);
+		creativeTabModifications = new GunCusCreativeTab("GunCus.modifications", null);
+		creativeTabBullets = new GunCusCreativeTab("GunCus.bullets", null);
 		quickKnife = new ItemKnife();
 		
 		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true).getBoolean(true);
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
 		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true).getBoolean(true);
+		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false).getBoolean(false);
 		
 		config.save();
 		
@@ -635,7 +638,7 @@ public class GunCus {
 			bulletIdProp.comment = "Bullet ID of the bullet (guns refer to bullet by this ID)";
 			
 			Property ironProp = configBullet.get("general", "Iron", 1);
-			ironProp.comment = "How much iron you need to craft this bullet type";
+			ironProp.comment = "How much iron ingots you need to craft this bullet type";
 			
 			Property gunpowderProp = configBullet.get("general", "Gunpowder", 3);
 			gunpowderProp.comment = "How much gunpowder you need to craft this bullet type";
@@ -673,10 +676,10 @@ public class GunCus {
 					+ "\n10:X:Y = knockback +X horizontally +Y vertically.";
 			
 			Property gravityModifierProp = configBullet.get("general", "GravityModifier", 1.0D);
-			gravityModifierProp.comment = "Modifies the applied gravity of a bullet.\nApplied gravity is Gravity x GravityModifier";
+			gravityModifierProp.comment = "Applied gravity is (normal gravity) x gun.Gravity x bullet.GravityModifier";
 			
 			Property damageModifierProp = configBullet.get("general", "Damage Modifier", 1.0D);
-			damageModifierProp.comment = "Applied damage is Gun Damage * Damage Modifier";
+			damageModifierProp.comment = "Applied damage is Gun Damage x Damage Modifier";
 			
 			float damageModifier = (float) damageModifierProp.getDouble(1.0D);
 			int bulletId = bulletIdProp.getInt(1);
@@ -708,7 +711,7 @@ public class GunCus {
 				} else {
 					iconName = pack + ":bullets/" + iconName;
 				}
-				ItemBullet bullet = new ItemBullet(pack, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
+				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
 					.setSpray(spray);
@@ -825,8 +828,8 @@ public class GunCus {
 			int delay = delayProp.getInt(3);
 			int magSize = magSizeProp.getInt(1);
 			String[] stringBullets = bulletsProp.getString().split(";");
-			int magIngots = magIngotsProp.getInt(1);
-			int gunIngots = gunIngotsProp.getInt(1);
+			int magIronIngots = magIngotsProp.getInt(1);
+			int gunIronIngots = gunIngotsProp.getInt(1);
 			int gunRedstone = gunRedstoneProp.getInt(1);
 			String name = nameProp.getString();
 			String stringIcon = iconProp.getString();
@@ -860,8 +863,8 @@ public class GunCus {
 				logger.error("[" + pack + "] [" + name + "] Invalid delay '" + delay + "', expecting a positive or nul value");
 				errored = true;
 			}
-			if (gunIngots <= 0) {
-				logger.error("[" + pack + "] [" + name + "] Invalid Iron Ingots '" + gunIngots + "', expecting at least 1");
+			if (gunIronIngots <= 0) {
+				logger.error("[" + pack + "] [" + name + "] Invalid Iron Ingots '" + gunIronIngots + "', expecting at least 1");
 				errored = true;
 			}
 			if (gunRedstone < 0) {
@@ -906,8 +909,8 @@ public class GunCus {
 					errored = true;
 				}
 				
-				if (magIngots < 0) {
-					logger.error("[" + pack + "] [" + name + "] Invalid Mag Ingots '" + magIngots + "', expecting at least 0");
+				if (magIronIngots < 0) {
+					logger.error("[" + pack + "] [" + name + "] Invalid Mag Ingots '" + magIronIngots + "', expecting at least 0");
 					errored = true;
 				}
 				
@@ -919,13 +922,13 @@ public class GunCus {
 			
 			if ( (!errored) && (name != null) && (stringIcon != null) ) {
 				boolean defaultTexture = false;
-				String icon;
+				String iconName;
 				if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
 					logger.info("[" + pack + "] The texture of the gun \"" + name + "\" is missing!");
-					icon = "guncus:gun_default/";
+					iconName = "guncus:gun_default/";
 					defaultTexture = true;
 				} else {
-					icon = pack + ":gun_" + stringIcon + "/";
+					iconName = pack + ":gun_" + stringIcon + "/";
 				}
 				try {
 					// Create customization parts
@@ -958,9 +961,15 @@ public class GunCus {
 					}
 					
 					// Create gun and magazine items
-					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize,
-							intMagBulletId, magIngots, gunIngots, gunRedstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
-							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
+					ItemGun gun = new ItemGun(pack, false, name, iconName,
+							damage, shootType, delay, magSize,
+							intMagBulletId, magIronIngots, gunIronIngots, gunRedstone,
+							intAttachments, intBarrels, intScopes,
+							!usingMag, intBullets)
+							.setRecoilModifier(recoilModifier)
+							.setSoundModifier(soundModifier)
+							.defaultTexture(defaultTexture)
+							.setZoom(zoom);
 					GunCusCreativeTab tab = new GunCusCreativeTab(pack + "." + name, gun);
 					gun.setCreativeTab(tab);
 					if (gun.mag != null) {

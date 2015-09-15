@@ -35,7 +35,7 @@ public class ItemRenderer implements IItemRenderer {
 			}
 		}
 		
-		if (gun.getZoom(itemStack.getItemDamage()) > 0) {
+		if (gun.getScopeIndex(itemStack.getItemDamage()) > 0) {
 			renderItem.renderIcon(0, 0, gun.iconScope, 16, 16);
 		}
 		

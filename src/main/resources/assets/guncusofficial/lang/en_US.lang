@@ -1,21 +1,28 @@
-item.official.bullet0.name=GC .45 ACP
-item.official.bullet1.name=GC 5.56x45mm NATO
-item.official.bullet2.name=GC 5.45x39mm WP
-item.official.bullet3.name=GC 9x19mm Parabellum
-item.official.bullet4.name=GC 7.62x51mm NATO
-item.official.bullet5.name=GC 7.62x39mm WP
-item.official.bullet6.name=GC 7.62x54mm R
+item.Official.bullet.acp.name=GunCus .45 ACP
+item.Official.bullet.nato.name=GunCus 5.56x45mm NATO
+item.Official.bullet.wp.name=GunCus 5.45x39mm WP
+item.Official.bullet.parabellum.name=GunCus 9x19mm Parabellum
+item.Official.bullet.natoHeavy.name=GunCus 7.62x51mm NATO
+item.Official.bullet.wpHeavy.name=GunCus 7.62x39mm WP
+item.Official.bullet.rHeavy.name=GunCus 7.62x54mm R
 
-item.official.m16a3.name=GC M16A3
-item.official.aek971.name=GC AEK-971
-item.official.l96.name=GC L96
-item.official.sv98.name=GC SV98
-item.official.g17.name=GC G17
-item.official.g18.name=GC G18
+item.Official.m16a3.name=GunCus M16A3
+item.Official.aek971.name=GunCus AEK-971
+item.Official.l96.name=GunCus L96
+item.Official.sv98.name=GunCus SV98
+item.Official.g17.name=GunCus G17
+item.Official.g18.name=GunCus G18
 
-item.official.m16a3.magazine.name=GC M16A3 magazine
-item.official.aek971.magazine.name=GC AEK-971 magazine
-item.official.l96.magazine.name=GC L96 magazine
-item.official.sv98.magazine.name=GC SV98 magazine
-item.official.g17.magazine.name=GC G17 magazine
-item.official.g18.magazine.name=GC G18 magazine
+item.Official.m16a3.magazine.name=GunCus M16A3 magazine
+item.Official.aek971.magazine.name=GunCus AEK-971 magazine
+item.Official.l96.magazine.name=GunCus L96 magazine
+item.Official.sv98.magazine.name=GunCus SV98 magazine
+item.Official.g17.magazine.name=GunCus G17 magazine
+item.Official.g18.magazine.name=GunCus G18 magazine
+
+itemGroup.Official.m16a3=GunCus M16A3
+itemGroup.Official.aek971=GunCus AEK-971
+itemGroup.Official.l96=GunCus L96
+itemGroup.Official.sv98=GunCus SV98
+itemGroup.Official.g17=GunCus G17
+itemGroup.Official.g18=GunCus G18

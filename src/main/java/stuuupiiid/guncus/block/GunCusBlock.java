@@ -11,7 +11,7 @@ public class GunCusBlock extends Block {
 	public GunCusBlock(Material par2Material, String unlocalized) {
 		super(par2Material);
 		setBlockName(unlocalized);
-		setCreativeTab(GunCus.creativeTabGunCus);
+		setCreativeTab(GunCus.creativeTabModifications);
 		setHardness(2.0F);
 		setResistance(5.0F);
 	}

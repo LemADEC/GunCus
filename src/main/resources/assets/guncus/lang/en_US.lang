@@ -1,6 +1,6 @@
 item.quickKnife.name=Quick Knife
 item.boxpart.name=Box Part
-item.ammo_M320.name=GC 40x46mm SR Frag
+item.ammo_M320.name=GunCus 40x46mm SR Frag
 item.magFiller.name=Manual Magazine Filler
 item.mine.name=Mine
 
@@ -9,9 +9,12 @@ tile.blockAmmo.name=Ammo Box
 tile.blockBullet.name=Bullet Box
 tile.blockGun.name=Gun Box
 tile.blockMag.name=Magazine Box
-tile.gcmine.name=Mine
+tile.mine.name=Mine
 
-item.explosive.ammo_rpg.name=GC PG-7VL Rocket
-item.explosive.ammo_smaw.name=GC HEDP Rocket
-item.explosive.rpg.name=GC RPG-7V2
-item.explosive.smaw.name=GC SMAW
+item.explosive.ammo_rpg.name=GunCus PG-7VL Rocket
+item.explosive.ammo_smaw.name=GunCus HEDP Rocket
+item.explosive.rpg.name=GunCus RPG-7V2
+item.explosive.smaw.name=GunCus SMAW
+
+itemGroup.GunCus.modifications=Gun Customization
+itemGroup.GunCus.bullets=GunCus bullets
