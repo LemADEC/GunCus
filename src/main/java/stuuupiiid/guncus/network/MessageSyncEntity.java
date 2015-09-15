@@ -41,7 +41,11 @@ public class MessageSyncEntity implements IMessage, IMessageHandler<MessageSyncE
 	@SideOnly(Side.CLIENT)
 	private void handle(EntityPlayer player) {
 		ISynchronisingEntity entity = (ISynchronisingEntity)player.worldObj.getEntityByID(entityId);
-		entity.readSyncDataCompound(entitySyncDataCompound);
+		if (entity != null) {
+			entity.readSyncDataCompound(entitySyncDataCompound);
+		} else {
+			GunCus.logger.warn("Skipping update for missing entity with id " + entityId); // FIXME: defer update?
+		}
 	}
 	
 	@Override
