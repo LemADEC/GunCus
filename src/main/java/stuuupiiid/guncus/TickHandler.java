@@ -117,7 +117,7 @@ public class TickHandler {
 					&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
 					&& (Mouse.isButtonDown(1))) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-				if ((Keyboard.isKeyDown(42)) && (GunCus.counter <= 0)
+				if ((Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) && (GunCus.counter <= 0)
 						&& (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
 						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					if (!GunCus.startedBreathing) {
