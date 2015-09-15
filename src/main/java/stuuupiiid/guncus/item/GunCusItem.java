@@ -3,7 +3,6 @@ package stuuupiiid.guncus.item;
 import java.util.List;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -11,16 +10,13 @@ import net.minecraft.item.ItemStack;
 
 public class GunCusItem extends Item {
 	
-	public GunCusItem(String iconName, String name, String unlocalizedName) {
+	public GunCusItem(String iconName, String unlocalizedName) {
 		super();
 		setMaxStackSize(1);
 		setCreativeTab(GunCus.creativeTabGunCus);
 		iconString = iconName;
 		setUnlocalizedName(unlocalizedName);
 		GameRegistry.registerItem(this, unlocalizedName);
-		if (name != null && !name.isEmpty()) {
-			LanguageRegistry.instance().addStringLocalization(unlocalizedName, name);
-		}
 	}
 	
 	public GunCusItem() {

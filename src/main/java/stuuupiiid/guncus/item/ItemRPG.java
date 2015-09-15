@@ -22,10 +22,10 @@ import org.lwjgl.input.Mouse;
 public class ItemRPG extends GunCusItem {
 	public Item ammo;
 
-	public ItemRPG(String iconName, String name, String unlocalized, Item parAmmo) {
-		super(iconName, name, unlocalized);
+	public ItemRPG(String iconName, String name, Item ammo) {
+		super(iconName, name);
 		setFull3D();
-		ammo = parAmmo;
+		this.ammo = ammo;
 	}
 
 	@Override

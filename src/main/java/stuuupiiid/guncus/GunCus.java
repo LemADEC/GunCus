@@ -164,7 +164,7 @@ public class GunCus {
 		blockGun = new BlockGun();
 		
 		magFill = new ItemMagFiller();
-		part = new GunCusItem("guncus:boxpart", null, "boxpart");
+		part = new GunCusItem("guncus:boxpart", "boxpart");
 		
 		scope = new ItemScope("scope", "scope",
 				new ScopePart[] {
@@ -197,7 +197,7 @@ public class GunCus {
 					new CustomizationPart("Improved Grip", "-img", 6),
 					new CustomizationPart("Laser Pointer", "-ptr", 7) });
 		
-		ammoM320 = new GunCusItem("guncus:ammoM320", null, "ammoM320").setMaxStackSize(8);
+		ammoM320 = new GunCusItem("guncus:ammo_M320", "ammo_M320").setMaxStackSize(8);
 		
 		if (enableExplosives) {
 			mineBlock = new BlockMine();
@@ -205,11 +205,11 @@ public class GunCus {
 			
 			mineItem = new ItemMine();
 			
-			rpgm = new GunCusItem("guncus:rpgm", null, "explosive.rpgm");
-			smawm = new GunCusItem("guncus:smawm", null, "explosive.smawm");
+			rpgm = new GunCusItem("guncus:explosive/ammo_rpg", "explosive.ammo_rpg");
+			smawm = new GunCusItem("guncus:explosive/ammo_smaw", "explosive.ammo_smaw");
 			
-			rpg = new ItemRPG("guncus:rpg", null, "explosive.rpg", rpgm);
-			smaw = new ItemRPG("guncus:smaw", null, "explosive.smaw", smawm);
+			rpg = new ItemRPG("guncus:explosive/rpg", "explosive.rpg", rpgm);
+			smaw = new ItemRPG("guncus:explosive/smaw", "explosive.smaw", smawm);
 			
 		}
 		
@@ -681,11 +681,11 @@ public class GunCus {
 			float damageModifier = (float) damageModifierProp.getDouble(1.0D);
 			int bulletId = bulletIdProp.getInt(1);
 			int texture = textureProp.getInt(0);
-			int iron = ironProp.getInt(1);
+			int ironIngot = ironProp.getInt(1);
 			int gunpowder = gunpowderProp.getInt(3);
-			int stack = stackProp.getInt(4);
+			int stackOnCreate = stackProp.getInt(4);
 			String name = nameProp.getString();
-			String icon = iconProp.getString();
+			String iconName = iconProp.getString();
 			String[] effects = onImpactProp.getString().split(";");
 			int split = splitProp.getInt(1);
 			int spray = sprayProp.getInt(100);
@@ -697,18 +697,21 @@ public class GunCus {
 			
 			if ( (name != null)
 			  && (bulletId > 0)
-			  && (iron >= 0)
+			  && (ironIngot >= 0)
 			  && (gunpowder >= 0)
-			  && ((iron > 0) || (gunpowder > 0))
-			  && (stack > 0)
+			  && ((ironIngot > 0) || (gunpowder > 0))
+			  && (stackOnCreate > 0)
 			  && ( ( (ItemBullet.bulletsList.get(pack).size() > bulletId) && (ItemBullet.bulletsList.get(pack).get(bulletId) == null) )
 				|| (ItemBullet.bulletsList.get(pack).size() <= bulletId) ) ) {
-				if (icon.equals("") || icon.equals(" ")) {
-					icon = "guncus:bullet";
+				if (iconName.equals("") || iconName.equals(" ")) {
+					iconName = "guncus:bullet";
 				} else {
-					icon = pack + ":bullets/" + icon;
+					iconName = pack + ":bullets/" + iconName;
 				}
-				ItemBullet bullet = new ItemBullet(name, bulletId, texture, gunpowder, iron, stack, pack, icon, damageModifier).setSplit(split).setGravityModifier(gravityModifier).setSpray(spray);
+				ItemBullet bullet = new ItemBullet(pack, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
+					.setSplit(split)
+					.setGravityModifier(gravityModifier)
+					.setSpray(spray);
 				
 				for (String effect : effects) {
 					try {
@@ -727,7 +730,7 @@ public class GunCus {
 					}
 				}
 				
-				loadedBullets.add(" - " + name + " (Bullet ID:" + bulletId + ", Pack:" + pack + ")");
+				loadedBullets.add(" - " + name + " (Pack " + pack + ", Bullet ID " + bulletId + ")");
 			} else {
 				logger.info("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 			}

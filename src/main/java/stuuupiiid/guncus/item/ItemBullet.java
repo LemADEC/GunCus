@@ -13,7 +13,7 @@ public class ItemBullet extends GunCusItem {
 	public int iron;
 	public int stackOnCreate;
 	public String pack;
-	public float damage;
+	public float damageModifier;
 	public int spray = 100;
 	public int split = 1;
 	public HashMap<Integer, Float> effectModifiers = new HashMap();
@@ -22,18 +22,18 @@ public class ItemBullet extends GunCusItem {
 	
 	public static HashMap<String, List<ItemBullet>> bulletsList = new HashMap();
 	
-	public ItemBullet(String name, int bulletId, int texture, int sulphur, int iron, int stackOnCreate, String pack, String icon, float damage) {
-		super(icon, name, pack + ".bullet" + bulletId);
+	public ItemBullet(String pack, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
+		super(iconName, pack + ".bullet" + bulletId);
 		
 		if (!bulletsList.containsKey(pack)) {
 			bulletsList.put(pack, new ArrayList());
 		}
 		
-		this.damage = damage;
+		this.damageModifier = damageModifier;
 		this.bulletId = bulletId;
 		this.texture = texture;
-		this.sulphur = sulphur;
-		this.iron = iron;
+		this.sulphur = gunpowder;
+		this.iron = ironIngot;
 		this.stackOnCreate = stackOnCreate;
 		this.pack = pack;
 		if (bulletsList.get(pack).size() <= bulletId) {

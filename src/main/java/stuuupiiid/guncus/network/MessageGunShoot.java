@@ -97,7 +97,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					accuracy = bulletItem.spray;
 				}
 				
-				float damage = gun.damage * bulletItem.damage;
+				float damage = gun.damage * bulletItem.damageModifier;
 				
 				if (gun.hasHeavyBarrel(metadata)) {
 					damage += 2.0F;

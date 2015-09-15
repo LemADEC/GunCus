@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 
 public class ItemMine extends GunCusItem {
 	public ItemMine() {
-		super("guncus:mine", null, "mine");
+		super("guncus:mine", "mine");
 	}
 	
 	@Override

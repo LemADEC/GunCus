@@ -9,8 +9,8 @@ public class ItemMag extends GunCusItem {
 	public String gunName;
 	public String pack;
 	
-	public ItemMag(String gunName, String unlocalized, int magSize, String weaponIcon, int bulletId, String pack) {
-		super(weaponIcon + "magazine", gunName + " Magazine", unlocalized + ".magazine");
+	public ItemMag(String pack, String gunName, String gunIcon, int magSize, int bulletId) {
+		super(gunIcon + "magazine", gunName + ".magazine");
 		setMaxDamage(magSize);
 		setMaxStackSize(1);
 		this.bulletId = bulletId;

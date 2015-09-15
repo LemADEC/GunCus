@@ -111,7 +111,7 @@ public class ItemGun extends Item {
 			bullets = parBullets;
 			mag = null;
 		} else {
-			mag = new ItemMag(parName, getName(0), magSize, parIconName, intMagBulletId, parPack);
+			mag = new ItemMag(parPack, name, parIconName, magSize, intMagBulletId);
 			ingotsMag = parIngotsMag;
 		}
 		
@@ -228,7 +228,7 @@ public class ItemGun extends Item {
 				bulletItem = ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]);
 			}
 			
-			float damage1 = this.damage * bulletItem.damage;
+			float damage1 = this.damage * bulletItem.damageModifier;
 			
 			double newAccuracy = damage1;
 			if (Mouse.isButtonDown(1)) {
@@ -656,7 +656,7 @@ public class ItemGun extends Item {
 		return icon;
 	}
 	
-	public String getName2(int metadata) {
+	public String getName(int metadata) {
 		String barrel = "";
 		String attachment = "";
 		String scope = "";
@@ -691,11 +691,7 @@ public class ItemGun extends Item {
 			scope = "-scp";
 		}
 		
-		return "gun" + barrel + attachment + scope;
-	}
-	
-	public String getName(int metadata) {
-		return pack + "." + name + getName2(metadata).replace("gun", "");
+		return pack + "." + name + barrel + attachment + scope;
 	}
 	
 	@Override

@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 
 public class ItemKnife extends GunCusItem {
 	public ItemKnife() {
-		super("guncus:knife", null, "quickKnife");
+		super("guncus:quickKnife", "quickKnife");
 		setFull3D();
 	}
 	
