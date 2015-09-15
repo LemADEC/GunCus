@@ -83,11 +83,9 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 			double accX2 = accX1 - rand.nextInt(accX1 + 1) * 2;
 			double accY2 = accY1 - rand.nextInt(accY1 + 1) * 2;
 			double accZ2 = accZ1 - rand.nextInt(accZ1 + 1) * 2;
-			GunCus.logger.info("initial motion " + motionX + " " + motionY + " " + motionZ);
 			motionX += accX2 / 370.0D;
 			motionY += accY2 / 370.0D;
 			motionZ += accZ2 / 370.0D;
-			GunCus.logger.info("adjusted motion " + motionX + " " + motionY + " " + motionZ);
 		}
 		this.isRocket = isRocket;
 		setThrowableHeading(motionX, motionY, motionZ, (isRocket ? 3.0F : 4.2F) / slowMotionFactor, 1.0F);

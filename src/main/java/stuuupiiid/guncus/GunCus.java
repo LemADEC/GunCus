@@ -20,12 +20,10 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import stuuupiiid.guncus.block.BlockAmmo;
@@ -121,7 +119,7 @@ public class GunCus {
 	public static Item mineItem;
 	
 	// logging options
-	public static boolean logging_enableNetwork = true;
+	public static boolean logging_enableNetwork = false;
 	
 	public static Logger logger;
 	
