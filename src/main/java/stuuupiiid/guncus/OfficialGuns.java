@@ -19,7 +19,7 @@ public class OfficialGuns {
 	public static Item g17;
 	public static Item g18;
 	public static String pack = "official";
-
+	
 	public static void load() {
 		acp = new ItemBullet("GC .45 ACP", 0, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_0", 5.0F);
 		nato = new ItemBullet("GC 5.56x45mm NATO", 1, 0, 1, 1, 4, pack, "guncusofficial:bullets/bullet_1", 5.0F);

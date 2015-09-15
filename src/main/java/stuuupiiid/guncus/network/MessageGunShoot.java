@@ -84,7 +84,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				if (gun.hasSilencer(metadata)) {
 					playerEntity.worldObj.playSoundAtEntity(playerEntity, gun.soundSilenced, 1.0F, 1.0F / (playerEntity.worldObj.rand.nextFloat() * 0.4F + 0.8F));
 				} else {
-					playerEntity.worldObj.playSoundAtEntity(playerEntity, gun.soundNormal, 5.0F * (float) gun.soundModify, 1.0F / (playerEntity.worldObj.rand.nextFloat() * 0.4F + 0.8F));
+					playerEntity.worldObj.playSoundAtEntity(playerEntity, gun.soundNormal, 5.0F * (float) gun.soundModifier, 1.0F / (playerEntity.worldObj.rand.nextFloat() * 0.4F + 0.8F));
 				}
 				ItemBullet bulletItem;
 				if (gun.mag != null) {

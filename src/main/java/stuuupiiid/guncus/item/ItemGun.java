@@ -51,7 +51,7 @@ public class ItemGun extends Item {
 	public int ingots;
 	public int field_redstone;
 	public double recoilModifier;
-	public double soundModify;
+	public double soundModifier;
 	public boolean isOfficial;
 	public boolean usingDefault = false;
 	public float zoom = 1.0F;
@@ -89,7 +89,7 @@ public class ItemGun extends Item {
 		field_redstone = parRedstone;
 		pack = parPack;
 		recoilModifier = 1.0D;
-		soundModify = 1.0D;
+		soundModifier = 1.0D;
 		attachments = parAttach;
 		barrels = parBarrel;
 		scopes = parScopes;
@@ -115,17 +115,7 @@ public class ItemGun extends Item {
 			ingotsMag = parIngotsMag;
 		}
 		
-		int i = scopes.length + 1;
-		
-		if (barrels.length > 0) {
-			i *= (barrels.length + 1);
-		}
-		
-		if (attachments.length > 0) {
-			i *= (attachments.length + 1);
-		}
-		
-		subs = i;
+		subs = (scopes.length + 1) * (barrels.length + 1) * (attachments.length + 1);
 		
 		GameRegistry.registerItem(this, name);
 		
@@ -136,10 +126,7 @@ public class ItemGun extends Item {
 	}
 	
 	public ItemGun setZoom(float zoom) {
-		this.zoom = zoom;
-		if (this.zoom < 1.0F) {
-			this.zoom = 1.0F;
-		}
+		this.zoom = Math.max(1.0F, zoom);
 		return this;
 	}
 	
@@ -148,23 +135,23 @@ public class ItemGun extends Item {
 		return this;
 	}
 	
-	public ItemGun setRecoilModifier(double d) {
-		this.recoilModifier = d;
+	public ItemGun setRecoilModifier(double recoilModifier) {
+		this.recoilModifier = recoilModifier;
 		return this;
 	}
 	
-	public ItemGun setSoundModifier(double d) {
-		this.soundModify = d;
+	public ItemGun setSoundModifier(double soundModifier) {
+		this.soundModifier = soundModifier;
 		return this;
 	}
 	
-	public ItemGun setNormalSound(String sound) {
-		this.soundNormal = sound;
+	public ItemGun setNormalSound(String soundNormal) {
+		this.soundNormal = soundNormal;
 		return this;
 	}
 	
-	public ItemGun setSilencedSound(String sound) {
-		this.soundSilenced = sound;
+	public ItemGun setSilencedSound(String soundSilenced) {
+		this.soundSilenced = soundSilenced;
 		return this;
 	}
 	
@@ -550,16 +537,16 @@ public class ItemGun extends Item {
 	}
 	
 	public int getZoom(int metadata) {
-		int v1 = metadata;
+		int scopeIndex = metadata;
 		
-		while (v1 >= scopes.length + 1) {
-			v1 -= scopes.length + 1;
+		while (scopeIndex >= scopes.length + 1) {
+			scopeIndex -= scopes.length + 1;
 		}
-		if (v1 == 0) {
+		if (scopeIndex == 0) {
 			return 0;
 		}
-		
-		return scopes[(v1 - 1)];
+		GunCus.logger.info("Scope for " + metadata + " is " + scopeIndex + " = " + scopes[scopeIndex - 1]);
+		return scopes[scopeIndex - 1];
 	}
 	
 	public boolean canUseBipod(EntityPlayer entityPlayer) {
@@ -670,41 +657,41 @@ public class ItemGun extends Item {
 	}
 	
 	public String getName2(int metadata) {
-		String front = "";
-		String attatchment = "";
+		String barrel = "";
+		String attachment = "";
 		String scope = "";
 		
 		if (hasSilencer(metadata)) {
-			front = "-sln";
+			barrel = "-sln";
 		} else if (hasHeavyBarrel(metadata)) {
-			front = "-hbl";
+			barrel = "-hbl";
 		} else if (hasRifledBarrel(metadata)) {
-			front = "-rbl";
+			barrel = "-rbl";
 		} else if (hasPolygonalBarrel(metadata)) {
-			front = "-pbl";
+			barrel = "-pbl";
 		}
 		
 		if (hasStraightPullBolt(metadata)) {
-			attatchment = "-spb";
+			attachment = "-spb";
 		} else if (hasBipod(metadata)) {
-			attatchment = "-bpd";
+			attachment = "-bpd";
 		} else if (hasGrip(metadata)) {
-			attatchment = "-grp";
+			attachment = "-grp";
 		} else if (hasM320(metadata)) {
-			attatchment = "-320";
+			attachment = "-320";
 		} else if (hasStrongSpiralSpring(metadata)) {
-			attatchment = "-sss";
+			attachment = "-sss";
 		} else if (hasImprovedGrip(metadata)) {
-			attatchment = "-img";
+			attachment = "-img";
 		} else if (hasLaserPointer(metadata)) {
-			attatchment = "-ptr";
+			attachment = "-ptr";
 		}
 		
 		if (getZoom(metadata) > 0) {
 			scope = "-scp";
 		}
 		
-		return "gun" + front + attatchment + scope;
+		return "gun" + barrel + attachment + scope;
 	}
 	
 	public String getName(int metadata) {
@@ -712,8 +699,8 @@ public class ItemGun extends Item {
 	}
 	
 	@Override
-	public String getUnlocalizedName(ItemStack par1ItemStack) {
-		return getName(par1ItemStack.getItemDamage()).toLowerCase().replace(" ", "_");
+	public String getUnlocalizedName(ItemStack itemStack) {
+		return getName(itemStack.getItemDamage()).toLowerCase().replace(" ", "_");
 	}
 	
 	public float getZoomFromScope(int scope) {
