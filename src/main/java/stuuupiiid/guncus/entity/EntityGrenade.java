@@ -7,6 +7,8 @@ import java.util.List;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
@@ -91,6 +93,32 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 		setThrowableHeading(motionX, motionY, motionZ, (isRocket ? 3.0F : 4.2F) / slowMotionFactor, 1.0F);
 	}
 	
+	@SideOnly(Side.CLIENT)
+	public void onUpdate_tailParticles() {
+		Minecraft mc = Minecraft.getMinecraft();
+		double dX = mc.renderViewEntity.posX - posX;
+		double dY = mc.renderViewEntity.posY - posY;
+		double dZ = mc.renderViewEntity.posZ - posZ;
+		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+		if (dX * dX + dY * dY + dZ * dZ < range * range) {
+			double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
+			
+			for (int smokeIndex = 0; smokeIndex < (4 - mc.gameSettings.particleSetting); smokeIndex++) {
+				double factor = 0.20 * smokeIndex;
+				// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
+				mc.effectRenderer.addEffect(new EntitySmokeFX(
+						worldObj,
+						tailX - motionX * factor,
+						tailY - motionY * factor,
+						tailZ - motionZ * factor,
+						motionX, motionY + 0.3, motionZ,
+						1.5F));
+			}
+		}
+	}
+	
 	@Override
 	public void onUpdate() {
 		// skip the arrow computation
@@ -108,28 +136,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			Minecraft mc = Minecraft.getMinecraft();
-			double dX = mc.renderViewEntity.posX - posX;
-			double dY = mc.renderViewEntity.posY - posY;
-			double dZ = mc.renderViewEntity.posZ - posZ;
-			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
-			if (dX * dX + dY * dY + dZ * dZ < range * range) {
-				double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
-				
-				for (int smokeIndex = 0; smokeIndex < (4 - mc.gameSettings.particleSetting); smokeIndex++) {
-					double factor = 0.20 * smokeIndex;
-					// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
-					mc.effectRenderer.addEffect(new EntitySmokeFX(
-							worldObj,
-							tailX - motionX * factor,
-							tailY - motionY * factor,
-							tailZ - motionZ * factor,
-							motionX, motionY + 0.3, motionZ,
-							1.5F));
-				}
-			}
+			onUpdate_tailParticles();
 			
 			// Do collision resolution on server side only
 			return;

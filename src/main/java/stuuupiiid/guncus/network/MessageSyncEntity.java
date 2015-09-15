@@ -2,6 +2,7 @@ package stuuupiiid.guncus.network;
 
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import io.netty.buffer.ByteBuf;
@@ -21,8 +22,8 @@ public class MessageSyncEntity implements IMessage, IMessageHandler<MessageSyncE
 	}
 	
 	public MessageSyncEntity(final ISynchronisingEntity entity) {
-		this.entityId = entity.getEntityId();
-		this.entitySyncDataCompound = entity.writeSyncDataCompound();
+		entityId = ((Entity)entity).getEntityId();
+		entitySyncDataCompound = entity.writeSyncDataCompound();
 	}
 	
 	@Override
