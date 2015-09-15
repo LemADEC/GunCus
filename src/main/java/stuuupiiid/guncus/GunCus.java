@@ -958,7 +958,7 @@ public class GunCus {
 					ItemGun gun = new ItemGun(damage, shootType, delay, name, icon, magSize,
 							intMagBulletId, magIngots, gunIngots, gunRedstone, pack, false, intAttachments, intBarrels, intScopes, !usingMag, intBullets)
 							.setRecoilModifier(recoilModifier).setSoundModifier(soundModifier).defaultTexture(defaultTexture).setZoom(zoom);
-					GunCusCreativeTab tab = new GunCusCreativeTab(name, gun);
+					GunCusCreativeTab tab = new GunCusCreativeTab(pack + "." + name, gun);
 					gun.setCreativeTab(tab);
 					if (gun.mag != null) {
 						gun.mag.setCreativeTab(tab);
