@@ -30,7 +30,8 @@ public class ItemKnife extends GunCusItem {
 		if ( (GunCus.knifeTime <= 0)
 		  && (FMLClientHandler.instance().getClient().thePlayer != null)
 		  && (FMLClientHandler.instance().getClient().theWorld != null)) {
-			if ((Keyboard.isKeyDown(29) || Keyboard.isKeyDown(157)) && Keyboard.isKeyDown(33)
+			if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
+			  && Keyboard.isKeyDown(Keyboard.KEY_F)
 			  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
 				GunCus.knifeTime += 25;
 				GunCus.shootTime += 24;
