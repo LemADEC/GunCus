@@ -1,7 +1,5 @@
 package stuuupiiid.guncus.item;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -15,51 +13,53 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
 public class ItemMetadata extends GunCusItem {
-	public CustomizationPart[] metadatas;
+	public CustomizationPart[] customizationParts;
+	public int maxId;
 	public IIcon[] icons;
-	public String unlocalized;
 	
-	public ItemMetadata(String unlocalized, String iconName, CustomizationPart[] metadatas) {
-		super();
+	public ItemMetadata(String unlocalizedName, String iconName, CustomizationPart[] customizationParts) {
+		super(iconName, unlocalizedName);
 		
-		this.unlocalized = unlocalized;
-		this.iconString = iconName;
-		this.metadatas = metadatas;
-		setHasSubtypes(true);
-		
-		GameRegistry.registerItem(this, unlocalized);
-		
-		for (int v1 = 0; v1 < metadatas.length; v1++) {
-			LanguageRegistry.addName(new ItemStack(this, 1, v1), this.metadatas[v1].localized);
+		this.customizationParts = customizationParts;
+		maxId = 0;
+		for (CustomizationPart customizationPart : customizationParts) {
+			if (maxId < customizationPart.id) {
+				maxId = customizationPart.id;
+			}
 		}
+		setHasSubtypes(true);
 	}
 	
 	@Override
-	public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
-		for (int j = 0; j < metadatas.length; j++) {
-			ItemStack itemStack = new ItemStack(par1, 1, j);
-			par3List.add(itemStack);
+	public void getSubItems(Item item, CreativeTabs creativeTab, List list) {
+		for (int metadata = 0; metadata < customizationParts.length; metadata++) {
+			ItemStack itemStack = new ItemStack(item, 1, customizationParts[metadata].id);
+			list.add(itemStack);
 		}
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister par1IconRegister) {
-		icons = new IIcon[metadatas.length];
+	public void registerIcons(IIconRegister iconRegister) {
+		icons = new IIcon[maxId + 1];
 		
-		for (int i = 0; i < metadatas.length; i++) {
-			icons[i] = par1IconRegister.registerIcon("guncus:" + iconString + i);
+		for (int indexPart = 0; indexPart < customizationParts.length; indexPart++) {
+			icons[customizationParts[indexPart].id] = iconRegister.registerIcon("guncus:" + iconString + customizationParts[indexPart].id);
 		}
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int damage) {
-		return icons[damage];
+		if (damage >= 0 && damage <= maxId) {
+			return icons[damage];
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
-	public String getUnlocalizedName(ItemStack par1ItemStack) {
-		return unlocalized + par1ItemStack.getItemDamage();
+	public String getUnlocalizedName(ItemStack itemStack) {
+		return super.getUnlocalizedName() + itemStack.getItemDamage();
 	}
 }

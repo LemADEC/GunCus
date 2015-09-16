@@ -4,6 +4,33 @@ item.ammo_M320.name=GunCus 40x46mm SR Frag
 item.magFiller.name=Manual Magazine Filler
 item.mine.name=Mine
 
+item.scope1.name=Reflex (RDS) Scope
+item.scope2.name=Kobra (RDS) Scope
+item.scope3.name=Holographic (Holo) Scope
+item.scope4.name=PKA-S (Holo) Scope
+item.scope5.name=M145 (3.4x) Scope
+item.scope6.name=PK-A (3.4x) Scope
+item.scope7.name=ACOG (4x) Scope
+item.scope8.name=PSO-1 (4x) Scope
+item.scope9.name=Rifle (6x) Scope
+item.scope10.name=PKS-07 (7x) Scope
+item.scope11.name=Rifle (8x) Scope
+item.scope12.name=Ballistic (12x) Scope
+item.scope13.name=Ballistic (20x) Scope
+
+item.barrel1.name=Silencer
+item.barrel2.name=Heavy Barrel
+item.barrel3.name=Rifled Barrel
+item.barrel4.name=Polygonal Barrel
+
+item.attachment1.name=Straight Pull Bolt
+item.attachment2.name=Bipod
+item.attachment3.name=Foregrip
+item.attachment4.name=M320
+item.attachment5.name=Strong Spiral Spring
+item.attachment6.name=Improved Grip
+item.attachment7.name=Laser Pointer
+
 tile.blockWeapon.name=Weapon box
 tile.blockAmmo.name=Ammo Box
 tile.blockBullet.name=Bullet Box

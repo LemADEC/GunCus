@@ -373,7 +373,7 @@ public class ItemGun extends Item {
 	}
 	
 	public boolean hasNoBarrel(int metadata) {
-		for (int v1 = 0; v1 < GunCus.barrel.metadatas.length; v1++) {
+		for (int v1 = 0; v1 < GunCus.barrel.customizationParts.length; v1++) {
 			if (hasBarrel(v1 + 1, metadata)) {
 				return false;
 			}
@@ -383,7 +383,7 @@ public class ItemGun extends Item {
 	}
 	
 	public boolean hasNoAttachment(int metadata) {
-		for (int attachmentIndex = 0; attachmentIndex < GunCus.attachment.metadatas.length; attachmentIndex++) {
+		for (int attachmentIndex = 0; attachmentIndex < GunCus.attachment.customizationParts.length; attachmentIndex++) {
 			if (hasAttachment(attachmentIndex + 1, metadata)) {
 				return false;
 			}
@@ -656,7 +656,7 @@ public class ItemGun extends Item {
 	public float getZoomFromScope(int scope) {
 		float newZoom = 1.0F;
 		if (scope > 0) {
-			ScopePart scopePart = (ScopePart) GunCus.scope.metadatas[(scope - 1)];
+			ScopePart scopePart = (ScopePart) GunCus.scope.customizationParts[(scope - 1)];
 			newZoom = scopePart.zoom;
 		}
 		
@@ -672,20 +672,21 @@ public class ItemGun extends Item {
 			String attachment = null;
 			String scope = null;
 			
-			for (int v1 = 1; v1 <= GunCus.barrel.metadatas.length; v1++) {
+			for (int v1 = 1; v1 <= GunCus.barrel.customizationParts.length; v1++) {
 				if (hasBarrel(v1, metadata)) {
-					front = GunCus.barrel.metadatas[(v1 - 1)].localized;
+					front = GunCus.barrel.customizationParts[(v1 - 1)].localized;
 				}
 			}
 			
-			for (int v1 = 1; v1 <= GunCus.attachment.metadatas.length; v1++) {
+			for (int v1 = 1; v1 <= GunCus.attachment.customizationParts.length; v1++) {
 				if (hasAttachment(v1, metadata)) {
-					attachment = GunCus.attachment.metadatas[(v1 - 1)].localized;
+					attachment = GunCus.attachment.customizationParts[(v1 - 1)].localized;
 				}
 			}
 			
-			if (getScopeIndex(metadata) > 0) {
-				scope = GunCus.scope.metadatas[(getScopeIndex(metadata) - 1)].localized;
+			int scopeIndex = getScopeIndex(metadata);
+			if (scopeIndex >= 0) {
+				scope = GunCus.scope.customizationParts[scopeIndex].localized;
 			}
 			
 			if (front != null) {

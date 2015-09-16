@@ -16,7 +16,7 @@ public class GunCusItem extends Item {
 		setCreativeTab(GunCus.creativeTabModifications);
 		iconString = iconName;
 		setUnlocalizedName(unlocalizedName.replace(" ", "_"));
-		GameRegistry.registerItem(this, unlocalizedName);
+		GameRegistry.registerItem(this, getUnlocalizedName());
 	}
 	
 	public GunCusItem() {

@@ -85,7 +85,7 @@ public class ContainerGun extends Container {
 			
 			int extra1 = 0;
 			
-			for (int v1 = 1; v1 <= GunCus.attachment.metadatas.length; v1++) {
+			for (int v1 = 1; v1 <= GunCus.attachment.customizationParts.length; v1++) {
 				if (gun.hasAttachment(v1, metadata)) {
 					extra1 = v1;
 					break;
@@ -98,7 +98,7 @@ public class ContainerGun extends Container {
 			
 			int bar1 = 0;
 			
-			for (int v1 = 1; v1 <= GunCus.barrel.metadatas.length; v1++) {
+			for (int v1 = 1; v1 <= GunCus.barrel.customizationParts.length; v1++) {
 				if (gun.hasBarrel(v1, metadata)) {
 					bar1 = v1;
 					break;
@@ -131,75 +131,66 @@ public class ContainerGun extends Container {
 	}
 	
 	public void build() {
-		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack top = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack left = ((Slot) inventorySlots.get(2)).getStack();
+		ItemStack itemStackAttachmentSlot = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack itemStackScopeSlot = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack itemStackBarrelSlot = ((Slot) inventorySlots.get(2)).getStack();
 		// ItemStack right = ((Slot) inventorySlots.get(3)).getStack();
 		ItemStack mid = ((Slot) inventorySlots.get(4)).getStack();
 		
-		int scope = 0;
+		int scopeId = 0;
 		
-		if (top != null) {
-			Item topItem = top.getItem();
+		if (itemStackScopeSlot != null) {
+			Item topItem = itemStackScopeSlot.getItem();
 			if (topItem != null) {
 				if (topItem == GunCus.scope) {
-					int scopeMeta = top.getItemDamage();
-					
-					scope = scopeMeta + 1;
+					scopeId = itemStackScopeSlot.getItemDamage();
 				}
 			}
 		}
 		
-		int bar1 = 0;
+		int barrelId = 0;
 		
-		if (left != null) {
-			Item leftItem = left.getItem();
+		if (itemStackBarrelSlot != null) {
+			Item leftItem = itemStackBarrelSlot.getItem();
 			if (leftItem != null) {
 				if (leftItem == GunCus.barrel) {
-					int attaMeta = left.getItemDamage();
-					bar1 = attaMeta + 1;
+					barrelId = itemStackBarrelSlot.getItemDamage();
 				}
 			}
 		}
 		
-		int bar = 0;
 		
-		int extra1 = 0;
+		int attachmentId = 0;
 		
-		if (down != null) {
-			Item downItem = down.getItem();
+		if (itemStackAttachmentSlot != null) {
+			Item downItem = itemStackAttachmentSlot.getItem();
 			if (downItem != null) {
 				if (downItem == GunCus.attachment) {
-					int attaMeta = down.getItemDamage();
-					
-					extra1 = attaMeta + 1;
+					attachmentId = itemStackAttachmentSlot.getItemDamage();
 				}
 			}
 		}
 		
-		int extra = 0;
-		ItemGun gun = null;
-		
 		if (mid != null && (mid.getItem() != null) && (mid.getItem() instanceof ItemGun)) {
-			gun = (ItemGun) mid.getItem();
+			ItemGun gun = (ItemGun) mid.getItem();
 			
-			extra = gun.attachAsMetadataFactor(extra1);
-			bar = gun.barrelAsMetadataFactor(bar1);
+			int attachmentFactor = gun.attachAsMetadataFactor(attachmentId);
+			int barrelFactor = gun.barrelAsMetadataFactor(barrelId);
 			
 			int metadata = mid.getItemDamage();
 			
-			if ((scope > 0) && (gun.getScopeIndex(metadata) <= 0) && (gun.canHaveScope(scope))) {
-				metadata += scope;
+			if ((scopeId >= 0) && (gun.getScopeIndex(metadata) < 0) && gun.canHaveScope(scopeId)) {
+				metadata += scopeId;
 				((Slot) inventorySlots.get(1)).decrStackSize(1);
 				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
-			if ((extra > 0) && (gun.hasNoAttachment(metadata))) {
-				metadata += extra * (gun.scopes.length + 1);
+			if ((attachmentFactor > 0) && (gun.hasNoAttachment(metadata))) {
+				metadata += attachmentFactor * (gun.scopes.length + 1);
 				((Slot) inventorySlots.get(0)).decrStackSize(1);
 				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
-			if ((bar > 0) && (gun.hasNoBarrel(metadata))) {
-				metadata += bar * gun.barrelFactor;
+			if ((barrelFactor > 0) && (gun.hasNoBarrel(metadata))) {
+				metadata += barrelFactor * gun.barrelFactor;
 				((Slot) inventorySlots.get(2)).decrStackSize(1);
 				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 			}
