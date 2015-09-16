@@ -258,7 +258,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							if ( mopCollision.entityHit != shootingEntity
 							  && mopCollision.entityHit instanceof EntityPlayer
 							  && shootingEntity instanceof EntityPlayerMP) {
-								((EntityPlayerMP) this.shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
+								((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
 							}
 							
 							if ( mopCollision.entityHit != shootingEntity
