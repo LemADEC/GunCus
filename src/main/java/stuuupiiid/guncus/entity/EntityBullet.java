@@ -156,9 +156,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 					setDead();
 				}
 			} else {
-				motionX *= rand.nextFloat() * 0.2F;
-				motionY *= rand.nextFloat() * 0.2F;
-				motionZ *= rand.nextFloat() * 0.2F;
+				motionX = 0.2F - rand.nextFloat() * 0.4F;
+				motionY = 1.0F - rand.nextFloat() * 1.5F;
+				motionZ = 0.2F - rand.nextFloat() * 0.4F;
 				state = STATE_BOUNCING;
 				stateTicks = 0;
 				PacketHandler.sendToClient_syncEntity(this);
@@ -287,7 +287,8 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
 					} else {
-						// (not a valid target) Bouncing
+						// (not a valid entity target) Bouncing
+						setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 						motionX *= -0.1D;
 						motionY *= -0.1D;
 						motionZ *= -0.1D;
@@ -317,6 +318,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							}
 							if (isCanceled) {
 								// (protected block) Bouncing
+								setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 								motionX *= -0.1D;
 								motionY *= -0.1D;
 								motionZ *= -0.1D;
@@ -331,14 +333,18 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
-						// (not in air) Fix the bullet 5% in the block
-						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
-						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
-						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
-						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-						posX -= motionX / speed * 0.05D;
-						posY -= motionY / speed * 0.05D;
-						posZ -= motionZ / speed * 0.05D;
+						// (not in air) Fix the bullet 5% in the block if flying, right on edge if bouncing
+						double depth = 0.25D * width;
+						if (state == STATE_BOUNCING) {
+							depth = -0.70D * width;
+							prevRotationPitch = 0.0F;
+						}
+						motionX = 0.0F;
+						motionY = 0.0F;
+						motionZ = 0.0F;
+						posX = mopCollision.hitVec.xCoord + depth * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posZ = mopCollision.hitVec.zCoord + depth * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posY = mopCollision.hitVec.yCoord + depth * MathHelper.sin(rotationPitch * fDegToRadFactor);
 						state = STATE_BLOCKHIT;
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
@@ -396,7 +402,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			// apply gravity when applicable
 			if (state == STATE_FLYING || state == STATE_BOUNCING) { 
 				ItemBullet itemBullet = getBullet();
-				motionY -= (lowerGravity ? 0.014D : 0.02D) * (itemBullet == null ? 1.0D : itemBullet.gravity) / slowMotionFactor;
+				motionY -= (lowerGravity ? 0.014D : 0.02D) * (itemBullet == null ? 1.0D : itemBullet.gravityModifier) / slowMotionFactor;
 			}
 			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
