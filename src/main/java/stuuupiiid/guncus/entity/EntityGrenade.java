@@ -153,9 +153,9 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 					setDead();
 				}
 			} else {
-				motionX *= rand.nextFloat() * 0.2F;
-				motionY *= rand.nextFloat() * 0.2F;
-				motionZ *= rand.nextFloat() * 0.2F;
+				motionX = 0.1F - rand.nextFloat() * 0.2F;
+				motionY = 0.8F - rand.nextFloat() * 1.2F;
+				motionZ = 0.1F - rand.nextFloat() * 0.2F;
 				state = STATE_BOUNCING;
 				stateTicks = 0;
 				PacketHandler.sendToClient_syncEntity(this);
@@ -197,7 +197,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 				vecNextTick = Vec3.createVectorHelper(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 			}
 			
-			List<Entity> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+			List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
 			double distance2Closest = 0.0D;
 			
 			for (Entity entityInRange : list) {
@@ -232,23 +232,41 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 			
 			// Resolve collision
 			if (mopCollision != null) {
-				if (ticksExisted < 5) {
-					// Fix the grenade on collision point
-					setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
-					state = STATE_ENTITYHIT;
-					stateTicks = 0;
-					PacketHandler.sendToClient_syncEntity(this);
-				} else if (mopCollision.entityHit != null) {
-					// (entity is too close) Bouncing
-					motionX *= -0.1D;
-					motionY *= -0.1D;
-					motionZ *= -0.1D;
-					rotationYaw += 180.0F;
-					prevRotationYaw += 180.0F;
-					state = STATE_BOUNCING;
-					stateTicks = 0;
-					PacketHandler.sendToClient_syncEntity(this);
+				if (mopCollision.entityHit != null) {
+					if (ticksExisted < 5) {
+						// (entity is too close) Bouncing
+						motionX = motionX * -0.001D + 0.05F - rand.nextFloat() * 0.1F;;
+						motionY = motionY * -0.001D + 0.50F - rand.nextFloat() * 0.8F;
+						motionZ = motionZ * -0.001D + 0.05F - rand.nextFloat() * 0.1F;
+						
+						rotationYaw += 180.0F;
+						prevRotationYaw += 180.0F;
+						state = STATE_BOUNCING;
+						stateTicks = 0;
+						PacketHandler.sendToClient_syncEntity(this);
+						
+					} else {
+						// (entity is far enough) Fix the grenade on collision point and blow it up
+						double depth = 0.25D * width;
+						if (state == STATE_BOUNCING) {
+							depth = -0.70D * width;
+							prevRotationPitch = 0.0F;
+						}
+						motionX = 0.0F;
+						motionY = 0.0F;
+						motionZ = 0.0F;
+						posX = mopCollision.hitVec.xCoord + depth * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posZ = mopCollision.hitVec.zCoord + depth * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posY = mopCollision.hitVec.yCoord + depth * MathHelper.sin(rotationPitch * fDegToRadFactor);
+						state = STATE_BOUNCING;
+						stateTicks = 0;
+						PacketHandler.sendToClient_syncEntity(this);
+						setPosition(posX, posY, posZ);
+						explode();
+						setDead();
+					}
 				} else {
+					// (block collision) Resolve block breaking first
 					blockX = mopCollision.blockX;
 					blockY = mopCollision.blockY;
 					blockZ = mopCollision.blockZ;
@@ -266,6 +284,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 							}
 							if (isCanceled) {
 								// (protected block) Bouncing
+								setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 								motionX *= -0.1D;
 								motionY *= -0.1D;
 								motionZ *= -0.1D;
@@ -275,24 +294,35 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 								stateTicks = 0;
 								PacketHandler.sendToClient_syncEntity(this);
 							} else {
+								setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
 								// onBlockHit(mopCollision.hitVec);
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
-						// (not in air) Fix the grenade 5% in the block
-						motionX = ((float) (mopCollision.hitVec.xCoord - posX));
-						motionY = ((float) (mopCollision.hitVec.yCoord - posY));
-						motionZ = ((float) (mopCollision.hitVec.zCoord - posZ));
-						float speed = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
-						posX -= motionX / speed * 0.05D;
-						posY -= motionY / speed * 0.05D;
-						posZ -= motionZ / speed * 0.05D;
+						// (not in air) Fix the grenade 5% in the block if flying, right on edge if bouncing
+						double depth = 0.25D * width;
+						if (state == STATE_BOUNCING) {
+							depth = -0.70D * width;
+							prevRotationPitch = 0.0F;
+						}
+						motionX = 0.0F;
+						motionY = 0.0F;
+						motionZ = 0.0F;
+						posX = mopCollision.hitVec.xCoord + depth * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posZ = mopCollision.hitVec.zCoord + depth * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+						posY = mopCollision.hitVec.yCoord + depth * MathHelper.sin(rotationPitch * fDegToRadFactor);
 						state = STATE_BLOCKHIT;
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
 						// onBlockHit(mopCollision.hitVec);
+						
+						// explode instantly if it's passed fuse duration
+						if (ticksExisted > 5) {
+							explode();
+							setDead();
+						}
 					}
 				}
 			}
