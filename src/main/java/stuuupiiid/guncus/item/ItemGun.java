@@ -29,7 +29,7 @@ import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.network.PacketHandler;
-import stuuupiiid.guncus.render.ItemRenderer;
+import stuuupiiid.guncus.render.RenderGun;
 
 public class ItemGun extends Item {
 	public int delay = 3;
@@ -72,7 +72,7 @@ public class ItemGun extends Item {
 			boolean noMag, int[] parBullets) {
 		super();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			MinecraftForgeClient.registerItemRenderer(this, new ItemRenderer());
+			MinecraftForgeClient.registerItemRenderer(this, new RenderGun());
 		}
 		damage = parDamage;
 		setHasSubtypes(true);
