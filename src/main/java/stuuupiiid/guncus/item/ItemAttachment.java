@@ -23,36 +23,36 @@ public class ItemAttachment extends ItemMetadata {
 	public ItemAttachment(String unlocalized, String iconName, CustomizationPart[] metadatas) {
 		super(unlocalized, iconName, metadatas);
 	}
-
+	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
-		if ((FMLCommonHandler.instance().getEffectiveSide().isClient()) && (itemStack.getItemDamage() == 3)) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient() && (itemStack.getItemDamage() == 3)) {
 			doUpdate(itemStack, world, entity, par1, flag);
 		}
 	}
-
+	
 	@SideOnly(Side.CLIENT)
 	public void doUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		EntityPlayer entityPlayer = client.thePlayer;
-		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
-				&& (entityPlayer.inventory.getCurrentItem().getItem() == this)) {
-			if ((entityPlayer.inventory.getCurrentItem().getItemDamage() == 3)
-					&& (GunCus.shootTime <= 0)
-					&& (Mouse.isButtonDown(0))
-					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-					&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320)) || (entityPlayer.capabilities.isCreativeMode))) {
-				GunCus.shootTime += 95;
-				PacketHandler.sendToServer_playerAction_tube();
-				recoilTube(entityPlayer);
-				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource
-			}
+		if ( (entityPlayer != null)
+		  && (entityPlayer.inventory.getCurrentItem() != null)
+		  && (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
+		  && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 3)
+		  && (GunCus.shootTime <= 0)
+		  && (Mouse.isButtonDown(0))
+		  && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) ) {
+			GunCus.shootTime += 95;
+			PacketHandler.sendToServer_playerAction_tube();
+			recoilTube(entityPlayer);
+			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource
 		}
 	}
-
+	
 	private void recoilTube(EntityPlayer entityPlayer) {
 		float strength = 1.5F;
-
+		
 		entityPlayer.rotationPitch -= strength;
 		entityPlayer.rotationYaw -= (Item.itemRand.nextBoolean() ? strength / 2.0F : -strength / 2.0F);
 	}
