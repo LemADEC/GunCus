@@ -1,13 +1,11 @@
 package stuuupiiid.guncus.data;
 
 public class CustomizationPart {
-	public String localized;
-	public String iconPart;
+	public String iconName;
 	public int id;
 	
-	public CustomizationPart(String localized, String iconPart, int id) {
-		this.localized = localized;
-		this.iconPart = iconPart;
+	public CustomizationPart(String iconName, int id) {
+		this.iconName = iconName;
 		this.id = id;
 	}
 }

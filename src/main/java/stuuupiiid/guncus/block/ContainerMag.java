@@ -49,7 +49,7 @@ public class ContainerMag extends Container {
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
 			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
 			if ((itemStackSlot != null) && (entityPlayer != null)) {
-				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
+				entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 			}
 		}
 	}

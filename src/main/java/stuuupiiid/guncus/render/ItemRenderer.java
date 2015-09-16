@@ -1,5 +1,6 @@
 package stuuupiiid.guncus.render;
 
+import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.init.Items;
@@ -29,20 +30,18 @@ public class ItemRenderer implements IItemRenderer {
 		}
 		renderItem.renderIcon(0, 0, icon, 16, 16);
 		
-		for (int v1 = 0; v1 < gun.barrels.length; v1++) {
-			if ((gun.hasBarrel(gun.barrels[v1], itemStack.getItemDamage())) && (gun.iconsBarrel[v1] != null)) {
-				renderItem.renderIcon(0, 0, gun.iconsBarrel[v1], 16, 16);
-			}
+		CustomizationPart customizationPart = gun.getBarrelPart(itemStack.getItemDamage());
+		if (customizationPart != null && gun.iconsBarrel[customizationPart.id] != null) {
+			renderItem.renderIcon(0, 0, gun.iconsBarrel[customizationPart.id], 16, 16);
 		}
 		
-		if (gun.getScopeIndex(itemStack.getItemDamage()) > 0) {
+		if (gun.getScopePart(itemStack.getItemDamage()) != null) {
 			renderItem.renderIcon(0, 0, gun.iconScope, 16, 16);
 		}
 		
-		for (int v1 = 0; v1 < gun.attachments.length; v1++) {
-			if ((gun.hasAttachment(gun.attachments[v1], itemStack.getItemDamage())) && (gun.iconsAttachment[v1] != null)) {
-				renderItem.renderIcon(0, 0, gun.iconsAttachment[v1], 16, 16);
-			}
+		customizationPart = gun.getAttachmentPart(itemStack.getItemDamage());
+		if (customizationPart != null && gun.iconsAttachment[customizationPart.id] != null) {
+			renderItem.renderIcon(0, 0, gun.iconsAttachment[customizationPart.id], 16, 16);
 		}
 	}
 }

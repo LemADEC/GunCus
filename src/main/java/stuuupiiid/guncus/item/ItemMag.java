@@ -24,14 +24,15 @@ public class ItemMag extends GunCusItem {
 		int bulletCount = getMaxDamage() - itemStack.getItemDamage();
 		if (bulletCount == getMaxDamage()) {
 			list.add("Full magazine of " + itemStackBullet.getDisplayName());
-			list.add("Bullet count: " + bulletCount + " / " + getMaxDamage());
+			list.add(bulletCount + " / " + getMaxDamage() + " bullets");
 		} else if (bulletCount == 0) {
 			list.add("Empty magazine of " + itemStackBullet.getDisplayName());
 			list.add("Use an Ammo box to fill it up.");
 		} else {
 			list.add("Magazine of " + itemStackBullet.getDisplayName());
-			list.add("Bullet count: " + bulletCount + " / " + getMaxDamage());
+			list.add(bulletCount + " / " + getMaxDamage() + " bullets");
 		}
-		list.add("Pack: " + pack);
+		list.add("");
+		list.add(pack + " pack");
 	}
 }

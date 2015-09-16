@@ -2,8 +2,10 @@ package stuuupiiid.guncus.block;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.GunCus;
+import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
@@ -51,149 +53,107 @@ public class ContainerGun extends Container {
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
 			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
 			if ((itemStackSlot != null) && (entityPlayer != null)) {
-				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
+				entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 			}
 		}
 	}
 	
 	public void split() {
-		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack top = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack left = ((Slot) inventorySlots.get(2)).getStack();
-		// ItemStack right = ((Slot)inventorySlots.get(3)).getStack();
-		ItemStack mid = ((Slot) inventorySlots.get(4)).getStack();
+		ItemStack itemStackGunSlot = ((Slot) inventorySlots.get(4)).getStack();
 		
-		ItemStack scope = null;
-		ItemStack attatch = null;
-		ItemStack extra = null;
-		
-		ItemGun gun = null;
-		
-		if ((mid != null) && (mid.getItem() != null) && ((mid.getItem() instanceof ItemGun))) {
-			gun = (ItemGun) mid.getItem();
-			int metadata = mid.getItemDamage();
+		if ((itemStackGunSlot != null) && (itemStackGunSlot.getItem() instanceof ItemGun)) {
+			ItemGun gun = (ItemGun) itemStackGunSlot.getItem();
+			int metadata = itemStackGunSlot.getItemDamage();
 			
-			int scope1 = 0;
-			
-			if (gun.getScopeIndex(metadata) > 0) {
-				scope1 = gun.getScopeIndex(metadata);
-			}
-			
-			if (scope1 > 0) {
-				scope = new ItemStack(GunCus.scope, 1, scope1 - 1);
-			}
-			
-			int extra1 = 0;
-			
-			for (int v1 = 1; v1 <= GunCus.attachment.customizationParts.length; v1++) {
-				if (gun.hasAttachment(v1, metadata)) {
-					extra1 = v1;
-					break;
+			CustomizationPart customizationPart;
+			customizationPart = gun.getScopePart(metadata);
+			if (customizationPart != null) {
+				ItemStack itemStackScope = new ItemStack(GunCus.scope, 1, customizationPart.id);
+				if (((Slot) inventorySlots.get(1)).getStack() == null) {
+					metadata -= itemStackScope.getItemDamage();
+					((Slot) inventorySlots.get(1)).putStack(itemStackScope);
 				}
 			}
 			
-			if (extra1 > 0) {
-				extra = new ItemStack(GunCus.attachment, 1, extra1 - 1);
-			}
-			
-			int bar1 = 0;
-			
-			for (int v1 = 1; v1 <= GunCus.barrel.customizationParts.length; v1++) {
-				if (gun.hasBarrel(v1, metadata)) {
-					bar1 = v1;
-					break;
+			customizationPart = gun.getAttachmentPart(metadata);
+			if (customizationPart != null) {
+				ItemStack itemStackAttachment = new ItemStack(GunCus.attachment, 1, customizationPart.id);
+				if (((Slot) inventorySlots.get(0)).getStack() == null) {
+					metadata -= itemStackAttachment.getItemDamage() * (GunCus.scope.maxId + 1);
+					((Slot) inventorySlots.get(0)).putStack(itemStackAttachment);
 				}
 			}
 			
-			if (bar1 > 0) {
-				attatch = new ItemStack(GunCus.barrel, 1, bar1 - 1);
+			customizationPart = gun.getBarrelPart(metadata);
+			if (customizationPart != null) {
+				ItemStack itemStackBarrel = new ItemStack(GunCus.barrel, 1, customizationPart.id);
+				if (((Slot) inventorySlots.get(2)).getStack() == null) {
+					metadata -= itemStackBarrel.getItemDamage() * (GunCus.scope.maxId + 1) * (GunCus.attachment.maxId + 1);
+					((Slot) inventorySlots.get(2)).putStack(itemStackBarrel);
+				}
 			}
 			
-			int extra2 = gun.attachAsMetadataFactor(extra1);
-			int bar2 = gun.barrelAsMetadataFactor(bar1);
-			
-			if (top == null) {
-				metadata -= scope1;
-				((Slot) inventorySlots.get(1)).putStack(scope);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
-			if (left == null) {
-				metadata -= bar2 * gun.barrelFactor;
-				((Slot) inventorySlots.get(2)).putStack(attatch);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
-			if (down == null) {
-				metadata -= extra2 * (gun.scopes.length + 1);
-				((Slot) inventorySlots.get(0)).putStack(extra);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
+			((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 		}
 	}
 	
-	public void build() {
-		ItemStack itemStackAttachmentSlot = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack itemStackScopeSlot = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack itemStackBarrelSlot = ((Slot) inventorySlots.get(2)).getStack();
-		// ItemStack right = ((Slot) inventorySlots.get(3)).getStack();
-		ItemStack mid = ((Slot) inventorySlots.get(4)).getStack();
+	public void build(EntityPlayerMP entityPlayer) {
+		ItemStack itemStackGunSlot = ((Slot) inventorySlots.get(4)).getStack();
 		
-		int scopeId = 0;
-		
-		if (itemStackScopeSlot != null) {
-			Item topItem = itemStackScopeSlot.getItem();
-			if (topItem != null) {
-				if (topItem == GunCus.scope) {
-					scopeId = itemStackScopeSlot.getItemDamage();
+		if (itemStackGunSlot != null && (itemStackGunSlot.getItem() instanceof ItemGun)) {
+			ItemGun gun = (ItemGun) itemStackGunSlot.getItem();
+			
+			int metadata = itemStackGunSlot.getItemDamage();
+			
+			ItemStack itemStackScopeSlot = ((Slot) inventorySlots.get(1)).getStack();
+			if (itemStackScopeSlot != null) {
+				Item itemScope = itemStackScopeSlot.getItem();
+				if (itemScope == GunCus.scope) {
+					int scopeId = itemStackScopeSlot.getItemDamage();
+					if (gun.getScopePart(metadata) != null) {
+						// already has scope
+					} else if (!gun.canHaveScope(scopeId)) {
+						// can't have this scope
+					} else {
+						metadata += scopeId;
+						((Slot) inventorySlots.get(1)).decrStackSize(1);
+					}
 				}
 			}
-		}
-		
-		int barrelId = 0;
-		
-		if (itemStackBarrelSlot != null) {
-			Item leftItem = itemStackBarrelSlot.getItem();
-			if (leftItem != null) {
-				if (leftItem == GunCus.barrel) {
-					barrelId = itemStackBarrelSlot.getItemDamage();
+			
+			ItemStack itemStackAttachmentSlot = ((Slot) inventorySlots.get(0)).getStack();
+			if (itemStackAttachmentSlot != null) {
+				Item itemAttachment = itemStackAttachmentSlot.getItem();
+				if (itemAttachment == GunCus.attachment) {
+					int attachmentId = itemStackAttachmentSlot.getItemDamage();
+					if (gun.getAttachmentPart(metadata) != null) {
+						// already has attachment
+					} else if (!gun.canHaveAttachment(attachmentId)) {
+						// can't have this attachment
+					} else {
+						metadata += attachmentId * (GunCus.scope.maxId + 1);
+						((Slot) inventorySlots.get(0)).decrStackSize(1);
+					}
 				}
 			}
-		}
-		
-		
-		int attachmentId = 0;
-		
-		if (itemStackAttachmentSlot != null) {
-			Item downItem = itemStackAttachmentSlot.getItem();
-			if (downItem != null) {
-				if (downItem == GunCus.attachment) {
-					attachmentId = itemStackAttachmentSlot.getItemDamage();
+			
+			ItemStack itemStackBarrelSlot = ((Slot) inventorySlots.get(2)).getStack();
+			if (itemStackBarrelSlot != null) {
+				Item itemBarrel = itemStackBarrelSlot.getItem();
+				if (itemBarrel == GunCus.barrel) {
+					int barrelId = itemStackBarrelSlot.getItemDamage();
+					if (gun.getBarrelPart(metadata) != null) {
+						// already has barrel
+					} else if (!gun.canHaveBarrel(barrelId)) {
+						// can't have this barrel
+					} else {
+						metadata += barrelId * (GunCus.scope.maxId + 1) * (GunCus.attachment.maxId + 1);
+						((Slot) inventorySlots.get(2)).decrStackSize(1);
+					}
 				}
 			}
-		}
-		
-		if (mid != null && (mid.getItem() != null) && (mid.getItem() instanceof ItemGun)) {
-			ItemGun gun = (ItemGun) mid.getItem();
 			
-			int attachmentFactor = gun.attachAsMetadataFactor(attachmentId);
-			int barrelFactor = gun.barrelAsMetadataFactor(barrelId);
-			
-			int metadata = mid.getItemDamage();
-			
-			if ((scopeId >= 0) && (gun.getScopeIndex(metadata) < 0) && gun.canHaveScope(scopeId)) {
-				metadata += scopeId;
-				((Slot) inventorySlots.get(1)).decrStackSize(1);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
-			if ((attachmentFactor > 0) && (gun.hasNoAttachment(metadata))) {
-				metadata += attachmentFactor * (gun.scopes.length + 1);
-				((Slot) inventorySlots.get(0)).decrStackSize(1);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
-			if ((barrelFactor > 0) && (gun.hasNoBarrel(metadata))) {
-				metadata += barrelFactor * gun.barrelFactor;
-				((Slot) inventorySlots.get(2)).decrStackSize(1);
-				((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
-			}
+			((Slot) inventorySlots.get(4)).putStack(new ItemStack(gun, 1, metadata));
 		}
 	}
 	

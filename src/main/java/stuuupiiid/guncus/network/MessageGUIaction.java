@@ -51,7 +51,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			if (buttonId == 0) {
 				container.split();
 			} else if (buttonId == 1) {
-				container.build();
+				container.build(entityPlayer);
 			}
 		} else if (guiId == GuiHandler.ammoBlock) {// 4 GuiAmmo (client -> server)
 			ContainerAmmo container = (ContainerAmmo) entityPlayer.openContainer;

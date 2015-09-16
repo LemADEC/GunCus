@@ -13,7 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
 public class ItemMetadata extends GunCusItem {
-	public CustomizationPart[] customizationParts;
+	private CustomizationPart[] customizationParts;
 	public int maxId;
 	public IIcon[] icons;
 	
@@ -32,8 +32,8 @@ public class ItemMetadata extends GunCusItem {
 	
 	@Override
 	public void getSubItems(Item item, CreativeTabs creativeTab, List list) {
-		for (int metadata = 0; metadata < customizationParts.length; metadata++) {
-			ItemStack itemStack = new ItemStack(item, 1, customizationParts[metadata].id);
+		for (CustomizationPart customizationPart : customizationParts) {
+			ItemStack itemStack = new ItemStack(item, 1, customizationPart.id);
 			list.add(itemStack);
 		}
 	}
@@ -43,15 +43,15 @@ public class ItemMetadata extends GunCusItem {
 	public void registerIcons(IIconRegister iconRegister) {
 		icons = new IIcon[maxId + 1];
 		
-		for (int indexPart = 0; indexPart < customizationParts.length; indexPart++) {
-			icons[customizationParts[indexPart].id] = iconRegister.registerIcon("guncus:" + iconString + customizationParts[indexPart].id);
+		for (CustomizationPart customizationPart : customizationParts) {
+			icons[customizationPart.id] = iconRegister.registerIcon("guncus:" + iconString + customizationPart.id);
 		}
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int damage) {
-		if (damage >= 0 && damage <= maxId) {
+		if (damage > 0 && damage <= maxId) {
 			return icons[damage];
 		} else {
 			return null;
@@ -61,5 +61,15 @@ public class ItemMetadata extends GunCusItem {
 	@Override
 	public String getUnlocalizedName(ItemStack itemStack) {
 		return super.getUnlocalizedName() + itemStack.getItemDamage();
+	}
+	
+	public CustomizationPart getCustomizationPart(final int partId) {
+		for (CustomizationPart customizationPart : customizationParts) {
+			if (customizationPart.id == partId) {
+				return customizationPart;
+			}
+		}
+		
+		return null;
 	}
 }

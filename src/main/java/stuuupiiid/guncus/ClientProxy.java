@@ -47,14 +47,13 @@ public class ClientProxy extends CommonProxy {
 			// draw sight
 			if (hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null)) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-				int scopeIndex = gun.getScopeIndex(entityPlayer.inventory.getCurrentItem().getItemDamage());
+				ScopePart scopePart = gun.getScopePart(entityPlayer.inventory.getCurrentItem().getItemDamage());
 				String sightTextureName;
 				float newZoom = gun.zoom + 0.1F;
-				if (scopeIndex >= 0) {
-					// scope, always use original
-					ScopePart scope = (ScopePart) GunCus.scope.customizationParts[scopeIndex];
-					newZoom = scope.zoom + 0.1F;
-					sightTextureName = "guncus:textures/sights/" + scope.sight + ".png";
+				if (scopePart != null) {
+					// scope, always use originals
+					newZoom = scopePart.zoom + 0.1F;
+					sightTextureName = "guncus:textures/sights/" + scopePart.sight + ".png";
 				} else if (gun.usingDefault) {
 					// no scope, using default
 					sightTextureName = "guncus:textures/sights/default.png";
@@ -63,13 +62,14 @@ public class ClientProxy extends CommonProxy {
 					sightTextureName = gun.iconBasePath.replace(":gun_", ":textures/items/gun_") + "sight.png";
 				}
 				
+				// Progressively adjust zoom
 				if (GunCus.zoomLevel < newZoom) {
-					GunCus.zoomLevel = (float) (GunCus.zoomLevel + 2.5D);
-				}
-				if (GunCus.zoomLevel > newZoom) {
-					GunCus.zoomLevel = newZoom;
+					GunCus.zoomLevel = Math.min(newZoom, GunCus.zoomLevel + 0.5F);
+				} else if (GunCus.zoomLevel > newZoom) {
+					GunCus.zoomLevel = Math.max(newZoom, GunCus.zoomLevel - 0.5F);
 				}
 				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
+				
 				client.getTextureManager().bindTexture(new ResourceLocation(sightTextureName));
 				Tessellator tessellator = Tessellator.instance;
 				tessellator.startDrawingQuads();
@@ -79,11 +79,13 @@ public class ClientProxy extends CommonProxy {
 				tessellator.addVertexWithUV(xCenter - offset,         0.0D, -90.0D, 0.0D, 0.0D);
 				tessellator.draw();
 			} else {
-				if (GunCus.zoomLevel > 1.0F) {
-					GunCus.zoomLevel = GunCus.zoomLevel - 2.5F;
-				}
-				if (GunCus.zoomLevel < 1.0F) {
-					GunCus.zoomLevel = 1.0F;
+				float newZoom = 1.0F;
+				
+				// Progressively adjust zoom
+				if (GunCus.zoomLevel < newZoom) {
+					GunCus.zoomLevel = Math.min(newZoom, GunCus.zoomLevel + 2.5F);
+				} else if (GunCus.zoomLevel > newZoom) {
+					GunCus.zoomLevel = Math.max(newZoom, GunCus.zoomLevel - 2.5F);
 				}
 				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
 			}

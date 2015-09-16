@@ -3,7 +3,7 @@ package stuuupiiid.guncus;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
+import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.item.ItemGun;
 
 public class TickHandler {
@@ -19,7 +20,9 @@ public class TickHandler {
 	// Called when a new frame is displayed (See FPS)
 	@SubscribeEvent
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
-		GunCus.commonProxy.sight();
+		if (event.phase == Phase.END) {
+			GunCus.commonProxy.sight();
+		}
 	}
 
 	// Called when the server ticks. Usually 20 ticks a second.
@@ -34,7 +37,7 @@ public class TickHandler {
 		if (GunCus.switchTime > 0) {
 			GunCus.switchTime -= 1;
 		}
-
+		
 		if ((!Mouse.isButtonDown(0)) && (GunCus.accuracyReset > 0) && (GunCus.accuracy < 100.0D)) {
 			GunCus.accuracyReset -= 1;
 		} else if ((!Mouse.isButtonDown(0)) && (GunCus.accuracyReset == 0) && (GunCus.accuracy < 100.0D)) {
@@ -43,20 +46,20 @@ public class TickHandler {
 		} else {
 			GunCus.accuracyReset = 5;
 		}
-
+		
 		if (GunCus.accuracy < 0.0D) {
 			GunCus.accuracy = 0.0D;
 		} else if (GunCus.accuracy > 100.0D) {
 			GunCus.accuracy = 100.0D;
 		}
-
+		
 		if (GunCus.knifeTime > 0) {
 			GunCus.knifeTime -= 1;
 		}
-
+		
 		if (FMLClientHandler.instance().getClient().thePlayer != null) {
 			EntityPlayer entityPlayer = FMLClientHandler.instance().getClient().thePlayer;
-
+			
 			if (GunCus.shootTime > 0) {
 				if (entityPlayer.inventory.getCurrentItem() == null) {
 					GunCus.shootTime -= 1;
@@ -64,7 +67,7 @@ public class TickHandler {
 					GunCus.shootTime -= 1;
 				} else {
 					ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-
+					
 					if (gun.canHaveStraightPullBolt()) {
 						if (Mouse.isButtonDown(1)) {
 							if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage())) {
@@ -87,7 +90,7 @@ public class TickHandler {
 			if (GunCus.shootTime <= 0) {
 				GunCus.reloading = false;
 			}
-
+			
 			if ((entityPlayer.motionY + 0.07840000152587891D != 0.0D) && (GunCus.accuracy > 35.0D)) {
 				GunCus.accuracy = 35.0D;
 			} else if ((entityPlayer.isSprinting()) && (GunCus.accuracy > 40.0D)) {
@@ -108,14 +111,14 @@ public class TickHandler {
 					GunCus.accuracy = 92.5D;
 				}
 			}
-
+			
 			if (entityPlayer.capabilities.isCreativeMode) {
 				GunCus.accuracy = 100.0D;
 			}
-
-			if ((entityPlayer.inventory.getCurrentItem() != null)
-					&& ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
-					&& (Mouse.isButtonDown(1))) {
+			
+			if ( (entityPlayer.inventory.getCurrentItem() != null)
+			  && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)
+			  && (Mouse.isButtonDown(1))) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 				if ((Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) && (GunCus.counter <= 0)
 						&& (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
@@ -131,39 +134,40 @@ public class TickHandler {
 						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					GunCus.breathCounter = 0;
 					int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
-					float zoom = gun.getZoomFromScope(gun.getScopeIndex(metadata));
+					ScopePart scopePart = gun.getScopePart(metadata);
+					float zoom = (scopePart == null) ? 1.0F : scopePart.zoom;
 					float maxX = 0.05475F / (zoom / 3.0F * 2.0F);
 					float maxY = 0.0975F / (zoom / 3.0F * 2.0F);
 					float plusX = 0.005F / (zoom / 3.0F * 2.0F);
 					float plusY = 0.005F / (zoom / 3.0F * 2.0F);
-
+					
 					if (GunCus.scopingX) {
 						GunCus.maxX += plusX;
 						entityPlayer.rotationYaw += GunCus.maxX;
-
+						
 						if (GunCus.maxX >= maxX) {
 							GunCus.scopingX = false;
 						}
 					} else if (!GunCus.scopingX) {
 						GunCus.maxX -= plusX;
 						entityPlayer.rotationYaw += GunCus.maxX;
-
+						
 						if (GunCus.maxX <= -maxX) {
 							GunCus.scopingX = true;
 						}
 					}
-
+					
 					if (GunCus.scopingY) {
 						GunCus.maxY += plusY;
 						entityPlayer.rotationPitch += GunCus.maxY;
-
+						
 						if (GunCus.maxY >= maxY) {
 							GunCus.scopingY = false;
 						}
 					} else if (!GunCus.scopingY) {
 						GunCus.maxY -= plusY;
 						entityPlayer.rotationPitch += GunCus.maxY;
-
+						
 						if (GunCus.maxY <= -maxY) {
 							GunCus.scopingY = true;
 						}

@@ -171,34 +171,34 @@ public class GunCus {
 		
 		scope = new ItemScope("scope", "scope",
 				new ScopePart[] {
-					new ScopePart("Reflex (RDS) Scope", "reflex", 1.0F, 1),
-					new ScopePart("Kobra (RDS) Scope", "kobra", 1.0F, 2),
-					new ScopePart("Holographic (Holo) Scope", "holographic", 1.0F, 3),
-					new ScopePart("PKA-S (Holo) Scope", "pka-s", 1.0F, 4),
-					new ScopePart("M145 (3.4x) Scope", "m145", 3.4F, 5),
-					new ScopePart("PK-A (3.4x) Scope", "pk-a", 3.4F, 6),
-					new ScopePart("ACOG (4x) Scope", "acog", 4.0F, 7),
-					new ScopePart("PSO-1 (4x) Scope", "pso-1", 4.0F, 8),
-					new ScopePart("Rifle (6x) Scope", "rifle", 6.0F, 9),
-					new ScopePart("PKS-07 (7x) Scope", "pks-07", 7.0F, 10),
-					new ScopePart("Rifle (8x) Scope", "rifle", 8.0F, 11),
-					new ScopePart("Ballistic (12x) Scope", "ballistic", 12.0F, 12),
-					new ScopePart("Ballistic (20x) Scope", "ballistic", 20.0F, 13) });
+					new ScopePart("reflex", 1.0F, 1),
+					new ScopePart("kobra", 1.0F, 2),
+					new ScopePart("holographic", 1.0F, 3),
+					new ScopePart("pka-s", 1.0F, 4),
+					new ScopePart("m145", 3.4F, 5),
+					new ScopePart("pk-a", 3.4F, 6),
+					new ScopePart("acog", 4.0F, 7),
+					new ScopePart("pso-1", 4.0F, 8),
+					new ScopePart("rifle", 6.0F, 9),
+					new ScopePart("pks-07", 7.0F, 10),
+					new ScopePart("rifle", 8.0F, 11),
+					new ScopePart("ballistic", 12.0F, 12),
+					new ScopePart("ballistic", 20.0F, 13) });
 		barrel = new ItemMetadata("barrel", "barrel",
 				new CustomizationPart[] {
-					new CustomizationPart("Silencer", "-sln", 1),
-					new CustomizationPart("Heavy Barrel", "-hbl", 2),
-					new CustomizationPart("Rifled Barrel", "-rbl", 3),
-					new CustomizationPart("Polygonal Barrel", "-pbl", 4) });
+					new CustomizationPart("sln", 1),
+					new CustomizationPart("hbl", 2),
+					new CustomizationPart("rbl", 3),
+					new CustomizationPart("pbl", 4) });
 		attachment = new ItemAttachment("attachment", "attachment",
 				new CustomizationPart[] {
-					new CustomizationPart("Straight Pull Bolt", "-spb", 1),
-					new CustomizationPart("Bipod", "-bpd", 2),
-					new CustomizationPart("Foregrip", "-grp", 3),
-					new CustomizationPart("M320", "-320", 4),
-					new CustomizationPart("Strong Spiral Spring", "-sss", 5),
-					new CustomizationPart("Improved Grip", "-img", 6),
-					new CustomizationPart("Laser Pointer", "-ptr", 7) });
+					new CustomizationPart("spb", 1),
+					new CustomizationPart("bpd", 2),
+					new CustomizationPart("grp", 3),
+					new CustomizationPart("320", 4),
+					new CustomizationPart("sss", 5),
+					new CustomizationPart("img", 6),
+					new CustomizationPart("ptr", 7) });
 		
 		ammoM320 = new GunCusItem("guncus:ammo_M320", "ammo_M320").setMaxStackSize(8);
 		
@@ -970,7 +970,7 @@ public class GunCus {
 							.setSoundModifier(soundModifier)
 							.defaultTexture(defaultTexture)
 							.setZoom(zoom);
-					GunCusCreativeTab tab = new GunCusCreativeTab(pack + "." + name, gun);
+					GunCusCreativeTab tab = new GunCusCreativeTab((pack + "." + name).replace(" ", "_"), gun);
 					gun.setCreativeTab(tab);
 					if (gun.mag != null) {
 						gun.mag.setCreativeTab(tab);

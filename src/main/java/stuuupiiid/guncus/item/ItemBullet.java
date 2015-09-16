@@ -61,8 +61,8 @@ public class ItemBullet extends GunCusItem {
 		return this;
 	}
 	
-	public ItemBullet setSpray(int modify) {
-		this.spray = modify;
+	public ItemBullet setSpray(int spray) {
+		this.spray = spray;
 		return this;
 	}
 	
@@ -73,7 +73,8 @@ public class ItemBullet extends GunCusItem {
 	}
 	
 	@Override
-	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
-		par2List.add("Pack: " + pack);
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+		list.add("");
+		list.add(pack + " pack");
 	}
 }

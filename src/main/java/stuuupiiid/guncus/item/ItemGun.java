@@ -26,6 +26,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
+import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.network.PacketHandler;
 import stuuupiiid.guncus.render.ItemRenderer;
@@ -58,7 +59,6 @@ public class ItemGun extends Item {
 	public int[] barrels;
 	public int[] scopes;
 	public int barrelFactor;
-	public int subs;
 	public boolean tubing = false;
 	public String pack;
 	public String soundNormal;
@@ -113,8 +113,6 @@ public class ItemGun extends Item {
 			mag = new ItemMag(parPack, parName, parIconBasePath, magSize, intMagBulletId);
 			magIronIngots = parMagIronIngots;
 		}
-		
-		subs = (scopes.length + 1) * (barrels.length + 1) * (attachments.length + 1);
 		
 		GameRegistry.registerItem(this, getUnlocalizedName());
 	}
@@ -366,52 +364,50 @@ public class ItemGun extends Item {
 	
 	@Override
 	public void getSubItems(Item item, CreativeTabs creativeTabs, List list) {
-		for (int subsIndex = 0; subsIndex < subs; subsIndex++) {
-			ItemStack itemStack = new ItemStack(item, 1, subsIndex);
-			list.add(itemStack);
-		}
-	}
-	
-	public boolean hasNoBarrel(int metadata) {
-		for (int v1 = 0; v1 < GunCus.barrel.customizationParts.length; v1++) {
-			if (hasBarrel(v1 + 1, metadata)) {
-				return false;
+		for (int barrelIndex = 0; barrelIndex <= barrels.length; barrelIndex++) {
+			int barrelId = (barrelIndex == 0)? 0 : barrels[barrelIndex - 1];
+			
+			for (int attachmentIndex = 0; attachmentIndex <= attachments.length; attachmentIndex++) {
+				int attachmentId = (attachmentIndex == 0)? 0 : attachments[attachmentIndex - 1];
+				
+				for (int scopeIndex = 0; scopeIndex <= scopes.length; scopeIndex++) {
+					int scopeId = (scopeIndex == 0)? 0 : scopes[scopeIndex - 1];
+					
+					int metadata = scopeId + (GunCus.scope.maxId + 1) * (attachmentId + (GunCus.attachment.maxId + 1) * barrelId);
+					list.add(new ItemStack(item, 1, metadata));
+				}
 			}
 		}
-		
-		return true;
 	}
 	
-	public boolean hasNoAttachment(int metadata) {
-		for (int attachmentIndex = 0; attachmentIndex < GunCus.attachment.customizationParts.length; attachmentIndex++) {
-			if (hasAttachment(attachmentIndex + 1, metadata)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
+	// hasScope() not needed
 	
-	public boolean canHaveScope(int scope) {
+	public boolean canHaveScope(int scopeId) {
 		for (int scopeIndex = 0; scopeIndex < scopes.length; scopeIndex++) {
-			if (scopes[scopeIndex] == scope) {
+			if (scopes[scopeIndex] == scopeId) {
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
-	public boolean hasBarrel(int barrel, int metadata) {
-		boolean flag = false;
-		
+	
+	private boolean hasBarrel(int barrelId, int metadata) {
+		CustomizationPart customizationPart = getBarrelPart(metadata);
+		if (customizationPart != null) {
+			return customizationPart.id == barrelId; 
+		} else {
+			return 0 == barrelId;
+		}
+	}
+	
+	public boolean canHaveBarrel(int barrelId) {
 		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
-			if ((barrels[barrelIndex] == barrel) && (metadata >= barrelFactor * (barrelIndex + 1)) && (metadata < barrelFactor * (barrelIndex + 2))) {
+			if (barrels[barrelIndex] == barrelId) {
 				return true;
 			}
 		}
-		
-		return flag;
+		return false;
 	}
 	
 	public boolean hasSilencer(int metadata) {
@@ -430,26 +426,19 @@ public class ItemGun extends Item {
 		return hasBarrel(4, metadata);
 	}
 	
-	public boolean hasAttachment(int attachment, int metadata) {
-		for (int attachmentIndex = 0; attachmentIndex < attachments.length; attachmentIndex++) {
-			if (attachments[attachmentIndex] == attachment) {
-				// TODO: check the logic here
-				for (int scopeIndex = (scopes.length + 1) * (attachmentIndex + 1); scopeIndex < (scopes.length + 1) * (attachmentIndex + 2); scopeIndex++) {
-					for (int barrelIndex = 0; barrelIndex <= barrels.length; barrelIndex++) {
-						if (metadata == scopeIndex + barrelIndex * barrelFactor) {
-							return true;
-						}
-					}
-				}
-			}
+	
+	private boolean hasAttachment(int attachmentId, int metadata) {
+		CustomizationPart customizationPart = getAttachmentPart(metadata);
+		if (customizationPart != null) {
+			return customizationPart.id == attachmentId; 
+		} else {
+			return 0 == attachmentId;
 		}
-		
-		return false;
 	}
 	
-	public boolean canHaveExtra(int attachment) {
-		for (int v1 = 0; v1 < attachments.length; v1++) {
-			if (attachments[v1] == attachment) {
+	public boolean canHaveAttachment(int attachmentId) {
+		for (int attachmentIndex = 0; attachmentIndex < attachments.length; attachmentIndex++) {
+			if (attachments[attachmentIndex] == attachmentId) {
 				return true;
 			}
 		}
@@ -485,65 +474,71 @@ public class ItemGun extends Item {
 	}
 	
 	public boolean canHaveStraightPullBolt() {
-		return canHaveExtra(1);
+		return canHaveAttachment(1);
 	}
 	
+	/*
 	public boolean canHaveBipod() {
-		return canHaveExtra(2);
+		return canHaveAttachment(2);
 	}
 	
 	public boolean canHaveGrip() {
-		return canHaveExtra(3);
+		return canHaveAttachment(3);
 	}
 	
 	public boolean canHaveM320() {
-		return canHaveExtra(4);
+		return canHaveAttachment(4);
 	}
 	
 	public boolean canHaveStrongSpiralString() {
-		return canHaveExtra(5);
+		return canHaveAttachment(5);
 	}
+	/**/
 	
 	public boolean canHaveImprovedGrip() {
-		return canHaveExtra(6);
+		return canHaveAttachment(6);
 	}
 	
+	/*
 	public boolean canHaveLaserPointer() {
-		return canHaveExtra(7);
+		return canHaveAttachment(7);
 	}
+	/**/
 	
-	public int barrelAsMetadataFactor(int barrel) {
-		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
-			if (barrels[barrelIndex] == barrel) {
-				return barrelIndex + 1;
-			}
-		}
-		return 0;
-	}
-	
-	public int attachAsMetadataFactor(int attachment) {
-		for (int attachmentIndex = 0; attachmentIndex < attachments.length; attachmentIndex++) {
-			if (attachments[attachmentIndex] == attachment) {
-				return attachmentIndex + 1;
-			}
-		}
-		return 0;
-	}
-	
-	// get the glocal scope index
-	public int getScopeIndex(int metadata) {
-		int scopeIndex = metadata;
+	// get the scope part or null
+	public ScopePart getScopePart(final int metadata) {
+		int scopeId = metadata % (GunCus.scope.maxId + 1);
 		
-		// find scope in the gun's accepted list
-		while (scopeIndex >= scopes.length + 1) {
-			scopeIndex -= scopes.length + 1;
-		}
-		if (scopeIndex == 0) {
-			return 0;
+		if (scopeId == 0) {
+			return null;
 		}
 		
 		// return the global index of that scope
-		return scopes[scopeIndex - 1];
+		return (ScopePart) GunCus.scope.getCustomizationPart(scopeId);
+	}
+	
+	// get the attachment part or null
+	public CustomizationPart getAttachmentPart(final int metadata) {
+		int attachmentId = (metadata / (GunCus.scope.maxId + 1)) % (GunCus.attachment.maxId + 1);
+		
+		if (attachmentId == 0) {
+			return null;
+		}
+		
+		// return the global index of that scope
+		return GunCus.attachment.getCustomizationPart(attachmentId);
+	}
+	
+	// get the barrel part or null
+	public CustomizationPart getBarrelPart(final int metadata) {
+		int barrelId = (metadata / (GunCus.scope.maxId + 1) / (GunCus.attachment.maxId + 1)) % (GunCus.barrel.maxId + 1);
+		
+		if (barrelId == 0) {
+			return null;
+		}
+		
+		// return the global index of that scope
+		return GunCus.barrel.getCustomizationPart(barrelId);
 	}
 	
 	public boolean canUseBipod(EntityPlayer entityPlayer) {
@@ -566,24 +561,6 @@ public class ItemGun extends Item {
 			GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 		}
 		
-		iconsAttachment = new IIcon[attachments.length];
-		for (int attachIndex = 0; attachIndex < attachments.length; attachIndex++) {
-			iconToRegisterName = iconBasePath + getAttachIcon("a", attachments[attachIndex]);
-			iconsAttachment[attachIndex] = par1IconRegister.registerIcon(iconToRegisterName);
-			if (iconsAttachment[attachIndex] == null) {
-				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-			}
-		}
-		
-		iconsBarrel = new IIcon[barrels.length];
-		for (int barrelIndex = 0; barrelIndex < barrels.length; barrelIndex++) {
-			iconToRegisterName = iconBasePath + getAttachIcon("b", barrels[barrelIndex]);
-			iconsBarrel[barrelIndex] = par1IconRegister.registerIcon(iconToRegisterName);
-			if (iconsBarrel[barrelIndex] == null) {
-				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-			}
-		}
-		
 		if (scopes.length > 0) {
 			iconToRegisterName = iconBasePath + "scp";
 			iconScope = par1IconRegister.registerIcon(iconToRegisterName);
@@ -591,116 +568,61 @@ public class ItemGun extends Item {
 				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 			}
 		}
-	}
-	
-	public String getAttachIcon(String type, int attach1) {
-		String string = "-";
 		
-		if (type.toLowerCase().startsWith("a")) {
-			switch (attach1) {
-			case 1:
-				string = "spb";
-				break;
-			case 2:
-				string = "bpd";
-				break;
-			case 3:
-				string = "grp";
-				break;
-			case 4:
-				string = "320";
-				break;
-			case 5:
-				string = "sss";
-				break;
-			case 6:
-				string = "img";
-				break;
-			case 7:
-				string = "ptr";
-				break;
-			default:
-				string = "!bad!";
-				break;
-			}
-			
-		} else if (type.toLowerCase().startsWith("b")) {
-			switch (attach1) {
-			case 1:
-				string = "sln";
-				break;
-			case 2:
-				string = "hbl";
-				break;
-			case 3:
-				string = "rbl";
-				break;
-			case 4:
-				string = "pbl";
-				break;
-			default:
-				string = "!bad!";
-				break;
+		iconsAttachment = new IIcon[GunCus.attachment.maxId + 1];
+		for (int attachmentId : attachments) {
+			iconToRegisterName = iconBasePath + GunCus.attachment.getCustomizationPart(attachmentId).iconName;
+			iconsAttachment[attachmentId] = par1IconRegister.registerIcon(iconToRegisterName);
+			if (iconsAttachment[attachmentId] == null) {
+				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
 			}
 		}
 		
-		return string;
+		iconsBarrel = new IIcon[GunCus.barrel.maxId + 1];
+		for (int barrelId : barrels) {
+			iconToRegisterName = iconBasePath + GunCus.barrel.getCustomizationPart(barrelId).iconName;
+			iconsBarrel[barrelId] = par1IconRegister.registerIcon(iconToRegisterName);
+			if (iconsBarrel[barrelId] == null) {
+				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
+			}
+		}
 	}
-	
+		
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IIcon getIconFromDamage(int metadata) {
 		return icon;
 	}
 	
-	public float getZoomFromScope(int scope) {
-		float newZoom = 1.0F;
-		if (scope > 0) {
-			ScopePart scopePart = (ScopePart) GunCus.scope.customizationParts[(scope - 1)];
-			newZoom = scopePart.zoom;
-		}
-		
-		return newZoom;
-	}
-	
 	@Override
-	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par2List, boolean par4) {
-		int metadata = par1ItemStack.getItemDamage();
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+		int metadata = itemStack.getItemDamage();
 		
-		if (metadata > 0) {
-			String front = null;
-			String attachment = null;
-			String scope = null;
-			
-			for (int v1 = 1; v1 <= GunCus.barrel.customizationParts.length; v1++) {
-				if (hasBarrel(v1, metadata)) {
-					front = GunCus.barrel.customizationParts[(v1 - 1)].localized;
-				}
-			}
-			
-			for (int v1 = 1; v1 <= GunCus.attachment.customizationParts.length; v1++) {
-				if (hasAttachment(v1, metadata)) {
-					attachment = GunCus.attachment.customizationParts[(v1 - 1)].localized;
-				}
-			}
-			
-			int scopeIndex = getScopeIndex(metadata);
-			if (scopeIndex >= 0) {
-				scope = GunCus.scope.customizationParts[scopeIndex].localized;
-			}
-			
-			if (front != null) {
-				par2List.add(front);
-			}
-			if (attachment != null) {
-				par2List.add(attachment);
-			}
-			if (scope != null) {
-				par2List.add(scope);
-			}
-			
-			par2List.add("");
+		CustomizationPart customizationPart;
+		ItemStack itemStackPart;
+		customizationPart = getBarrelPart(metadata);
+		if (customizationPart != null) {
+			itemStackPart = new ItemStack(GunCus.barrel, 1, customizationPart.id);
+			list.add(itemStackPart.getDisplayName());
+		} else if (barrels.length > 0) {
+			list.add("-");
 		}
-		par2List.add("Pack: " + pack);
+		customizationPart = getAttachmentPart(metadata);
+		if (customizationPart != null) {
+			itemStackPart = new ItemStack(GunCus.attachment, 1, customizationPart.id);
+			list.add(itemStackPart.getDisplayName());
+		} else if (attachments.length > 0) {
+			list.add("-");
+		}
+		customizationPart = getScopePart(metadata);
+		if (customizationPart != null) {
+			itemStackPart = new ItemStack(GunCus.scope, 1, customizationPart.id);
+			list.add(itemStackPart.getDisplayName());
+		} else if (scopes.length > 0) {
+			list.add("-");
+		}
+		
+		list.add("");
+		list.add(pack + " pack");
 	}
 }
