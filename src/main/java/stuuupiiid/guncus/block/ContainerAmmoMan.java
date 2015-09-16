@@ -1,5 +1,6 @@
 package stuuupiiid.guncus.block;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemMag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,44 +9,35 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 
 public class ContainerAmmoMan extends Container {
 	public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
-	private World worldObj;
-	public int posX;
-	public int posY;
-	public int posZ;
 	
-	public ContainerAmmoMan(InventoryPlayer par1InventoryPlayer, World world, int x, int y, int z) {
-		this.worldObj = world;
-		this.posX = x;
-		this.posY = y;
-		this.posZ = z;
-		
+	public ContainerAmmoMan(InventoryPlayer inventoryPlayer) {
 		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
 		addSlotToContainer(new Slot(craftMatrix, 1, 101, 35));
 		
 		for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
 			for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
-				addSlotToContainer(new Slot(par1InventoryPlayer, columnIndex + rowIndex * 9 + 9, 8 + columnIndex * 18, 84 + rowIndex * 18));
+				addSlotToContainer(new Slot(inventoryPlayer, columnIndex + rowIndex * 9 + 9, 8 + columnIndex * 18, 84 + rowIndex * 18));
 			}
 		}
 		for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
-			addSlotToContainer(new Slot(par1InventoryPlayer, columnIndex, 8 + columnIndex * 18, 142));
+			addSlotToContainer(new Slot(inventoryPlayer, columnIndex, 8 + columnIndex * 18, 142));
 		}
 		onCraftMatrixChanged(craftMatrix);
 	}
 	
 	@Override
-	public void onContainerClosed(EntityPlayer par1EntityPlayer) {
-		super.onContainerClosed(par1EntityPlayer);
-		if (!this.worldObj.isRemote) {
-			for (int var2 = 0; var2 < 9; var2++) {
-				ItemStack var3 = craftMatrix.getStackInSlotOnClosing(var2);
-				if (var3 != null) {
-					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
-				}
+	public void onContainerClosed(EntityPlayer entityPlayer) {
+		super.onContainerClosed(entityPlayer);
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			if ((itemStackSlot != null) && (entityPlayer != null)) {
+				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
 			}
 		}
 	}

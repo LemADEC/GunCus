@@ -1,5 +1,6 @@
 package stuuupiiid.guncus.block;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,91 +21,92 @@ public class ContainerWeapon extends Container {
 	public ItemGun actualGunItem;
 	public int actualGunIndex;
 	
-	public ContainerWeapon(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
+	public ContainerWeapon(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+		this.worldObj = world;
+		this.posX = x;
+		this.posY = y;
+		this.posZ = z;
+		
 		actualGunIndex = 0;
 		actualGunItem = null;
 		if (GunCus.instance.guns.size() > 0) {
 			actualGunItem = GunCus.instance.guns.get(0);
 		}
 		
-		worldObj = par2World;
-		posX = par3;
-		posY = par4;
-		posZ = par5;
-		
 		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
 		addSlotToContainer(new Slot(craftMatrix, 1, 80, 35));
 		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
 		
-		for (int var6 = 0; var6 < 3; var6++) {
-			for (int var7 = 0; var7 < 9; var7++) {
-				addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
+		for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
+			for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+				addSlotToContainer(new Slot(inventoryPlayer, columnIndex + rowIndex * 9 + 9, 8 + columnIndex * 18, 84 + rowIndex * 18));
 			}
 		}
-		for (int var8 = 0; var8 < 9; var8++) {
-			addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
+		for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+			addSlotToContainer(new Slot(inventoryPlayer, columnIndex, 8 + columnIndex * 18, 142));
 		}
-		onCraftMatrixChanged(this.craftMatrix);
+		onCraftMatrixChanged(craftMatrix);
 	}
 	
 	@Override
-	public void onContainerClosed(EntityPlayer par1EntityPlayer) {
-		super.onContainerClosed(par1EntityPlayer);
-		if (!this.worldObj.isRemote) {
-			for (int var2 = 0; var2 < 9; var2++) {
-				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
-				if (var3 != null) {
-					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
-				}
+	public void onContainerClosed(EntityPlayer entityPlayer) {
+		super.onContainerClosed(entityPlayer);
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			if ((itemStackSlot != null) && (entityPlayer != null)) {
+				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
 			}
 		}
 	}
 	
 	public String[] info() {
-		if (GunCus.instance.guns.size() > 0) {
-			String rtn = "Oops! Something went wrong!";
-			String rtn2 = null;
-			
-			if (actualGunItem != null) {
-				int ironIngots = actualGunItem.gunIronIngots;
-				int redstone = actualGunItem.gunRedstone;
-				rtn = "Gun '" + actualGunItem.getItemStackDisplayName(null) + "', Pack '" + actualGunItem.pack + "'";
-				rtn2 = "-> " + (ironIngots > 0 ? ironIngots + " iron ingot" + (ironIngots > 1 ? "s, " : ", ") : "")
-						+ (redstone > 0 ? redstone + " redstone" : "");
-			}
-			return new String[] { rtn, rtn2 };
+		String info1 = "Oops! Something went wrong!";
+		String info2 = null;
+		if (GunCus.instance.guns.size() <= 0) {
+			info1 = "No guns defined!";
+			info2 = "Enable official pack or install an GunCus addon, then try again";
+		} else if (actualGunItem == null) {
+			info1 = "No actual gun!";
+			info2 = "Click next to select a gun, then try again";
+		} else {
+			info1 = "In pack '" + actualGunItem.pack + "', gun '" + actualGunItem.getItemStackDisplayName(null) + "' requires";
+			info2 = " " + (actualGunItem.gunIronIngots > 0 ? actualGunItem.gunIronIngots + " iron ingot" + (actualGunItem.gunIronIngots > 1 ? "s " : " no iron ingot") : "")
+					+ " and "
+					+ (actualGunItem.gunRedstone > 0 ? actualGunItem.gunRedstone + " redstone" : " no redstone");
 		}
-		return new String[] { "Oops! Something went wrong!", null };
+		return new String[] { info1, info2 };
 	}
-
+	
 	public void create() {
 		if (GunCus.instance.guns.size() > 0) {
-			ItemStack ir = ((Slot) this.inventorySlots.get(0)).getStack();
-			ItemStack re = ((Slot) this.inventorySlots.get(1)).getStack();
-
+			ItemStack itemStackIronIngotsSlot = ((Slot) inventorySlots.get(0)).getStack();
+			ItemStack itemStackRedstoneSlot = ((Slot) inventorySlots.get(1)).getStack();
+			
 			if (actualGunItem != null) {
-				int reqIr = actualGunItem.gunIronIngots;
-				int reqRe = actualGunItem.gunRedstone;
-
-				if (((ir != null) && (ir.stackSize >= reqIr) && (ir.getItem() == Items.iron_ingot))
-						|| ((reqIr <= 0) && (((re != null) && (re.stackSize >= reqRe) && (re.getItem() == Items.redstone)) || (reqRe <= 0)))) {
-					((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(actualGunItem, 1, 0));
-					if (ir != null) {
-						((Slot) this.inventorySlots.get(0)).decrStackSize(reqIr);
+				if (((itemStackIronIngotsSlot != null) && (itemStackIronIngotsSlot.stackSize >= actualGunItem.gunIronIngots) && (itemStackIronIngotsSlot.getItem() == Items.iron_ingot))
+						|| ((actualGunItem.gunIronIngots <= 0)
+				  && (((itemStackRedstoneSlot != null) && (itemStackRedstoneSlot.stackSize >= actualGunItem.gunRedstone) && (itemStackRedstoneSlot.getItem() == Items.redstone))
+						|| (actualGunItem.gunRedstone <= 0)))) {
+					((Slot) inventorySlots.get(2)).putStack(new ItemStack(actualGunItem, 1, 0));
+					if (itemStackIronIngotsSlot != null) {
+						((Slot) inventorySlots.get(0)).decrStackSize(actualGunItem.gunIronIngots);
 					}
-					if (re != null) {
-						((Slot) this.inventorySlots.get(1)).decrStackSize(reqRe);
+					if (itemStackRedstoneSlot != null) {
+						((Slot) inventorySlots.get(1)).decrStackSize(actualGunItem.gunRedstone);
 					}
 				}
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockWeapon;
+		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockWeapon;
 	}
-
+	
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2) {
 		return null;

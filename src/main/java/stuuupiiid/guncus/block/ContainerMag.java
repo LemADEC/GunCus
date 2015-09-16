@@ -1,5 +1,6 @@
 package stuuupiiid.guncus.block;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,44 +19,45 @@ public class ContainerMag extends Container {
 	public int posY;
 	public int posZ;
 	
-	public ContainerMag(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
-		this.worldObj = par2World;
-		this.posX = par3;
-		this.posY = par4;
-		this.posZ = par5;
+	public ContainerMag(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+		this.worldObj = world;
+		this.posX = x;
+		this.posY = y;
+		this.posZ = z;
 		
 		addSlotToContainer(new Slot(this.craftMatrix, 0, 80, 14));
 		addSlotToContainer(new Slot(this.craftMatrix, 1, 59, 35));
 		addSlotToContainer(new Slot(this.craftMatrix, 2, 101, 35));
 		
-		for (int var6 = 0; var6 < 3; var6++) {
-			for (int var7 = 0; var7 < 9; var7++) {
-				addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
+		for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
+			for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+				addSlotToContainer(new Slot(inventoryPlayer, columnIndex + rowIndex * 9 + 9, 8 + columnIndex * 18, 84 + rowIndex * 18));
 			}
 		}
-		for (int var8 = 0; var8 < 9; var8++) {
-			addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
+		for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+			addSlotToContainer(new Slot(inventoryPlayer, columnIndex, 8 + columnIndex * 18, 142));
 		}
-		onCraftMatrixChanged(this.craftMatrix);
+		onCraftMatrixChanged(craftMatrix);
 	}
 	
 	@Override
-	public void onContainerClosed(EntityPlayer par1EntityPlayer) {
-		super.onContainerClosed(par1EntityPlayer);
-		if (!this.worldObj.isRemote) {
-			for (int var2 = 0; var2 < 9; var2++) {
-				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
-				if ((var3 != null) && (par1EntityPlayer != null)) {
-					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
-				}
+	public void onContainerClosed(EntityPlayer entityPlayer) {
+		super.onContainerClosed(entityPlayer);
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			if ((itemStackSlot != null) && (entityPlayer != null)) {
+				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
 			}
 		}
 	}
 	
 	public void create() {
-		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
-		ItemStack left = ((Slot) this.inventorySlots.get(1)).getStack();
-		ItemStack right = ((Slot) this.inventorySlots.get(2)).getStack();
+		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack left = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack right = ((Slot) inventorySlots.get(2)).getStack();
 		
 		ItemGun gun = null;
 		int ingotsRequired = 0;
@@ -72,32 +74,36 @@ public class ContainerMag extends Container {
 			
 			stackSize -= ingotsRequired;
 			
-			((Slot) this.inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, stackSize));
-			((Slot) this.inventorySlots.get(2)).putStack(new ItemStack(gun.mag, 1, gun.mag.getMaxDamage()));
+			((Slot) inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, stackSize));
+			((Slot) inventorySlots.get(2)).putStack(new ItemStack(gun.mag, 1, gun.mag.getMaxDamage()));
 		}
 	}
 	
 	public String[] info() {
-		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
+		ItemStack itemStackGunSlot = ((Slot) inventorySlots.get(0)).getStack();
 		
 		ItemGun gun = null;
-		String rtn = "Oops! Something went wrong!";
-		String rtn2 = null;
+		String info1 = "Oops! Something went wrong!";
+		String info2 = null;
 		
-		if ((down != null) && (down.getItem() != null) && (down.getItem() instanceof ItemGun)) {
-			gun = (ItemGun) down.getItem();
-			if (gun != null) {
-				rtn = "Pack '" + gun.pack + "', Gun '" + down.getDisplayName() + "'";
-				rtn2 = "-> " + (gun.magIronIngots > 0 ? gun.magIronIngots + " iron ingot" + (gun.magIronIngots > 1 ? "s " : " ") : "");
-			}
+		if ((itemStackGunSlot == null) || (itemStackGunSlot.getItem() == null)) {
+			info1 = "Empty gun slot!";
+			info2 = "Place a GunCus gun in the gun slot and try again...";
+		} else if (itemStackGunSlot.getItem() instanceof ItemGun) {
+			gun = (ItemGun) itemStackGunSlot.getItem();
+			info1 = "In pack '" + gun.pack + "', gun '" + itemStackGunSlot.getDisplayName() + "' magazine requires";
+			info2 = " " + (gun.magIronIngots > 0 ? gun.magIronIngots + " iron ingot" + (gun.magIronIngots > 1 ? "s " : " ") : "");
+		} else {
+			info1 = "Invalid item detected in gun slot!";
+			info2 = "Place a GunCus gun in the gun slot and try again...";
 		}
 		
-		return new String[] { rtn, rtn2 };
+		return new String[] { info1, info2 };
 	}
 	
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockMag;
+		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockMag;
 	}
 	
 	@Override

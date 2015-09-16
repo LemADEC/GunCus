@@ -19,42 +19,42 @@ public class GuiHandler implements IGuiHandler {
 	static public final int weaponBlock = 5;
 	
 	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		switch (ID) {
+	public Object getClientGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z) {
+		switch (guiId) {
 		case gunBlock:
 			return new GuiGunBlock(player.inventory, world, x, y, z);
 		case ammoBlock:
 			return new GuiAmmoBlock(player.inventory, world, x, y, z);
 		case magItem:
-			return new GuiMagItem(player.inventory, world, x, y, z);
+			return new GuiMagItem(player.inventory);
 		case magBlock:
 			return new GuiMagBlock(player.inventory, world, x, y, z);
 		case bulletBlock:
 			return new GuiBulletBlock(player.inventory, world, x, y, z);
 		case weaponBlock:
 			return new GuiWeaponBlock(player.inventory, world, x, y, z);
+		default:
+			return null;
 		}
-
-		return null;
 	}
-
+	
 	@Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		switch (ID) {
+	public Object getServerGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z) {
+		switch (guiId) {
 		case 0:
 			return new ContainerGun(player.inventory, world, x, y, z);
 		case 1:
 			return new ContainerAmmo(player.inventory, world, x, y, z);
 		case 2:
-			return new ContainerAmmoMan(player.inventory, world, x, y, z);
+			return new ContainerAmmoMan(player.inventory);
 		case 3:
 			return new ContainerMag(player.inventory, world, x, y, z);
 		case 4:
 			return new ContainerBullet(player.inventory, world, x, y, z);
 		case 5:
 			return new ContainerWeapon(player.inventory, world, x, y, z);
+		default:
+			return null;
 		}
-
-		return null;
 	}
 }

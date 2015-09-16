@@ -11,8 +11,8 @@ import net.minecraft.item.ItemStack;
 public class ItemBullet extends GunCusItem {
 	public int bulletId;
 	public int texture;
-	public int sulphur;
-	public int iron;
+	public int gunpowder;
+	public int ironIngots;
 	public int stackOnCreate;
 	public String pack;
 	public float damageModifier;
@@ -35,8 +35,8 @@ public class ItemBullet extends GunCusItem {
 		this.damageModifier = damageModifier;
 		this.bulletId = bulletId;
 		this.texture = texture;
-		this.sulphur = gunpowder;
-		this.iron = ironIngot;
+		this.gunpowder = gunpowder;
+		this.ironIngots = ironIngot;
 		this.stackOnCreate = stackOnCreate;
 		this.pack = pack;
 		if (bulletsList.get(pack).size() <= bulletId) {

@@ -45,9 +45,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 	}
 	
 	private void handle(EntityPlayerMP entityPlayer) {
-		int packetType = guiId - 100;
-		
-		if (packetType == GuiHandler.gunBlock) {// 3 GuiGun (client -> server)
+		if (guiId == GuiHandler.gunBlock) {// 3 GuiGun (client -> server)
 			ContainerGun container = (ContainerGun) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
@@ -55,7 +53,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			} else if (buttonId == 1) {
 				container.build();
 			}
-		} else if (packetType == GuiHandler.ammoBlock) {// 4 GuiAmmo (client -> server)
+		} else if (guiId == GuiHandler.ammoBlock) {// 4 GuiAmmo (client -> server)
 			ContainerAmmo container = (ContainerAmmo) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
@@ -63,7 +61,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			} else if (buttonId == 1) {
 				container.empty();
 			}
-		} else if (packetType == GuiHandler.magItem) {// 5 GuiAmmoMan (client -> server)
+		} else if (guiId == GuiHandler.magItem) {// 5 GuiAmmoMan (client -> server)
 			ContainerAmmoMan container = (ContainerAmmoMan) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
@@ -71,7 +69,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			} else if (buttonId == 1) {
 				container.empty();
 			}
-		} else if (packetType == GuiHandler.magBlock) {// 6 GuiMag (client -> server)
+		} else if (guiId == GuiHandler.magBlock) {// 6 GuiMag (client -> server)
 			ContainerMag container = (ContainerMag) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
@@ -82,7 +80,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
 				}
 			}
-		} else if (packetType == GuiHandler.bulletBlock) {// 7 GuiBullet (client -> server)
+		} else if (guiId == GuiHandler.bulletBlock) {// 7 GuiBullet (client -> server)
 			ContainerBullet container = (ContainerBullet) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
@@ -93,7 +91,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
 				}
 			}
-		} else if (packetType == GuiHandler.weaponBlock) {// 9 GuiWeapon
+		} else if (guiId == GuiHandler.weaponBlock) {// 9 GuiWeapon
 			ContainerWeapon container = (ContainerWeapon) entityPlayer.openContainer;
 			
 			if (buttonId == 1) {
@@ -116,13 +114,15 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			} else if (buttonId == 2) {
 				container.create();
 			}
+		} else {
+			GunCus.logger.error(this + " Invalid guiId " + guiId);
 		}
 	}
 	
 	@Override
 	public IMessage onMessage(MessageGUIaction guiActionMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received guiAction packet: (GUIid " + guiActionMessage.guiId + " buttonId " + guiActionMessage.buttonId + " currentGun " + guiActionMessage.currentGun);
+			GunCus.logger.info("Received guiAction packet: (GUIid " + guiActionMessage.guiId + " buttonId " + guiActionMessage.buttonId + " currentGun " + guiActionMessage.currentGun + ")");
 		}
 		
 		guiActionMessage.handle(context.getServerHandler().playerEntity);

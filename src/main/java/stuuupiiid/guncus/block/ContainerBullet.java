@@ -1,7 +1,6 @@
 package stuuupiiid.guncus.block;
 
-import java.util.List;
-
+import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemMag;
@@ -21,125 +20,123 @@ public class ContainerBullet extends Container {
 	public int posY;
 	public int posZ;
 
-	public ContainerBullet(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5) {
-		this.worldObj = par2World;
-		this.posX = par3;
-		this.posY = par4;
-		this.posZ = par5;
-
+	public ContainerBullet(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+		this.worldObj = world;
+		this.posX = x;
+		this.posY = y;
+		this.posZ = z;
+		
 		addSlotToContainer(new Slot(craftMatrix, 0, 80, 14));
 		addSlotToContainer(new Slot(craftMatrix, 1, 59, 35));
 		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
 		addSlotToContainer(new Slot(craftMatrix, 3, 80, 35));
-
-		for (int var6 = 0; var6 < 3; var6++) {
-			for (int var7 = 0; var7 < 9; var7++) {
-				addSlotToContainer(new Slot(par1InventoryPlayer, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
+		
+		for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
+			for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+				addSlotToContainer(new Slot(inventoryPlayer, columnIndex + rowIndex * 9 + 9, 8 + columnIndex * 18, 84 + rowIndex * 18));
 			}
 		}
-		for (int var8 = 0; var8 < 9; var8++) {
-			addSlotToContainer(new Slot(par1InventoryPlayer, var8, 8 + var8 * 18, 142));
+		for (int columnIndex = 0; columnIndex < 9; columnIndex++) {
+			addSlotToContainer(new Slot(inventoryPlayer, columnIndex, 8 + columnIndex * 18, 142));
 		}
-		onCraftMatrixChanged(this.craftMatrix);
+		onCraftMatrixChanged(craftMatrix);
 	}
-
+	
 	@Override
-	public void onContainerClosed(EntityPlayer par1EntityPlayer) {
-		super.onContainerClosed(par1EntityPlayer);
-		if (!this.worldObj.isRemote) {
-			for (int var2 = 0; var2 < 9; var2++) {
-				ItemStack var3 = this.craftMatrix.getStackInSlotOnClosing(var2);
-				if (var3 != null) {
-					par1EntityPlayer.dropItem(var3.getItem(), var3.stackSize);
-				}
+	public void onContainerClosed(EntityPlayer entityPlayer) {
+		super.onContainerClosed(entityPlayer);
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
+			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			if ((itemStackSlot != null) && (entityPlayer != null)) {
+				entityPlayer.dropItem(itemStackSlot.getItem(), itemStackSlot.stackSize);
 			}
 		}
 	}
-
+	
 	public void create() {
-		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack left = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack right = ((Slot) inventorySlots.get(2)).getStack();
-		ItemStack mid = ((Slot) inventorySlots.get(3)).getStack();
-
+		ItemStack itemStackMagazineSlot = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack itemStackIronIngotsSlot = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack itemStackOutputSlot = ((Slot) inventorySlots.get(2)).getStack();
+		ItemStack itemStackGunpowerSlot = ((Slot) inventorySlots.get(3)).getStack();
+		
 		ItemMag mag = null;
 		ItemBullet bullet = null;
-		int iron = 0;
-		int sulphur = 0;
-
-		if ((down != null) && (down.getItem() != null) && ((down.getItem() instanceof ItemMag))) {
-			mag = (ItemMag) down.getItem();
-			bullet = (ItemBullet) ((List) ItemBullet.bulletsList.get(mag.pack)).get(mag.bulletId);
-
-			iron = bullet.iron;
-			sulphur = bullet.sulphur;
-			if ((sulphur >= 0)
-					&& (iron >= 0)
-					&& ((sulphur > 0) || (iron > 0))
-					&& (left != null)
-					&& (left.getItem() != null)
-					&& (left.getItem() == Items.iron_ingot)
-					&& (mid != null)
-					&& (mid.getItem() != null)
-					&& (mid.getItem() == Items.gunpowder)
-					&& ((right == null) || ((right.getItem() != null)
-							&& (right.getItem() == bullet) && (right.stackSize + bullet.stackOnCreate <= 64)))
-					&& (bullet.stackOnCreate >= 1) && (left.stackSize >= iron) && (mid.stackSize >= sulphur)) {
-				int sizeIr = left.stackSize;
-				int sizeSu = mid.stackSize;
-
-				sizeIr -= iron;
-				sizeSu -= sulphur;
-
+		
+		if ((itemStackMagazineSlot != null) && (itemStackMagazineSlot.getItem() != null) && (itemStackMagazineSlot.getItem() instanceof ItemMag)) {
+			mag = (ItemMag) itemStackMagazineSlot.getItem();
+			bullet = ItemBullet.bulletsList.get(mag.pack).get(mag.bulletId);
+			
+			if ( (bullet.gunpowder >= 0)
+			  && (bullet.ironIngots >= 0)
+			  && ((bullet.gunpowder > 0) || (bullet.ironIngots > 0))
+			  && (itemStackIronIngotsSlot != null)
+			  && (itemStackIronIngotsSlot.getItem() != null)
+			  && (itemStackIronIngotsSlot.getItem() == Items.iron_ingot)
+			  && (itemStackGunpowerSlot != null)
+			  && (itemStackGunpowerSlot.getItem() != null)
+			  && (itemStackGunpowerSlot.getItem() == Items.gunpowder)
+			  && ( (itemStackOutputSlot == null)
+			    || ( (itemStackOutputSlot.getItem() != null)
+			      && (itemStackOutputSlot.getItem() == bullet) && (itemStackOutputSlot.stackSize + bullet.stackOnCreate <= itemStackOutputSlot.getMaxStackSize())))
+			  && (bullet.stackOnCreate >= 1)
+			  && (itemStackIronIngotsSlot.stackSize >= bullet.ironIngots)
+			  && (itemStackGunpowerSlot.stackSize >= bullet.gunpowder)) {
+				int sizeIr = itemStackIronIngotsSlot.stackSize - bullet.ironIngots;
+				int sizeSu = itemStackGunpowerSlot.stackSize - bullet.gunpowder;
+				
 				int size = bullet.stackOnCreate
-						+ ((right != null) && (right.getItem() != null) && (right.stackSize > 0) ? right.stackSize : 0);
-
+						+ ((itemStackOutputSlot != null) && (itemStackOutputSlot.getItem() != null) && (itemStackOutputSlot.stackSize > 0) ? itemStackOutputSlot.stackSize : 0);
+				
 				((Slot) inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, sizeIr));
 				((Slot) inventorySlots.get(3)).putStack(new ItemStack(Items.gunpowder, sizeSu));
 				((Slot) inventorySlots.get(2)).putStack(new ItemStack(bullet, size));
 			}
 		}
 	}
-
+	
 	public String[] info() {
-		ItemStack down = ((Slot) this.inventorySlots.get(0)).getStack();
-
+		ItemStack itemStackMagSlot = ((Slot) inventorySlots.get(0)).getStack();
+		
 		ItemMag itemMag = null;
-		String rtn = "Oops! Something went wrong!";
-		String rtn2 = null;
-
-		if ((down != null) && (down.getItem() instanceof ItemMag)) {
-			itemMag = (ItemMag) down.getItem();
-		}
-
-		if (itemMag != null) {
+		String info1 = "Oops! Something went wrong!";
+		String info2 = null;
+		
+		if ((itemStackMagSlot == null) || (itemStackMagSlot.getItem() == null)) {
+			info1 = "Empty magazine slot!";
+			info2 = "Place a GunCus magazine in the magazine slot and try again...";
+		} else if (itemStackMagSlot.getItem() instanceof ItemMag) {
+			itemMag = (ItemMag) itemStackMagSlot.getItem();
+			
 			ItemBullet bullet = ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
-
-			String name = "<none>";
-			int sulphur = -1;
-			int iron = -1;
-
-			if (bullet != null) {
-				ItemStack itemStackBullet = new ItemStack(bullet);
-				name = itemStackBullet.getDisplayName();
-				sulphur = bullet.sulphur;
-				iron = bullet.iron;
+			if (bullet == null) {
+				info1 = "Invalid bullet defined!";
+				info2 = "Please contact the '" + itemMag.pack + "' addon author to fix it";
+			} else {
+				String name = bullet.getItemStackDisplayName(null);
+				if ((bullet.ironIngots >= 0) && (bullet.gunpowder >= 0) && ((bullet.ironIngots > 0) || (bullet.gunpowder > 0))) {
+					info1 = "Gun = \"" + itemMag.gunName + "\", Bullets = \"" + name + "\", Pack = \"" + itemMag.pack + "\"";
+					info2 = "-> " + (bullet.ironIngots > 0 ? bullet.ironIngots + " iron ingot" + (bullet.ironIngots > 1 ? "s, " : ", ") : "")
+							+ (bullet.gunpowder > 0 ? bullet.gunpowder + " gunpowder" : "");
+				} else {
+					info1 = "Invalid bullet costs detected!";
+					info2 = "Please contact the '" + bullet.pack + "' addon author to fix it";
+				}
 			}
-
-			if ((iron >= 0) && (sulphur >= 0) && ((iron > 0) || (sulphur > 0))) {
-				rtn = "Gun = \"" + itemMag.gunName + "\", Bullets = \"" + name + "\", Pack = \"" + itemMag.pack + "\"";
-				rtn2 = "-> " + (iron > 0 ? iron + " iron ingot" + (iron > 1 ? "s, " : ", ") : "")
-						+ (sulphur > 0 ? sulphur + " gunpowder" : "");
-			}
+		} else {
+			info1 = "Invalid item detected in magazine slot!";
+			info2 = "Place a GunCus magazine in the magazine slot and try again...";
 		}
-		return new String[] { rtn, rtn2 };
+		return new String[] { info1, info2 };
 	}
-
+	
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return this.worldObj.getBlock(posX, posY, posZ) == GunCus.blockBullet;
+		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockBullet;
 	}
-
+	
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2) {
 		return null;
