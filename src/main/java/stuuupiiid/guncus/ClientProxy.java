@@ -47,18 +47,20 @@ public class ClientProxy extends CommonProxy {
 			// draw sight
 			if (hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null)) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-				int scopeId = gun.getScopeIndex(entityPlayer.inventory.getCurrentItem().getItemDamage());
-				
-				String path;
+				int scopeIndex = gun.getScopeIndex(entityPlayer.inventory.getCurrentItem().getItemDamage());
+				String sightTextureName;
 				float newZoom = gun.zoom + 0.1F;
-				if (scopeId > 0) {
-					ScopePart scope = (ScopePart) GunCus.scope.metadatas[(scopeId - 1)];
+				if (scopeIndex >= 0) {
+					// scope, always use original
+					ScopePart scope = (ScopePart) GunCus.scope.customizationParts[scopeIndex];
 					newZoom = scope.zoom + 0.1F;
-					path = "guncus:textures/sights/" + scope.sight + ".png";
+					sightTextureName = "guncus:textures/sights/" + scope.sight + ".png";
 				} else if (gun.usingDefault) {
-					path = "guncus:textures/sights/default.png";
+					// no scope, using default
+					sightTextureName = "guncus:textures/sights/default.png";
 				} else {
-					path = gun.iconBasePath.replace("minecraft:gun_", "minecraft:textures/items/gun_") + "sight.png";
+					// no scope, using custom
+					sightTextureName = gun.iconBasePath.replace(":gun_", ":textures/items/gun_") + "sight.png";
 				}
 				
 				if (GunCus.zoomLevel < newZoom) {
@@ -68,7 +70,7 @@ public class ClientProxy extends CommonProxy {
 					GunCus.zoomLevel = newZoom;
 				}
 				ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
-				client.getTextureManager().bindTexture(new ResourceLocation(path));
+				client.getTextureManager().bindTexture(new ResourceLocation(sightTextureName));
 				Tessellator tessellator = Tessellator.instance;
 				tessellator.startDrawingQuads();
 				tessellator.addVertexWithUV(xCenter - offset, scaledHeight, -90.0D, 0.0D, 1.0D);
