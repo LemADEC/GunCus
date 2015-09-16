@@ -19,11 +19,13 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import stuuupiiid.guncus.block.BlockAmmo;
@@ -1018,6 +1020,13 @@ public class GunCus {
 			}
 		} else {
 			logger.info("Could not load sounds!");
+		}
+	}
+	
+	public static void addChatMessage(final ICommandSender sender, final String message) {
+		String[] lines = message.split("\n");
+		for (String line : lines) {
+			sender.addChatMessage(new ChatComponentText(line));
 		}
 	}
 }

@@ -111,9 +111,9 @@ public class ContainerGun extends Container {
 				if (itemScope == GunCus.scope) {
 					int scopeId = itemStackScopeSlot.getItemDamage();
 					if (gun.getScopePart(metadata) != null) {
-						// already has scope
+						GunCus.addChatMessage(entityPlayer, "This " + itemStackGunSlot.getDisplayName() + " already has a scope.");
 					} else if (!gun.canHaveScope(scopeId)) {
-						// can't have this scope
+						GunCus.addChatMessage(entityPlayer, itemStackScopeSlot.getDisplayName() + " isn't supported on " + itemStackGunSlot.getDisplayName() + ".");
 					} else {
 						metadata += scopeId;
 						((Slot) inventorySlots.get(1)).decrStackSize(1);
@@ -127,9 +127,9 @@ public class ContainerGun extends Container {
 				if (itemAttachment == GunCus.attachment) {
 					int attachmentId = itemStackAttachmentSlot.getItemDamage();
 					if (gun.getAttachmentPart(metadata) != null) {
-						// already has attachment
+						GunCus.addChatMessage(entityPlayer, "This " + itemStackGunSlot.getDisplayName() + " already has an attachment.");
 					} else if (!gun.canHaveAttachment(attachmentId)) {
-						// can't have this attachment
+						GunCus.addChatMessage(entityPlayer, itemStackAttachmentSlot.getDisplayName() + " isn't supported on " + itemStackGunSlot.getDisplayName() + ".");
 					} else {
 						metadata += attachmentId * (GunCus.scope.maxId + 1);
 						((Slot) inventorySlots.get(0)).decrStackSize(1);
@@ -143,9 +143,9 @@ public class ContainerGun extends Container {
 				if (itemBarrel == GunCus.barrel) {
 					int barrelId = itemStackBarrelSlot.getItemDamage();
 					if (gun.getBarrelPart(metadata) != null) {
-						// already has barrel
+						GunCus.addChatMessage(entityPlayer, "This " + itemStackGunSlot.getDisplayName() + " already has an barrel.");
 					} else if (!gun.canHaveBarrel(barrelId)) {
-						// can't have this barrel
+						GunCus.addChatMessage(entityPlayer, itemStackBarrelSlot.getDisplayName() + " isn't supported on " + itemStackGunSlot.getDisplayName() + ".");
 					} else {
 						metadata += barrelId * (GunCus.scope.maxId + 1) * (GunCus.attachment.maxId + 1);
 						((Slot) inventorySlots.get(2)).decrStackSize(1);
