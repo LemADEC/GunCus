@@ -27,6 +27,7 @@ public class ItemBullet extends GunCusItem {
 	public ItemBullet(String pack, String name, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
 		super(iconName, pack + ".bullet." + name);
 		setCreativeTab(GunCus.creativeTabBullets);
+		setMaxStackSize(64);
 		
 		if (!bulletsList.containsKey(pack)) {
 			bulletsList.put(pack, new ArrayList());

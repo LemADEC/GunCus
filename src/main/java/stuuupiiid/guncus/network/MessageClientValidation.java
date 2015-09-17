@@ -76,10 +76,12 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		buffer.writeBytes(bytesString);
 		
 		buffer.writeDouble(recoilModifier);
-		GunCus.logger.info("Sending clientValidation packet "
-				+ gunIndex + " '" + gunName + "' "
-				+ shootType + " " + delay + " "
-				+ "'" + bullets  + "' " + recoilModifier);
+		if (GunCus.logging_enableNetwork) {
+			GunCus.logger.info("Sending clientValidation packet "
+					+ gunIndex + " '" + gunName + "' "
+					+ shootType + " " + delay + " "
+					+ "'" + bullets  + "' " + recoilModifier);
+		}
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -117,7 +119,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			return null;
 		}
 		
-		if (GunCus.logging_enableNetwork) {
+		if (GunCus.logging_enableNetwork && false) {
 			GunCus.logger.info("Received clientValidation packet "
 					+ clientValidationMessage.gunIndex + " '" + clientValidationMessage.gunName + "' "
 					+ clientValidationMessage.shootType + " " + clientValidationMessage.delay + " "
