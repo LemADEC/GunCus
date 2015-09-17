@@ -19,8 +19,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	private String gunName = "";
 	private int shootType = 0;
 	private int delay = 0;
-	private String magName = "";
-	private int bullets = 0;
+	private String bullets = "";
 	private double recoilModifier = 0;
 	
 	public MessageClientValidation() {
@@ -34,8 +33,11 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			gunName = gun.getUnlocalizedName();
 			shootType = gun.shootType;
 			delay = gun.delay;
-			magName = gun.mag.getUnlocalizedName();
-			bullets = gun.mag.bulletId;
+			if (gun.mag != null) {
+				bullets = "" + gun.mag.bulletId;
+			} else {
+				bullets = "" + gun.bullets;
+			}
 			recoilModifier = gun.recoilModifier;
 		}
 	}
@@ -43,13 +45,18 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	@Override
 	public void fromBytes(ByteBuf buffer) {
 		gunIndex = buffer.readShort();
+		
 		int nameLength = buffer.readByte();
 		gunName = buffer.toString(buffer.readerIndex(), nameLength, Charset.forName("UTF8"));
+		buffer.readerIndex(buffer.readerIndex() + nameLength);
+		
 		shootType = buffer.readShort();
 		delay = buffer.readShort();
-		nameLength = buffer.readByte();
-		magName = buffer.toString(buffer.readerIndex(), nameLength, Charset.forName("UTF8"));
-		bullets = buffer.readShort();
+		
+		int bulletsLength = buffer.readByte();
+		bullets = buffer.toString(buffer.readerIndex(), bulletsLength, Charset.forName("UTF8"));
+		buffer.readerIndex(buffer.readerIndex() + bulletsLength);
+		
 		recoilModifier = buffer.readDouble();
 	}
 	
@@ -64,12 +71,15 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		buffer.writeShort(shootType);
 		buffer.writeShort(delay);
 		
-		bytesString = magName.getBytes(Charset.forName("UTF8"));
+		bytesString = bullets .getBytes(Charset.forName("UTF8"));
 		buffer.writeByte(bytesString.length);
 		buffer.writeBytes(bytesString);
 		
-		buffer.writeShort(bullets);
 		buffer.writeDouble(recoilModifier);
+		GunCus.logger.info("Sending clientValidation packet "
+				+ gunIndex + " '" + gunName + "' "
+				+ shootType + " " + delay + " "
+				+ "'" + bullets  + "' " + recoilModifier);
 	}
 	
 	@SideOnly(Side.CLIENT)
@@ -77,15 +87,17 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		if (gunIndex >= 0 && gunIndex < GunCus.instance.guns.size()) {
 			ItemGun gun = GunCus.instance.guns.get(gunIndex);
 			
-			byte[] bytesString = gun.getUnlocalizedName().getBytes(Charset.forName("UTF8"));
-			String encoded_gunName = bytesString.toString();
-			bytesString = gun.mag.getUnlocalizedName().getBytes(Charset.forName("UTF8"));
-			String encoded_magName = bytesString.toString();
-			if ( (!encoded_gunName.equals(gunName))
+			String encoded_bullets;
+			if (gun.mag != null) {
+				encoded_bullets = "" + gun.mag.bulletId;
+			} else {
+				encoded_bullets = "" + gun.bullets;
+			}
+			
+			if ( (!gunName.equals(gun.getUnlocalizedName()))
 			  || (shootType != gun.shootType)
 			  || (delay != gun.delay)
-			  || (!encoded_magName.equals(magName))
-			  || (bullets != gun.mag.bulletId)
+			  || (!bullets.equals(encoded_bullets))
 			  || (recoilModifier != gun.recoilModifier)) {
 				MessageKickPlayer kickPlayerMessage = new MessageKickPlayer(gunIndex, 1);
 				PacketHandler.simpleNetworkManager.sendToServer(kickPlayerMessage);
@@ -98,7 +110,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IMessage onMessage(MessageClientValidation bulletImpactMessage, MessageContext context) {
+	public IMessage onMessage(MessageClientValidation clientValidationMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
 			GunCus.logger.error("WorldObj is null, ignoring clientValidation packet");
@@ -106,11 +118,14 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		}
 		
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received clientValidation packet");
+			GunCus.logger.info("Received clientValidation packet "
+					+ clientValidationMessage.gunIndex + " '" + clientValidationMessage.gunName + "' "
+					+ clientValidationMessage.shootType + " " + clientValidationMessage.delay + " "
+					+ "'" + clientValidationMessage.bullets + "' " + clientValidationMessage.recoilModifier);
 		}
 		
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-		bulletImpactMessage.handle(player);
+		clientValidationMessage.handle(player);
 		
 		return null;	// no response
 	}

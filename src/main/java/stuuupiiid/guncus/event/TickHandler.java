@@ -1,4 +1,4 @@
-package stuuupiiid.guncus;
+package stuuupiiid.guncus.event;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -7,13 +7,18 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
+import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.item.ItemGun;
+import stuuupiiid.guncus.network.MessageClientValidation;
+import stuuupiiid.guncus.network.PacketHandler;
 
 public class TickHandler {
  
@@ -93,18 +98,18 @@ public class TickHandler {
 			
 			if ((entityPlayer.motionY + 0.07840000152587891D != 0.0D) && (GunCus.accuracy > 35.0D)) {
 				GunCus.accuracy = 35.0D;
-			} else if ((entityPlayer.isSprinting()) && (GunCus.accuracy > 40.0D)) {
+			} else if (entityPlayer.isSprinting() && (GunCus.accuracy > 40.0D)) {
 				GunCus.accuracy = 40.0D;
 			} else if (((entityPlayer.motionX != 0.0D) || (entityPlayer.motionZ != 0.0D)) && (GunCus.accuracy > 70.0D)) {
-				if ((Mouse.isButtonDown(1)) && (GunCus.accuracy > 70.0D)) {
+				if (Mouse.isButtonDown(1) && (GunCus.accuracy > 70.0D)) {
 					GunCus.accuracy = 75.0D;
 				} else {
 					GunCus.accuracy = 70.0D;
 				}
 			} else if ((!Mouse.isButtonDown(1)) && (GunCus.accuracy > 85.0D)) {
-				if ((entityPlayer.inventory.getCurrentItem() == null)
-						|| (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
-						|| (!((ItemGun) entityPlayer.inventory.getCurrentItem().getItem())
+				if ( (entityPlayer.inventory.getCurrentItem() == null)
+				  || (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
+				  || (!((ItemGun) entityPlayer.inventory.getCurrentItem().getItem())
 								.hasLaserPointer(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					GunCus.accuracy = 85.0D;
 				} else if (GunCus.accuracy > 92.5D) {
@@ -118,20 +123,21 @@ public class TickHandler {
 			
 			if ( (entityPlayer.inventory.getCurrentItem() != null)
 			  && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)
-			  && (Mouse.isButtonDown(1))) {
+			  && Mouse.isButtonDown(1)
+			  && entityPlayer.openContainer instanceof net.minecraft.inventory.ContainerPlayer) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
-				if ((Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) && (GunCus.counter <= 0)
-						&& (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
-						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
+				if ( Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && (GunCus.counter <= 0)
+				  && (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
+				  && (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					if (!GunCus.startedBreathing) {
 						entityPlayer.playSound("random.breath", 1.0F, 1.0F);
 						GunCus.startedBreathing = true;
 						GunCus.breathing = true;
 					}
-				} else if ((!GunCus.breathing)
-						&& ((!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage())) || (!gun
-								.canUseBipod(entityPlayer)))
-						&& (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
+				} else if ( (!GunCus.breathing)
+					     && ( (!gun.hasBipod(entityPlayer.inventory.getCurrentItem().getItemDamage()))
+					       || (!gun.canUseBipod(entityPlayer)))
+					     && (!gun.hasImprovedGrip(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
 					GunCus.breathCounter = 0;
 					int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
 					ScopePart scopePart = gun.getScopePart(metadata);
@@ -190,6 +196,20 @@ public class TickHandler {
 				if (GunCus.counter >= 300) {
 					GunCus.startedBreathing = false;
 					GunCus.counter = 0;
+				}
+			}
+		}
+	}
+	
+	// Server side
+	@SubscribeEvent
+	public void onEntityJoinWorld(EntityJoinWorldEvent event){
+		if (event.entity instanceof EntityPlayer) {
+			GunCus.logger.info("onEntityJoinWorld " + event.entity);
+			if (!event.world.isRemote) {
+				for (int gunIndex = 0; gunIndex < GunCus.instance.guns.size(); gunIndex++) {
+					MessageClientValidation clientConnectionMessage = new MessageClientValidation(gunIndex);
+					PacketHandler.simpleNetworkManager.sendTo(clientConnectionMessage, (EntityPlayerMP) event.entity);
 				}
 			}
 		}

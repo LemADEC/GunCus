@@ -26,6 +26,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import stuuupiiid.guncus.block.BlockAmmo;
@@ -38,6 +39,7 @@ import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.entity.EntityGrenade;
 import stuuupiiid.guncus.entity.EntityBullet;
+import stuuupiiid.guncus.event.TickHandler;
 import stuuupiiid.guncus.gui.GuiHandler;
 import stuuupiiid.guncus.item.GunCusItem;
 import stuuupiiid.guncus.item.ItemAttachment;
@@ -223,7 +225,9 @@ public class GunCus {
 		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			FMLCommonHandler.instance().bus().register(new TickHandler());
+			TickHandler tickHandler = new TickHandler();
+			FMLCommonHandler.instance().bus().register(tickHandler);
+			MinecraftForge.EVENT_BUS.register(tickHandler);
 		}
 		
 		path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
