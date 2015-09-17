@@ -21,30 +21,29 @@ import org.lwjgl.input.Mouse;
 
 public class ItemRPG extends GunCusItem {
 	public Item ammo;
-
+	
 	public ItemRPG(String iconName, String name, Item ammo) {
 		super(iconName, name);
 		setFull3D();
 		this.ammo = ammo;
 	}
-
+	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			doUpdate(itemStack, world, entity, par1, flag);
 		}
 	}
-
+	
 	@SideOnly(Side.CLIENT)
 	public void doUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		EntityPlayer entityPlayer = client.thePlayer;
-		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)
-				&& (entityPlayer.inventory.getCurrentItem().getItem() == this)) {
-
-			if ((GunCus.shootTime <= 0) && (Mouse.isButtonDown(0))
-					&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-					&& ((entityPlayer.inventory.hasItem(this.ammo)) || (entityPlayer.capabilities.isCreativeMode))) {
+		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() == this)) {
+			
+			if ( (GunCus.shootTime <= 0) && (Mouse.isButtonDown(0))
+			  && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+			  && (entityPlayer.inventory.hasItem(ammo) || entityPlayer.capabilities.isCreativeMode)) {
 				GunCus.shootTime += 140;
 				GunCus.reloading = true;
 				PacketHandler.sendToServer_playerAction_tube();
@@ -53,10 +52,10 @@ public class ItemRPG extends GunCusItem {
 			}
 		}
 	}
-
+	
 	private void recoilTube(EntityPlayer entityPlayer) {
 		float strength = 1.5F;
-
+		
 		entityPlayer.rotationPitch -= strength;
 		entityPlayer.rotationYaw -= (Item.itemRand.nextBoolean() ? strength / 2.0F : -strength / 2.0F);
 	}

@@ -36,7 +36,7 @@ public class ItemGun extends Item {
 	
 	public int shootType = 2;
 	
-	protected int actualType = 2;
+	protected int actualShootType = 2;
 	protected int burstCounter = 0;
 	protected int reloadBurst = 0;
 	protected boolean shot = false;
@@ -59,7 +59,7 @@ public class ItemGun extends Item {
 	public int[] barrels;
 	public int[] scopes;
 	public int barrelFactor;
-	public boolean tubing = false;
+	public boolean isInTubingMode = false;
 	public String pack;
 	public String soundNormal;
 	public String soundSilenced;
@@ -79,7 +79,7 @@ public class ItemGun extends Item {
 		maxStackSize = 1;
 		setFull3D();
 		shootType = parShootType;
-		actualType = parShootType;
+		actualShootType = parShootType;
 		delay = parDelay;
 		setMaxDamage(0);
 		setUnlocalizedName((parPack + "." + parName).replace(" ", "_"));
@@ -98,7 +98,7 @@ public class ItemGun extends Item {
 		if (canHaveStraightPullBolt()) {
 			soundNormal = "guncus:shoot_sniper";
 			shootType = 0;
-			actualType = 0;
+			actualShootType = 0;
 		} else {
 			soundNormal = "guncus:shoot_normal";
 		}
@@ -185,31 +185,36 @@ public class ItemGun extends Item {
 			}
 		}
 		
-		if ((GunCus.shootTime <= 0) && (Mouse.isButtonDown(0)) && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-				&& (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) && tubing) {
-			GunCus.shootTime += 95;
+		if ( (GunCus.shootTime <= 0)
+				&& Mouse.isButtonDown(0)
+				&& ((client.currentScreen == null) || Mouse.isButtonDown(1))
+				&& (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode)
+				&& isInTubingMode) {
+			GunCus.shootTime += 120;
 			GunCus.reloading = true;
 			PacketHandler.sendToServer_playerAction_tube();
 			recoilTube(entityPlayer);
 			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube")));
 		}
-		if ((GunCus.shootTime <= 0)
+		if ( (GunCus.shootTime <= 0)
 				&& (Mouse.isButtonDown(0))
-				&& (!this.shot)
-				&& ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
-				&& ((playerMag != null) || (entityPlayer.capabilities.isCreativeMode) || ((this.bullets != null) && (entityPlayer.inventory.hasItem((ItemBullet.bulletsList.get(pack))
-						.get(bullets[actualBullet]))))) && (!this.tubing)) {
+				&& (!shot)
+				&& ((client.currentScreen == null) || Mouse.isButtonDown(1))
+				&& ((playerMag != null) || (entityPlayer.capabilities.isCreativeMode)
+						|| ((bullets != null)
+								&& entityPlayer.inventory.hasItem((ItemBullet.bulletsList.get(pack)).get(bullets[actualBullet]))))
+				&& (!isInTubingMode)) {
 			GunCus.shootTime += this.delay;
 			this.reloadBurst = 0;
 			
-			if (this.actualType == 0) {
-				this.shot = true;
-			} else if (this.actualType == 1) {
-				if (this.burstCounter < 2) {
-					this.burstCounter += 1;
+			if (actualShootType == 0) {
+				shot = true;
+			} else if (actualShootType == 1) {
+				if (burstCounter < 2) {
+					burstCounter += 1;
 				} else {
-					this.burstCounter = 0;
-					this.shot = true;
+					burstCounter = 0;
+					shot = true;
 				}
 			}
 			
@@ -245,19 +250,19 @@ public class ItemGun extends Item {
 			recoil(entityPlayer, itemStack.getItemDamage(), Mouse.isButtonDown(1), damage1);
 		}
 		
-		if ((this.shot) && (!Mouse.isButtonDown(0))) {
-			this.shot = false;
+		if (shot && (!Mouse.isButtonDown(0))) {
+			shot = false;
 		}
 		
 		if (!hasM320(itemStack.getItemDamage())) {
-			this.tubing = false;
+			isInTubingMode = false;
 		}
 		
-		if ((this.burstCounter > 0) && (!Mouse.isButtonDown(0))) {
-			this.reloadBurst += 1;
-			if (this.reloadBurst >= this.delay * 3) {
-				this.burstCounter = 0;
-				this.reloadBurst = 0;
+		if ((burstCounter > 0) && (!Mouse.isButtonDown(0))) {
+			reloadBurst += 1;
+			if (reloadBurst >= delay * 3) {
+				burstCounter = 0;
+				reloadBurst = 0;
 			}
 		}
 		
@@ -271,40 +276,40 @@ public class ItemGun extends Item {
 			default:
 				entityPlayer.addChatComponentMessage(new ChatComponentText("The Fire mode of this gun can't be changed!"));
 				shootType = 0;
-				actualType = 0;
+				actualShootType = 0;
 				break;
 			
 			case 1:
-				switch (actualType) {
+				switch (actualShootType) {
 				case 0:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
-					actualType = 1;
+					actualShootType = 1;
 					break;
 					
 				case 1:
 				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
-					actualType = 0;
+					actualShootType = 0;
 					break;
 				}
 				break;
 			
 			case 2:
-				switch (actualType) {
+				switch (actualShootType) {
 				case 0:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Burst Mode!"));
-					actualType = 1;
+					actualShootType = 1;
 					break;
 					
 				case 1:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Auto Mode!"));
-					actualType = 2;
+					actualShootType = 2;
 					break;
 					
 				case 2:
 				default:
 					entityPlayer.addChatComponentMessage(new ChatComponentText("Switched To Single Mode!"));
-					actualType = 0;
+					actualShootType = 0;
 					break;
 				}
 				break;
@@ -318,20 +323,20 @@ public class ItemGun extends Item {
 			     && (GunCus.switchTime <= 0)
 			     && hasM320(itemStack.getItemDamage()) ) {
 			GunCus.switchTime = 20;
-			if (this.tubing) {
+			if (isInTubingMode) {
 				entityPlayer.addChatComponentMessage(new ChatComponentText("You are no longer using the M320!"));
-				this.tubing = false;
+				isInTubingMode = false;
 			} else {
 				entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using the M320!"));
-				this.tubing = true;
+				isInTubingMode = true;
 			}
 			
 			// Switching bullets
 		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
 			     && Keyboard.isKeyDown(Keyboard.KEY_G)
 			     && (GunCus.switchTime <= 0)
-			     && (this.bullets != null)
-			     && (this.bullets.length > 1) ) {
+			     && (bullets != null)
+			     && (bullets.length > 1) ) {
 			GunCus.switchTime = 20;
 			actualBullet += 1;
 			if (actualBullet >= bullets.length) {
