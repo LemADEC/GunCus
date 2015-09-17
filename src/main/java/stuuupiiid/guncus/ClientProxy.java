@@ -16,6 +16,7 @@ import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.entity.EntityGrenade;
 import stuuupiiid.guncus.entity.EntityBullet;
 import stuuupiiid.guncus.item.ItemGun;
+import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.render.RenderGrenade;
 import stuuupiiid.guncus.render.RenderBullet;
 
@@ -42,6 +43,9 @@ public class ClientProxy extends CommonProxy {
 		EntityPlayer entityPlayer = client.thePlayer;
 		
 		boolean hasGunInHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun);
+		boolean hasRPGinHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG);
+		boolean hasM320inHand = (entityPlayer.inventory.getCurrentItem() != null)
+				&& (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment) && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4);
 		ScaledResolution scale = new ScaledResolution(client, client.displayWidth,	client.displayHeight);
 		int scaledWidth = scale.getScaledWidth();
 		int scaledHeight = scale.getScaledHeight();
@@ -94,7 +98,7 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		// draw hit marker
-		if (hasGunInHand && (GunCus.hitmarker > 0) && (client.currentScreen == null)) {
+		if ((hasGunInHand || hasRPGinHand || hasM320inHand) && (GunCus.hitmarker > 0) && (client.currentScreen == null)) {
 			GunCus.hitmarker -= 1;
 			client.getTextureManager().bindTexture(new ResourceLocation("guncus:textures/sights/hitmarker.png"));
 			Tessellator tessellator = Tessellator.instance;
@@ -113,7 +117,7 @@ public class ClientProxy extends CommonProxy {
 		
 		// draw reloading overlay
 		Minecraft mc = Minecraft.getMinecraft();
-		if (hasGunInHand && GunCus.reloading) {
+		if ((hasGunInHand || hasRPGinHand || hasM320inHand) && GunCus.reloading) {
 			String text = "Reloading";
 			int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
 			float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / 95F));
@@ -123,7 +127,7 @@ public class ClientProxy extends CommonProxy {
 		}
 		
 		// draw delay for long downtime
-		if (hasGunInHand && !GunCus.reloading) {
+		if ((hasGunInHand || hasRPGinHand || hasM320inHand) && !GunCus.reloading) {
 			if (GunCus.shootTime > previousShootTime) {
 				previousShootTime = GunCus.shootTime;
 				startedShootTime = Math.max(GunCus.shootTime, startedShootTime);

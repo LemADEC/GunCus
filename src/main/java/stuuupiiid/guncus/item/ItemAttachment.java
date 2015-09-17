@@ -26,7 +26,7 @@ public class ItemAttachment extends ItemMetadata {
 	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient() && (itemStack.getItemDamage() == 3)) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient() && (itemStack.getItemDamage() == 4) && entity instanceof EntityPlayer) {
 			doUpdate(itemStack, world, entity, par1, flag);
 		}
 	}
@@ -38,12 +38,13 @@ public class ItemAttachment extends ItemMetadata {
 		if ( (entityPlayer != null)
 		  && (entityPlayer.inventory.getCurrentItem() != null)
 		  && (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
-		  && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 3)
+		  && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)
 		  && (GunCus.shootTime <= 0)
 		  && (Mouse.isButtonDown(0))
 		  && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
 		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) ) {
 			GunCus.shootTime += 95;
+			GunCus.reloading = true;
 			PacketHandler.sendToServer_playerAction_tube();
 			recoilTube(entityPlayer);
 			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource

@@ -33,31 +33,26 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 	
 	private void handle(EntityPlayerMP entityPlayer) {
 		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null)) {
-			if ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)) {
+			if (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun) {
 				ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 				int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
 				
-				if (gun.hasM320(metadata)
-						&& ((entityPlayer.inventory.hasItem(GunCus.ammoM320) && entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))
-								|| entityPlayer.capabilities.isCreativeMode)) {
+				if ( gun.hasM320(metadata)
+				  && (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) ) {
 					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}
 			} else if ((entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
-					&& (entityPlayer.inventory.getCurrentItem().getItemDamage() == 3)) {
-				if (entityPlayer.capabilities.isCreativeMode
-						|| (	entityPlayer.inventory.hasItem(GunCus.ammoM320)
-								&& entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320))) {
+					&& (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)) {
+				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) {
 					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}
-			} else if ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG)) {
+			} else if (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) {
 				ItemRPG rpg = (ItemRPG) entityPlayer.inventory.getCurrentItem().getItem();
-				if ((entityPlayer.capabilities.isCreativeMode)
-						|| ((entityPlayer.inventory.hasItem(rpg.ammo)) && (entityPlayer.inventory
-								.consumeInventoryItem(rpg.ammo)))) {
+				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(rpg.ammo)) {
 					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, true);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
@@ -69,7 +64,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 	@Override
 	public IMessage onMessage(MessageTubeShoot tubeShootMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received tubeShoot packet: (accuracy " + tubeShootMessage.accuracy);
+			GunCus.logger.info("Received tubeShoot packet: (accuracy " + tubeShootMessage.accuracy + ")");
 		}
 		
 		tubeShootMessage.handle(context.getServerHandler().playerEntity);
