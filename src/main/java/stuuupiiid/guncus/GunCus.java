@@ -444,7 +444,6 @@ public class GunCus {
 			if ((filePack.isDirectory()) && (!filePack.getName().equals("default"))) {
 				bullets(filePack.getAbsolutePath(), filePack.getName());
 				guns(filePack.getAbsolutePath(), filePack.getName());
-				sounds(filePack.getAbsolutePath());
 			}
 		}
 		
@@ -1003,23 +1002,6 @@ public class GunCus {
 				logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 			}
 			gunConfig.save();
-		}
-	}
-	
-	private void sounds(String stringPath) {
-		logger.info("Loading sounds for " + stringPath);
-		File fileSounds = new File(stringPath + "/assets/minecraft/sounds");
-		logger.info("fileSounds " + fileSounds);
-		
-		if (fileSounds.exists()) {
-			for (File file : fileSounds.listFiles()) {
-				if (file.getName().endsWith(".ogg") || (file.getName().endsWith(".wav") && (!file.getName().contains(" ")))) {
-					logger.info("(not implemented) Loading sound " + file.getName());
-					// FIXME: GunCusSound.addSound(f.getName());
-				}
-			}
-		} else {
-			logger.info("Could not load sounds!");
 		}
 	}
 	
