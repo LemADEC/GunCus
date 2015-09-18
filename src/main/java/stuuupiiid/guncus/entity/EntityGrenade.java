@@ -294,9 +294,11 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 								stateTicks = 0;
 								PacketHandler.sendToClient_syncEntity(this);
 							} else {
-								setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
+								posX = mopCollision.hitVec.xCoord - motionX;
+								posZ = mopCollision.hitVec.zCoord - motionY;
+								posY = mopCollision.hitVec.yCoord - motionZ;
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
-								// onBlockHit(mopCollision.hitVec);
+								// onBlockHit(mopCollision.hitVec, true);
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
@@ -316,7 +318,7 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
-						// onBlockHit(mopCollision.hitVec);
+						// onBlockHit(mopCollision.hitVec, false);
 						
 						// explode instantly if it's passed fuse duration
 						if (ticksExisted > 5) {
@@ -419,6 +421,12 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 		NBTTagCompound syncDataCompound = new NBTTagCompound();
 		syncDataCompound.setByte("state", (byte)state);
 		syncDataCompound.setInteger("stateTicks", stateTicks);
+		syncDataCompound.setDouble("posX", posX);
+		syncDataCompound.setDouble("posY", posY);
+		syncDataCompound.setDouble("posZ", posZ);
+		syncDataCompound.setDouble("motionX", motionX);
+		syncDataCompound.setDouble("motionY", motionY);
+		syncDataCompound.setDouble("motionZ", motionZ);
 		return syncDataCompound;
 	}
 	
@@ -426,6 +434,12 @@ public class EntityGrenade extends EntityArrow implements IProjectile, IEntityAd
 	public void readSyncDataCompound(NBTTagCompound syncDataCompound) {
 		state = syncDataCompound.getByte("state");
 		stateTicks = syncDataCompound.getInteger("stateTicks");
+		posX = syncDataCompound.getDouble("posX");
+		posY = syncDataCompound.getDouble("posY");
+		posZ = syncDataCompound.getDouble("posZ");
+		motionX = syncDataCompound.getDouble("motionX");
+		motionY = syncDataCompound.getDouble("motionY");
+		motionZ = syncDataCompound.getDouble("motionZ");
 	}
 	
 	@Override

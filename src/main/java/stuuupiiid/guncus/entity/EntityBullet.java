@@ -29,6 +29,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.world.BlockEvent;
@@ -139,7 +140,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f) * dRadToDegFactor));
 		}
 		
-		// Do collision resolution on server side only
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
@@ -246,7 +246,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 					
 					if ((damage > 0.0F) && (mopCollision.entityHit.attackEntityFrom(damagesource, damage))) {
 						
-						onEntityHit(mopCollision.entityHit);
+						onEntityHit(mopCollision.entityHit, mopCollision.hitVec);
 						
 						if (mopCollision.entityHit instanceof EntityLivingBase) {
 							if (!mopCollision.entityHit.isDead) {
@@ -288,12 +288,14 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 						PacketHandler.sendToClient_syncEntity(this);
 					} else {
 						// (not a valid entity target) Bouncing
-						setPosition(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 						motionX *= -0.1D;
 						motionY *= -0.1D;
 						motionZ *= -0.1D;
 						rotationYaw += 180.0F;
 						prevRotationYaw += 180.0F;
+						posX = mopCollision.hitVec.xCoord - motionX;
+						posZ = mopCollision.hitVec.zCoord - motionY;
+						posY = mopCollision.hitVec.yCoord - motionZ;
 						state = STATE_BOUNCING;
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
@@ -328,8 +330,11 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 								stateTicks = 0;
 								PacketHandler.sendToClient_syncEntity(this);
 							} else {
+								posX = mopCollision.hitVec.xCoord - motionX;
+								posZ = mopCollision.hitVec.zCoord - motionY;
+								posY = mopCollision.hitVec.yCoord - motionZ;
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
-								onBlockHit(mopCollision.hitVec);
+								onBlockHit(mopCollision.hitVec, true);
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
@@ -349,7 +354,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
-						onBlockHit(mopCollision.hitVec);
+						onBlockHit(mopCollision.hitVec, false);
 					}
 				}
 			}
@@ -418,11 +423,11 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		int i1 = MathHelper.floor_double(boundingBox.maxY - 0.001D);
 		int j1 = MathHelper.floor_double(boundingBox.maxZ - 0.001D);
 		
-		if (this.worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
+		if (worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
 			for (int k1 = i; k1 <= l; k1++) {
 				for (int l1 = j; l1 <= i1; l1++) {
 					for (int i2 = k; i2 <= j1; i2++) {
-						Block block = this.worldObj.getBlock(k1, l1, i2);
+						Block block = worldObj.getBlock(k1, l1, i2);
 						
 						// 20 Glass, 30 Cobweb, 89 Glowstone, 102 Glass pane 
 						if ((block != Blocks.air) && (block != Blocks.glass) && (block != Blocks.web) && (block != Blocks.glowstone) && (block != Blocks.glass_pane)) {
@@ -434,10 +439,27 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
-	public void onEntityHit(Entity entity) {
+	public void onEntityHit(Entity entity, Vec3 vecHit) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
+		
+		// particle effect at collision point
+		WorldServer[] worldServers = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers;
+		for (WorldServer worldServer : worldServers) {
+			if (worldObj.provider.dimensionId == worldServer.provider.dimensionId) {
+				worldServer.func_147487_a(
+						"blockcrack_" + Block.getIdFromBlock(Blocks.redstone_block) + "_" + 0,
+						vecHit.xCoord, vecHit.yCoord + 1.0, vecHit.zCoord,
+						5,
+						-0.05 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
+						-0.05 * MathHelper.sin(rotationPitch * fDegToRadFactor),
+						-0.05 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
+						0.0);
+			}
+		}
+		
+		// bullet effect upon first collision
 		if (!isFirstHit) {
 			return;
 		}
@@ -488,10 +510,27 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
-	public void onBlockHit(Vec3 vecHit) {
+	public void onBlockHit(Vec3 vecHit, boolean isBroken) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
+		
+		// particle effect at collision point
+		WorldServer[] worldServers = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers;
+		for (WorldServer worldServer : worldServers) {
+			if (worldObj.provider.dimensionId == worldServer.provider.dimensionId) {
+				worldServer.func_147487_a(
+						"blockcrack_" + Block.getIdFromBlock(blockCollided) + "_" + blockCollidedMetadata,
+						vecHit.xCoord, vecHit.yCoord, vecHit.zCoord,
+						isBroken ? 20 : 3,
+						-0.1 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
+						-0.1 * MathHelper.sin(rotationPitch * fDegToRadFactor),
+						-0.1 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
+						0.0);
+			}
+		}
+		
+		// bullet effect upon first collision
 		if (!isFirstHit) {
 			return;
 		}
@@ -553,6 +592,12 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		NBTTagCompound syncDataCompound = new NBTTagCompound();
 		syncDataCompound.setByte("state", (byte)state);
 		syncDataCompound.setInteger("stateTicks", stateTicks);
+		syncDataCompound.setDouble("posX", posX);
+		syncDataCompound.setDouble("posY", posY);
+		syncDataCompound.setDouble("posZ", posZ);
+		syncDataCompound.setDouble("motionX", motionX);
+		syncDataCompound.setDouble("motionY", motionY);
+		syncDataCompound.setDouble("motionZ", motionZ);
 		return syncDataCompound;
 	}
 	
@@ -560,6 +605,12 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	public void readSyncDataCompound(NBTTagCompound syncDataCompound) {
 		state = syncDataCompound.getByte("state");
 		stateTicks = syncDataCompound.getInteger("stateTicks");
+		posX = syncDataCompound.getDouble("posX");
+		posY = syncDataCompound.getDouble("posY");
+		posZ = syncDataCompound.getDouble("posZ");
+		motionX = syncDataCompound.getDouble("motionX");
+		motionY = syncDataCompound.getDouble("motionY");
+		motionZ = syncDataCompound.getDouble("motionZ");
 	}
 	
 	@Override
