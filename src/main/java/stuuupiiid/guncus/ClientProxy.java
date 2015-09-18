@@ -2,10 +2,8 @@ package stuuupiiid.guncus;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -114,7 +112,13 @@ public class ClientProxy extends CommonProxy {
 			} else if (GunCus.zoomLevel > newZoom) {
 				GunCus.zoomLevel = Math.max(newZoom, GunCus.zoomLevel - 0.5F);
 			}
-			ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
+			if (GunCus.cameraZoom != null) {
+				try {
+					GunCus.cameraZoom.set(client.entityRenderer, GunCus.zoomLevel);
+				} catch (Exception exception) {
+					exception.printStackTrace();
+				}
+			}
 			
 			client.getTextureManager().bindTexture(new ResourceLocation(sightTextureName));
 			Tessellator tessellator = Tessellator.instance;
@@ -133,7 +137,13 @@ public class ClientProxy extends CommonProxy {
 			} else if (GunCus.zoomLevel > newZoom) {
 				GunCus.zoomLevel = Math.max(newZoom, GunCus.zoomLevel - 2.5F);
 			}
-			ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, client.entityRenderer, GunCus.zoomLevel, new String[] { "cameraZoom", GunCus.cameraZoom });
+			if (GunCus.cameraZoom != null) {
+				try {
+					GunCus.cameraZoom.set(client.entityRenderer, GunCus.zoomLevel);
+				} catch (Exception exception) {
+					exception.printStackTrace();
+				}
+			}
 		}
 		
 		// draw hit marker

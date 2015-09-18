@@ -150,7 +150,7 @@ public class GunCus {
 				try {
 					cameraZoom = EntityRenderer.class.getDeclaredField("cameraZoom");
 				} catch (Exception exception) {
-					cameraZoom = EntityRenderer.class.getDeclaredField("Y");
+					cameraZoom = EntityRenderer.class.getDeclaredField("field_78503_V");
 				}
 				cameraZoom.setAccessible(true);
 			} catch (Exception exception) {
@@ -772,7 +772,9 @@ public class GunCus {
 			boolean defaultTexture = false;
 			String iconName;
 			if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
-				logger.info("[" + pack + "] The texture of the gun '" + name + "' is missing!");
+				if (!pack.equalsIgnoreCase("template")) {
+					logger.info("[" + pack + "] [" + name + "] Missing texture '" + name + "'!");
+				}
 				iconName = "guncus:gun_default/";
 				defaultTexture = true;
 			} else {
