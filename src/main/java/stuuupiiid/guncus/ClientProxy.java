@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 import org.lwjgl.input.Mouse;
 
@@ -34,25 +35,63 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EntityGrenade.class, new RenderGrenade());
 	}
 	
+	private static boolean hasGunInHand = false;
+	private static boolean hasRPGinHand = false;
+	private static boolean hasM320inHand = false;
+	private static boolean drawSight = false;
+	
 	@Override
-	public void sight() {
+	public void renderTickStart() {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		if (client.thePlayer == null) {
 			return;
 		}
 		EntityPlayer entityPlayer = client.thePlayer;
 		
-		boolean hasGunInHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun);
-		boolean hasRPGinHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG);
-		boolean hasM320inHand = (entityPlayer.inventory.getCurrentItem() != null)
+		hasGunInHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun);
+		hasRPGinHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG);
+		hasM320inHand = (entityPlayer.inventory.getCurrentItem() != null)
 				&& (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment) && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4);
+		drawSight = hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null);
+	}
+	
+	@Override
+	public boolean preRenderGameOverlay(ElementType type) {
+		if (drawSight) {
+			if ( type == ElementType.HELMET
+			  || type == ElementType.AIR
+			  || type == ElementType.ARMOR
+//			  || type == ElementType.BOSSHEALTH
+			  || type == ElementType.CROSSHAIRS
+			  || type == ElementType.EXPERIENCE
+			  || type == ElementType.FOOD
+			  || type == ElementType.HEALTH
+			  || type == ElementType.HEALTHMOUNT
+			  || type == ElementType.HOTBAR
+			  || type == ElementType.CHAT
+			  || type == ElementType.TEXT) {
+				// Don't render other GUI parts
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public void renderTickEnd() {
+		Minecraft client = FMLClientHandler.instance().getClient();
+		if (client.thePlayer == null) {
+			return;
+		}
+		EntityPlayer entityPlayer = client.thePlayer;
+		
 		ScaledResolution scale = new ScaledResolution(client, client.displayWidth,	client.displayHeight);
 		int scaledWidth = scale.getScaledWidth();
 		int scaledHeight = scale.getScaledHeight();
 		int xCenter = scaledWidth / 2;
 		int offset = scaledHeight * 2;
 		// draw sight
-		if (hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null)) {
+		if (drawSight) {
 			ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
 			ScopePart scopePart = gun.getScopePart(entityPlayer.inventory.getCurrentItem().getItemDamage());
 			String sightTextureName;

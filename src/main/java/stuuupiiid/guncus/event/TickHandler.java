@@ -9,6 +9,7 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
 import org.lwjgl.input.Keyboard;
@@ -21,21 +22,33 @@ import stuuupiiid.guncus.network.MessageClientValidation;
 import stuuupiiid.guncus.network.PacketHandler;
 
 public class TickHandler {
- 
+	
 	// Called when a new frame is displayed (See FPS)
 	@SubscribeEvent
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
-		if (event.phase == Phase.END) {
-			GunCus.commonProxy.sight();
+		if (event.phase == Phase.START) {
+			GunCus.commonProxy.renderTickStart();
+		} else if (event.phase == Phase.END) {
+			GunCus.commonProxy.renderTickEnd();
 		}
 	}
-
+	
+	// Client side
+	@SubscribeEvent
+	public void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
+		if (GunCus.commonProxy.preRenderGameOverlay(event.type)) {
+			if (event.isCancelable()) {
+				event.setCanceled(true);
+			}
+		}
+	}
+	
 	// Called when the server ticks. Usually 20 ticks a second.
 	@SubscribeEvent
 	public void onServerTick(TickEvent.ServerTickEvent event) {
-
+		
 	}
-
+	
 	// Called when the client ticks.
 	@SubscribeEvent
 	public void onClientTick(TickEvent.ClientTickEvent event) {
