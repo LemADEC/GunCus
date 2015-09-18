@@ -46,6 +46,9 @@ minecraft {
 
 version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?: 16}"
 
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
