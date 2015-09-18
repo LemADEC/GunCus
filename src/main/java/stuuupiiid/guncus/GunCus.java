@@ -10,15 +10,18 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
@@ -28,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
 import stuuupiiid.guncus.block.BlockAmmo;
 import stuuupiiid.guncus.block.BlockBullet;
 import stuuupiiid.guncus.block.BlockGun;
@@ -58,7 +60,7 @@ import stuuupiiid.guncus.network.PacketHandler;
  */
 @Mod(modid = GunCus.MODID, name = "Gun Customization", version = GunCus.VERSION, dependencies = "")
 public class GunCus {
-	public static final String MODID = "guncus";
+	public static final String MODID = "GunCus";
 	public static final String VERSION = "@version@";
 	
 	@SidedProxy(clientSide = "stuuupiiid.guncus.ClientProxy", serverSide = "stuuupiiid.guncus.CommonProxy")
@@ -81,17 +83,12 @@ public class GunCus {
 	public static int breathCounter = 0;
 	public static boolean reloading = false;
 	public static int hitmarker = 0;
-	public static String cameraZoom = "Y";
 	public static Item actualItem = null;
 	public static int actualIndex = 0;
 	
+	public static Field cameraZoom = null;
+	
 	public LinkedList<ItemGun> guns = new LinkedList<ItemGun>();
-	
-	public static int check = 300;
-	
-	private List<String> loadedGuns = new ArrayList();
-	private List<String> loadedBullets = new ArrayList();
-	public static File path;
 	
 	@Mod.Instance(GunCus.MODID)
 	public static GunCus instance;
@@ -146,6 +143,18 @@ public class GunCus {
 				((List) field.get(Minecraft.getMinecraft())).add(myResourceLoader);
 			} catch (Exception exception) {
 				logger.info("Failed to get the classloader; the textures wont work!");
+				exception.printStackTrace();
+			}
+			
+			try {
+				try {
+					cameraZoom = EntityRenderer.class.getDeclaredField("cameraZoom");
+				} catch (Exception exception) {
+					cameraZoom = EntityRenderer.class.getDeclaredField("Y");
+				}
+				cameraZoom.setAccessible(true);
+			} catch (Exception exception) {
+				logger.info("Failed to get the cameraZoom field; scopes wont work!");
 				exception.printStackTrace();
 			}
 		}
@@ -230,7 +239,7 @@ public class GunCus {
 			MinecraftForge.EVENT_BUS.register(tickHandler);
 		}
 		
-		path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
+		File path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
 		
 		if (!path.exists()) {
 			path.mkdirs();
@@ -442,188 +451,78 @@ public class GunCus {
 	}
 	
 	private void loadGunPacks(File fileGunCus) {
-		defaultPack(fileGunCus);
+		createTemplatePack(fileGunCus);
 		
 		for (File filePack : fileGunCus.listFiles()) {
-			if ((filePack.isDirectory()) && (!filePack.getName().equals("default"))) {
-				bullets(filePack.getAbsolutePath(), filePack.getName());
-				guns(filePack.getAbsolutePath(), filePack.getName());
+			if (filePack.isDirectory() && (!filePack.getName().equalsIgnoreCase("template"))) {
+				logger.info("Loading pack " + filePack.getName());
+				loadBullets(filePack.getAbsolutePath(), filePack.getName());
+				loadGuns(filePack.getAbsolutePath(), filePack.getName());
 			}
-		}
-		
-		if (this.loadedBullets.size() > 0) {
-			logger.info("");
-			logger.info("The GunCus addon found the following bullet files:");
-			
-			for (int v1 = 0; v1 < loadedBullets.size(); v1++) {
-				logger.info(loadedBullets.get(v1));
-			}
-		}
-		
-		if (this.loadedGuns.size() > 0) {
-			logger.info("");
-			logger.info("The GunCus addon found the following gun files:");
-			
-			for (int v1 = 0; v1 < loadedGuns.size(); v1++) {
-				logger.info(loadedGuns.get(v1));
-			}
-		}
-		
-		if ((loadedBullets.size() > 0) || (loadedGuns.size() > 0)) {
-			logger.info("");
 		}
 	}
 	
-	private void defaultPack(File fileGunCus) {
-		File fileDefault = new File(fileGunCus, "/default");
-		if (!fileDefault.exists()) {
-			fileDefault.mkdirs();
+	private void createTemplatePack(File fileGunCus) {
+		File fileTemplate = new File(fileGunCus, "/template");
+		if (!fileTemplate.exists()) {
+			fileTemplate.mkdirs();
 		}
 		
-		// default bullet configuration
-		File bulletConfigFile = new File(fileDefault.getAbsolutePath() + "/bullets/default.cfg");
-		Configuration bulletConfig = new Configuration(bulletConfigFile);
-		Property idProp = bulletConfig.get("general", "ID", 1010);
-		idProp.comment = "Item ID of the bullet";
+		// create template bullet from default configuration
+		File fileBulletConfig = new File(fileTemplate.getAbsolutePath() + "/bullets/default.cfg");
+		loadBullet("template", fileBulletConfig);
 		
-		Property bulProp = bulletConfig.get("general", "BulletID", 1);
-		bulProp.comment = "Bullet ID of the bullet";
+		// create template gun from default configuration
+		File fileGunConfig = new File(fileTemplate + "/guns/default.cfg");
+		loadGun("template", fileGunConfig);
 		
-		Property ironProp = bulletConfig.get("general", "Iron", 1);
-		ironProp.comment = "How much iron you need to craft this bullet type";
-		
-		Property sulProp = bulletConfig.get("general", "Gunpowder", 3);
-		sulProp.comment = "How much gunpowder you need to craft this bullet type";
-		
-		Property stackProp = bulletConfig.get("general", "stackSize", 4);
-		stackProp.comment = "How much bullets you get at a time by crafting this bullet type";
-		
-		Property nameProp = bulletConfig.get("general", "Name", "default");
-		nameProp.comment = "Name of the bullet";
-		
-		Property iconProp = bulletConfig.get("general", "Icon", "");
-		iconProp.comment = "Texture of this bullet. Leave blank for default";
-		
-		Property splitProp = bulletConfig.get("general", "Split", 1);
-		splitProp.comment = "How much bullets being shot at a time.";
-		
-		Property sprayProp = bulletConfig.get("general", "Spray", 100);
-		sprayProp.comment = "Maximum accuracy when using this bullet in percent. 100 = perfect accuracy. 30 = shotgun spray.";
-		
-		Property onImpactProp = bulletConfig.get("general", "Impact", "");
-		onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
-				+ "\n'X' and 'Y' are modifiers."
-				+ "\n1:X = Poison for X seconds"
-				+ "\n2:X = Nausea for X seconds"
-				+ "\n3:X = Fire for X seconds"
-				+ "\n4:X = Explosion of X Strength (3 is TnT, 7 is RPG, 4.5 is M320)"
-				+ "\n5:X = Explosion without Block Damage of X Strength"
-				+ "\n6:X = Heal of X points"
-				+ "\n7:X = Blindness for X seconds"
-				+ "\n8:X = Instant damage (harm) of X damages"
-				+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds.";
-		
-		Property gravityProp = bulletConfig.get("general", "GravityModifier", 1.0D);
-		gravityProp.comment = "Modifies the applied gravity of a bullet.\nApplied Gravity is Gravity x GravityModifier";
-		
-		Property damageProp = bulletConfig.get("general", "Damage Modifier", 1.0D);
-		damageProp.comment = "Applied damage is Gun Damage * Damage Modifier";
-		bulletConfig.save();
-		
-		// default gun configuration
-		File gunConfigFile = new File(fileDefault + "/guns/default.cfg");
-		Configuration gunConfig = new Configuration(gunConfigFile);
-		
-		Property idMagProp = gunConfig.get("general", "Mag ID", 1000);
-		idMagProp.comment = "ID of the magazines. Should be 1 lower than the gun's ID";
-		
-		Property idProp2 = gunConfig.get("general", "ID", 1001);
-		idProp2.comment = "ID of the gun";
-		
-		Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
-		shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
-		
-		Property delayProp = gunConfig.get("general", "Delay", 3);
-		delayProp.comment = "Delay between shots of the gun (in ticks)";
-		
-		Property magProp = gunConfig.get("general", "Magsize", 1);
-		magProp.comment = "Size of the magazines";
-		
-		Property magIngotProp = gunConfig.get("general", "Mag Ingots", 1);
-		magIngotProp.comment = "Number of iron ingots a mag needs to be crafted";
-		
-		Property ingotProp = gunConfig.get("general", "Iron Ingots", 1);
-		ingotProp.comment = "Number of iron ingots this gun needs to be crafted";
-		
-		Property redProp = gunConfig.get("general", "Redstone", 1);
-		redProp.comment = "Number of redstone this gun needs to be crafted";
-		
-		Property nameProp2 = gunConfig.get("general", "Name", "default");
-		nameProp2.comment = "Name of the gun";
-		
-		Property bulletProp = gunConfig.get("general", "Bullets", "1");
-		bulletProp.comment = "Semicolon separated list of bullet IDs for this gun."
-				+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!";
-		
-		Property usingMagProp = gunConfig.get("general", "UsingMags", true);
-		usingMagProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
-		
-		Property iconProp2 = gunConfig.get("general", "Texture", "");
-		iconProp2.comment = "The texture of the gun. Leave blanc for default";
-		
-		Property recProp = gunConfig.get("general", "RecoilModifier", 1.0D);
-		recProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
-		
-		Property sound_normalP = gunConfig.get("general", "NormalSound", "Sound_DERP2");
-		sound_normalP.comment = "The sound being used when shooting the gun. Only .ogg or .wav!!! Leave blanc for default";
-		
-		Property sound_silencedP = gunConfig.get("general", "SilencedSound", "");
-		sound_silencedP.comment = "The sound being used when shooting the gun that has a silencer. Only .ogg or .wav!!! Leave blanc for default";
-		
-		Property sndProp = gunConfig.get("general", "SoundModifier", 1.0D);
-		sndProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots).\nDefault Sound Volume x SoundModifier = Used Sound Volume";
-		
-		Property extra1Prop = gunConfig.get("general", "Attachments", "1;3;2;6");
-		extra1Prop.comment = "Semicolon separated list of attachments valid on this gun."
-				+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
-				+ "\n6 = Improved Grip | 7 = Laser Pointer.";
-		
-		Property bar1Prop = gunConfig.get("general", "Barrels", "1;2;3");
-		bar1Prop.comment = "Semicolon separated list of barrels valid on this gun."
-				+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.";
-		
-		Property scopesProp = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
-		scopesProp.comment = "Semicolon separated list of scopes valid on this gun."
-				+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
-				+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
-				+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.";
-		
-		Property defaultZoomProp = gunConfig.get("general", "Zoom", 1.0D);
-		defaultZoomProp.comment = "Zoom factor without any scope. Default 1.0";
-		
-		Property damageProp2 = gunConfig.get("general", "Damage", 6);
-		damageProp2.comment = "Damage dealt (1 is half a heart)";
-		gunConfig.save();
-		
-		File textures = new File(fileDefault.getAbsolutePath() + "/assets/minecraft/textures");
-		if (!textures.exists()) {
-			textures.mkdirs();
+		File fileTextures = new File(fileTemplate.getAbsolutePath() + "/textures");
+		if (!fileTextures.exists()) {
+			fileTextures.mkdirs();
 		}
-		File items = new File(textures.getAbsolutePath() + "/items");
-		if (!items.exists()) {
-			items.mkdirs();
+		File fileItems = new File(fileTextures.getAbsolutePath() + "/items");
+		if (!fileItems.exists()) {
+			fileItems.mkdirs();
 		}
-		File blocks = new File(textures.getAbsolutePath() + "/blocks");
-		if (!blocks.exists()) {
-			blocks.mkdirs();
+		
+		File fileLang = new File(fileTemplate.getAbsolutePath() + "/lang");
+		if (!fileLang.exists()) {
+			fileLang.mkdirs();
 		}
-		File sounds = new File(fileDefault.getAbsolutePath() + "/assets/minecraft/sounds");
+		File fileLangENUS = new File(fileTemplate + "/lang/en_US.lang");
+		if (!fileLangENUS.exists()) {
+			try {
+				FileUtils.writeStringToFile(fileLangENUS, "item._YourPackName_.bullet._BulletUnlocalizedName_.name=.45 ACP"
+						+ "\n"
+						+ "\nitemGroup._YourPackName_._GunUnlocalizedName_=AK-47"
+						+ "\nitem._YourPackName_._GunUnlocalizedName_.name=AK-47"
+						+ "\nitem._YourPackName_._GunUnlocalizedName_.magazine.name=AK-47 magazine"
+						+ "\n", "utf-8");
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
+		
+		File sounds = new File(fileTemplate.getAbsolutePath() + "/sounds");
 		if (!sounds.exists()) {
 			sounds.mkdirs();
 		}
+		File fileSoundsJSON = new File(fileTemplate + "/sounds.json");
+		if (!fileSoundsJSON.exists()) {
+			try {
+				FileUtils.writeStringToFile(fileSoundsJSON, "{"
+						+ "\n   \"_EventNameWithoutNumbers_\": {\"category\": \"master\", \"sounds\": [{\"name\": \"_OGGsoundFileNameWithoutNumbers_\", \"stream\": false}]},"
+						+ "\n   \"akfortyseven\": {\"category\": \"master\", \"sounds\": [{\"name\": \"akfortyseven\", \"stream\": false}]},"
+						+ "\n   \"akfortysevensilencer\": {\"category\": \"master\", \"sounds\": [{\"name\": \"akfortysevensilencer\", \"stream\": false}]}"
+						+ "\n}"
+						+ "\n", "utf-8");
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		}
 	}
 	
-	private void bullets(String packPath, String pack) {
+	private void loadBullets(String packPath, String pack) {
 		File fileBullets = new File(packPath + "/bullets");
 		fileBullets.mkdirs();
 		File[] filesFound = fileBullets.listFiles();
@@ -636,86 +535,69 @@ public class GunCus {
 		}
 		
 		for (File file : files) {
-			Configuration configBullet = new Configuration(file);
-			configBullet.load();
-			
-			Property bulletIdProp = configBullet.get("general", "Bullet ID", 1);
-			bulletIdProp.comment = "Bullet ID of the bullet (guns refer to bullet by this ID)";
-			
-			Property ironProp = configBullet.get("general", "Iron", 1);
-			ironProp.comment = "How much iron ingots you need to craft this bullet type";
-			
-			Property gunpowderProp = configBullet.get("general", "Gunpowder", 3);
-			gunpowderProp.comment = "How much gunpowder you need to craft this bullet type";
-			
-			Property stackProp = configBullet.get("general", "stackSize", 4);
-			stackProp.comment = "How much bullets you get at a time by crafting this bullet type";
-			
-			Property nameProp = configBullet.get("general", "Name", "default");
-			nameProp.comment = "Name of the bullet";
-			
-			Property iconProp = configBullet.get("general", "Icon", "");
-			iconProp.comment = "Texture of this bullet. Leave blanc for default";
-			
-			Property splitProp = configBullet.get("general", "Split", 1);
-			splitProp.comment = "How much bullets are being shot at a time (only one ammo is consumed)";
-			
-			Property sprayProp = configBullet.get("general", "Spray", 100);
-			sprayProp.comment = "Maximum accuracy by using this bullet in %. 100 is perfect accuracy while 30 is a shotgun spray.";
-			
-			Property textureProp = configBullet.get("general", "Texture", 0);
-			textureProp.comment = "Texture variation of the bullet (0 to 5). 0 is normal, 1 is poison/rust, 2 is purple, 3 is red, 4 is fat metal, 5 is needle green.";
-			
-			Property onImpactProp = configBullet.get("general", "Impact", "");
-			onImpactProp.comment = "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
-					+ "\n'X' and 'Y' are modifiers."
-					+ "\n1:X = Poison for X seconds"
-					+ "\n2:X = Nausea for X seconds"
-					+ "\n3:X = Fire for X seconds"
-					+ "\n4:X = Explosion of X Strength (3 is TnT, 7 is RPG, 4.5 is M320)"
-					+ "\n5:X = Explosion without Block Damage of X Strength"
-					+ "\n6:X = Heal of X points"
-					+ "\n7:X = Blindness for X seconds"
-					+ "\n8:X = Instant damage (harm) of X damages"
-					+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds"
-					+ "\n10:X:Y = knockback +X horizontally +Y vertically.";
-			
-			Property gravityModifierProp = configBullet.get("general", "GravityModifier", 1.0D);
-			gravityModifierProp.comment = "Applied gravity is (normal gravity) x gun.Gravity x bullet.GravityModifier";
-			
-			Property damageModifierProp = configBullet.get("general", "Damage Modifier", 1.0D);
-			damageModifierProp.comment = "Applied damage is Gun Damage x Damage Modifier";
-			
-			float damageModifier = (float) damageModifierProp.getDouble(1.0D);
-			int bulletId = bulletIdProp.getInt(1);
-			int texture = textureProp.getInt(0);
-			int ironIngot = ironProp.getInt(1);
-			int gunpowder = gunpowderProp.getInt(3);
-			int stackOnCreate = stackProp.getInt(4);
-			String name = nameProp.getString();
-			String iconName = iconProp.getString();
-			String[] effects = onImpactProp.getString().split(";");
-			int split = splitProp.getInt(1);
-			int spray = sprayProp.getInt(100);
-			double gravityModifier = gravityModifierProp.getDouble(1.0D);
-			
-			if (!ItemBullet.bulletsList.containsKey(pack)) {
-				ItemBullet.bulletsList.put(pack, new ArrayList());
+			loadBullet(pack, file);
+		}
+	}
+	
+	private void loadBullet(String pack, File file) {
+		Configuration configBullet = new Configuration(file);
+		configBullet.load();
+		
+		int bulletId = configBullet.get("general", "Bullet ID", 1, "Bullet ID of the bullet (guns refer to bullet by this ID)").getInt();
+		
+		int ironIngot = configBullet.get("general", "Iron", 1, "How much iron ingots you need to craft this bullet type").getInt();
+		
+		int gunpowder = configBullet.get("general", "Gunpowder", 3, "How much gunpowder you need to craft this bullet type").getInt();
+		
+		int stackOnCreate = configBullet.get("general", "stackSize", 4, "How much bullets you get at a time by crafting this bullet type").getInt();
+		
+		String name = configBullet.get("general", "Name", "default", "Name of the bullet").getString();;
+		
+		String iconName = configBullet.get("general", "Icon", "", "Texture of this bullet. Leave blanc for default").getString();
+		
+		int split = configBullet.get("general", "Split", 1, "How much bullets are being shot at a time (only one ammo is consumed)").getInt();
+		
+		int spray = configBullet.get("general", "Spray", 100, "Maximum accuracy by using this bullet in %. 100 is perfect accuracy while 30 is a shotgun spray.").getInt();
+		
+		int texture = configBullet.get("general", "Texture", 0, "Texture variation of the bullet (0 to 5)."
+				+ "\n0 is normal, 1 is poison/rust, 2 is purple, 3 is red, 4 is fat metal, 5 is needle green.").getInt(0);;
+		
+		String[] effects = configBullet.get("general", "Impact", "", "Semicolon separated list of effects on impact. Example: \"1:3;2:3;4:1.0;5:3.5;7:10\""
+				+ "\n'X' and 'Y' are modifiers."
+				+ "\n1:X = Poison for X seconds"
+				+ "\n2:X = Nausea for X seconds"
+				+ "\n3:X = Fire for X seconds"
+				+ "\n4:X = Explosion of X Strength (3 is TnT, 7 is RPG, 4.5 is M320)"
+				+ "\n5:X = Explosion without Block Damage of X Strength"
+				+ "\n6:X = Heal of X points"
+				+ "\n7:X = Blindness for X seconds"
+				+ "\n8:X = Instant damage (harm) of X damages"
+				+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds"
+				+ "\n10:X:Y = knockback +X horizontally +Y vertically.").getString().split(";");
+		
+		double gravityModifier = configBullet.get("general", "GravityModifier", 1.0D, "Applied gravity is (normal gravity) x gun.Gravity x bullet.GravityModifier").getDouble();
+		
+		float damageModifier = (float) configBullet.get("general", "Damage Modifier", 1.0D, "Applied damage is Gun Damage x Damage Modifier").getDouble();
+		
+		if (!ItemBullet.bulletsList.containsKey(pack)) {
+			ItemBullet.bulletsList.put(pack, new ArrayList());
+		}
+		
+		if ( (name != null)
+		  && (bulletId > 0)
+		  && (ironIngot >= 0)
+		  && (gunpowder >= 0)
+		  && ((ironIngot > 0) || (gunpowder > 0))
+		  && (stackOnCreate > 0)
+		  && ( ( (ItemBullet.bulletsList.get(pack).size() > bulletId) && (ItemBullet.bulletsList.get(pack).get(bulletId) == null) )
+			|| (ItemBullet.bulletsList.get(pack).size() <= bulletId) ) ) {
+			if (iconName.equals("") || iconName.equals(" ")) {
+				iconName = "guncus:bullet";
+			} else {
+				iconName = pack + ":bullets/" + iconName;
 			}
 			
-			if ( (name != null)
-			  && (bulletId > 0)
-			  && (ironIngot >= 0)
-			  && (gunpowder >= 0)
-			  && ((ironIngot > 0) || (gunpowder > 0))
-			  && (stackOnCreate > 0)
-			  && ( ( (ItemBullet.bulletsList.get(pack).size() > bulletId) && (ItemBullet.bulletsList.get(pack).get(bulletId) == null) )
-				|| (ItemBullet.bulletsList.get(pack).size() <= bulletId) ) ) {
-				if (iconName.equals("") || iconName.equals(" ")) {
-					iconName = "guncus:bullet";
-				} else {
-					iconName = pack + ":bullets/" + iconName;
-				}
+			if (!pack.equalsIgnoreCase("template")) {
 				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
@@ -738,16 +620,16 @@ public class GunCus {
 					}
 				}
 				
-				loadedBullets.add(" - " + name + " (Pack " + pack + ", Bullet ID " + bulletId + ")");
-			} else {
-				logger.info("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
+				logger.info("Added bullet #" + bulletId + ": "+ name);
 			}
-			
-			configBullet.save();
+		} else {
+			logger.info("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 		}
+		
+		configBullet.save();
 	}
 	
-	private void guns(final String packPath, final String pack) {
+	private void loadGuns(final String packPath, final String pack) {
 		File fileGuns = new File(packPath + "/guns");
 		fileGuns.mkdirs();
 		File[] filesFound = fileGuns.listFiles();
@@ -760,217 +642,179 @@ public class GunCus {
 		}
 		
 		for (File file : files) {
-			Configuration gunConfig = new Configuration(file);
-			gunConfig.load();
-			
-			int intMagBulletId = -1;
-			
-			Property shootTypeProp = gunConfig.get("general", "Shoot", 2);
-			shootTypeProp.comment = "0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting";
-			
-			Property delayProp = gunConfig.get("general", "Delay", 3);
-			delayProp.comment = "Delay between shots of the gun (in ticks)";
-			
-			Property magSizeProp = gunConfig.get("general", "Magsize", 1);
-			magSizeProp.comment = "Size of the magazines";
-			
-			Property magIngotsProp = gunConfig.get("general", "Mag Ingots", 1);
-			magIngotsProp.comment = "Number of iron ingots a mag needs to be crafted";
-			
-			Property gunIngotsProp = gunConfig.get("general", "Iron Ingots", 1);
-			gunIngotsProp.comment = "Number of iron ingots this gun needs to be crafted";
-			
-			Property gunRedstoneProp = gunConfig.get("general", "Redstone", 1);
-			gunRedstoneProp.comment = "Number of redstone this gun needs to be crafted";
-			
-			Property nameProp = gunConfig.get("general", "Name", "default");
-			nameProp.comment = "Name of the gun";
-			
-			Property bulletsProp = gunConfig.get("general", "Bullets", "1");
-			bulletsProp.comment = "Semicolon separated list of bullet IDs for this gun."
-					+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!";
-			
-			Property usingMagsProp = gunConfig.get("general", "UsingMags", true);
-			usingMagsProp.comment = "Does this gun use magazines? False, if the gun is for example a shotgun.";
-			
-			Property iconProp = gunConfig.get("general", "Texture", "");
-			iconProp.comment = "Texture of the gun. Leave blanc for default";
-			
-			Property recoilModifierProp = gunConfig.get("general", "RecoilModifier", 1.0D);
-			recoilModifierProp.comment = "This modifies the recoil. | Recoil x RecoilModifier = Applied Recoil";
-			
-			Property sound_normalProp = gunConfig.get("general", "NormalSound", "Sound_DERP2");
-			sound_normalProp.comment = "Sound played when shooting. Only .ogg or .wav!!! Leave blanc for default";
-			
-			Property sound_silencedProp = gunConfig.get("general", "SilencedSound", "");
-			sound_silencedProp.comment = "Sound played when shooting while gun has a silencer. Only .ogg or .wav!!! Leave blanc for default";
-			
-			Property soundModifierProp = gunConfig.get("general", "SoundModifier", 1.0D);
-			soundModifierProp.comment = "Modifies the sound volume (does not affect the volume of silenced shots). | Default Sound Volume x SoundModifier = Used Sound Volume";
-			
-			Property attachmentsProp = gunConfig.get("general", "Attachments", "1;3;2;6");
-			attachmentsProp.comment = "Semicolon separated list of attachments valid on this gun."
-					+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
-					+ "\n6 = Improved Grip | 7 = Laser Pointer.";
-			
-			Property barrelsProp = gunConfig.get("general", "Barrels", "1;2;3");
-			barrelsProp.comment = "Semicolon separated list of barrels valid on this gun."
-					+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.";
-			
-			Property scopesProp = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13");
-			scopesProp.comment = "Semicolon separated list of scopes valid on this gun."
-					+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
-					+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
-					+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.";
-			
-			Property defaultZoomProp = gunConfig.get("general", "Zoom", 1.0D);
-			defaultZoomProp.comment = "Zoom factor without any scope. Default 1.0";
-			
-			Property damageProp = gunConfig.get("general", "Damage", 6);
-			damageProp.comment = "Damage dealth (1 is half a heart)";
-			
-			int shootType = shootTypeProp.getInt(2);
-			int delay = delayProp.getInt(3);
-			int magSize = magSizeProp.getInt(1);
-			String[] stringBullets = bulletsProp.getString().split(";");
-			int magIronIngots = magIngotsProp.getInt(1);
-			int gunIronIngots = gunIngotsProp.getInt(1);
-			int gunRedstone = gunRedstoneProp.getInt(1);
-			String name = nameProp.getString();
-			String stringIcon = iconProp.getString();
-			double recoilModifier = recoilModifierProp.getDouble(1.0D);
-			double soundModifier = soundModifierProp.getDouble(1.0D);
-			String sound_normal = sound_normalProp.getString();
-			String sound_silenced = sound_silencedProp.getString();
-			String[] stringAttachments = attachmentsProp.getString().split(";");
-			String[] stringBarrels = barrelsProp.getString().split(";");
-			String[] stringScopes = scopesProp.getString().split(";");
-			
-			float zoom = (float) defaultZoomProp.getDouble(1.1D);
-			boolean usingMag = usingMagsProp.getBoolean(true);
-			
-			int damage = damageProp.getInt(6);
-			
-			if (soundModifier < 1.E-005D) {
-				soundModifier = 1.E-005D;
-			}
-			
-			if (soundModifier > 20.0D) {
-				soundModifier = 20.0D;
-			}
-			
-			boolean errored = false;
-			if (shootType < 0 || shootType > 2) {
-				logger.error("[" + pack + "] [" + name + "] Invalid shootType '" + shootType + "', expecting 0, 1 or 2");
-				errored = true;
-			}
-			if (delay < 0) {
-				logger.error("[" + pack + "] [" + name + "] Invalid delay '" + delay + "', expecting a positive or nul value");
-				errored = true;
-			}
-			if (gunIronIngots <= 0) {
-				logger.error("[" + pack + "] [" + name + "] Invalid Iron Ingots '" + gunIronIngots + "', expecting at least 1");
-				errored = true;
-			}
-			if (gunRedstone < 0) {
-				logger.error("[" + pack + "] [" + name + "] Invalid Redstone '" + gunRedstone + "', expecting a positive or nul value");
+			loadGun(pack, file);
+		}
+	}
+
+	private void loadGun(final String pack, File file) {
+		Configuration gunConfig = new Configuration(file);
+		gunConfig.load();
+		
+		int shootType = gunConfig.get("general", "Shoot", 2, "Shooting type. Higher values are cumulative."
+				+ "\n0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting").getInt();
+		
+		int delay = gunConfig.get("general", "Delay", 3, "Delay between shots of the gun (in ticks)").getInt();
+		
+		int magSize = gunConfig.get("general", "Magsize", 1, "Size of the magazines").getInt();
+		
+		int magIronIngots = gunConfig.get("general", "Mag Ingots", 1, "Number of iron ingots a mag needs to be crafted").getInt();
+		
+		int gunIronIngots = gunConfig.get("general", "Iron Ingots", 1, "Number of iron ingots this gun needs to be crafted").getInt();
+		
+		int gunRedstone = gunConfig.get("general", "Redstone", 1, "Number of redstone this gun needs to be crafted").getInt();
+		
+		String name = gunConfig.get("general", "Name", "default", "Name of the gun").getString();
+		
+		String[] stringBullets = gunConfig.get("general", "Bullets", "1", "Semicolon separated list of bullet IDs for this gun."
+				+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!").getString().split(";");
+		
+		boolean usingMag = gunConfig.get("general", "UsingMags", true, "Does this gun use magazines? False, if the gun is for example a shotgun.").getBoolean();
+		
+		String stringIcon = gunConfig.get("general", "Texture", "", "Texture of the gun. Leave blanc for default").getString();
+		
+		double recoilModifier = gunConfig.get("general", "RecoilModifier", 1.0D, "Defines the gun base recoil."
+				+ "\nApplied recoil is gun.RecoilModifier x bullet.RecoilModifier.").getDouble();
+		
+		String sound_normal = gunConfig.get("general", "NormalSound", "Sound_DERP2", "Sound played when shooting."
+				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
+				+ "\nLeave blanc for default").getString();
+		
+		String sound_silenced = gunConfig.get("general", "SilencedSound", "", "Sound event played when shooting while gun has a silencer."
+				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
+				+ "\nLeave blanc for default").getString();
+		
+		double soundModifier = gunConfig.get("general", "SoundModifier", 1.0D, "Modifies the sound volume (does not affect the volume of silenced shots)."
+				+ "\nDefault Sound Volume x SoundModifier = Used Sound Volume").getDouble();
+		
+		String[] stringAttachments = gunConfig.get("general", "Attachments", "1;3;2;6", "Semicolon separated list of attachments valid on this gun."
+				+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
+				+ "\n6 = Improved Grip | 7 = Laser Pointer.").getString().split(";");
+		
+		String[] stringBarrels = gunConfig.get("general", "Barrels", "1;2;3", "Semicolon separated list of barrels valid on this gun."
+				+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.").getString().split(";");
+		
+		String[] stringScopes = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13", "Semicolon separated list of scopes valid on this gun."
+				+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
+				+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
+				+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.").getString().split(";");
+		
+		float zoom = (float) gunConfig.get("general", "Zoom", 1.0F, "Zoom factor without any scope. Default 1.0").getDouble();
+		
+		int damage = gunConfig.get("general", "Damage", 6, "Damage dealth (1 is half a heart)").getInt();
+		
+		if (soundModifier < 1.E-005D) {
+			soundModifier = 1.E-005D;
+		}
+		
+		if (soundModifier > 20.0D) {
+			soundModifier = 20.0D;
+		}
+		
+		boolean errored = false;
+		if (shootType < 0 || shootType > 2) {
+			logger.error("[" + pack + "] [" + name + "] Invalid shootType '" + shootType + "', expecting 0, 1 or 2");
+			errored = true;
+		}
+		if (delay < 0) {
+			logger.error("[" + pack + "] [" + name + "] Invalid delay '" + delay + "', expecting a positive or nul value");
+			errored = true;
+		}
+		if (gunIronIngots <= 0) {
+			logger.error("[" + pack + "] [" + name + "] Invalid Iron Ingots '" + gunIronIngots + "', expecting at least 1");
+			errored = true;
+		}
+		if (gunRedstone < 0) {
+			logger.error("[" + pack + "] [" + name + "] Invalid Redstone '" + gunRedstone + "', expecting a positive or nul value");
+			errored = true;
+		}
+		
+		int[] intBullets;
+		intBullets = new int[stringBullets.length];
+		for (int indexBullet = 0; indexBullet < stringBullets.length; indexBullet++) {
+			try {
+				intBullets[indexBullet] = Integer.parseInt(stringBullets[indexBullet]);
+			} catch (Exception exception) {
+				logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
+						+ "\"! Caused by: \"" + stringBullets[indexBullet] + "\"!");
 				errored = true;
 			}
 			
-			int[] intBullets;
-			if (!usingMag) {
-				intMagBulletId = -1;
-				intBullets = new int[stringBullets.length];
-				for (int indexBullet = 0; indexBullet < stringBullets.length; indexBullet++) {
-					try {
-						intBullets[indexBullet] = Integer.parseInt(stringBullets[indexBullet]);
-					} catch (Exception exception) {
-						logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
-								+ "\"! Caused by: \"" + stringBullets[indexBullet] + "\"!");
-						errored = true;
-					}
-					
-					if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intBullets[indexBullet]) == null) {
-						logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intBullets[indexBullet] + "");
-						errored = true;
-					}
-				}
-				
-				if (stringBullets.length <= 0) {
-					logger.error("[" + pack + "] [" + name + "] No bullets are defined?");
+			if (!pack.equalsIgnoreCase("template")) {
+				if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intBullets[indexBullet]) == null) {
+					logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intBullets[indexBullet] + "");
 					errored = true;
 				}
+			}
+		}
+		
+		if (stringBullets.length <= 0) {
+			logger.error("[" + pack + "] [" + name + "] No bullets are defined?");
+			errored = true;
+		}
+		if (usingMag) {
+			if (intBullets.length != 1) {
+				logger.info("[" + pack + "] [" + name + "] Invalid Bullets '" + stringBullets[0] + "', expecting a single integer");
+				errored = true;
+			}
+			
+			if (magSize < 1) {
+				logger.error("[" + pack + "] [" + name + "] Invalid Mag Size '" + magSize + "', expecting at least 1");
+				errored = true;
+			}
+			
+			if (magIronIngots < 0) {
+				logger.error("[" + pack + "] [" + name + "] Invalid Mag Ingots '" + magIronIngots + "', expecting at least 0");
+				errored = true;
+			}
+		}
+		
+		if ( (!errored) && (name != null) && (stringIcon != null) ) {
+			boolean defaultTexture = false;
+			String iconName;
+			if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
+				logger.info("[" + pack + "] The texture of the gun '" + name + "' is missing!");
+				iconName = "guncus:gun_default/";
+				defaultTexture = true;
 			} else {
-				intBullets = new int[0];
-				try {
-					intMagBulletId = Integer.parseInt(stringBullets[0]);
-				} catch (Exception exception) {
-					logger.info("[" + pack + "] [" + name + "] Invalid Bullets " + stringBullets[0] + ", expecting a single integer");
-					errored = true;
-				}
-				
-				if (magSize < 1) {
-					logger.error("[" + pack + "] [" + name + "] Invalid Delay '" + delay + "', expecting at least 1");
-					errored = true;
-				}
-				
-				if (magIronIngots < 0) {
-					logger.error("[" + pack + "] [" + name + "] Invalid Mag Ingots '" + magIronIngots + "', expecting at least 0");
-					errored = true;
-				}
-				
-				if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intMagBulletId) == null) {
-					logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intMagBulletId + "");
-					errored = true;
-				}
+				iconName = pack + ":gun_" + stringIcon + "/";
 			}
-			
-			if ( (!errored) && (name != null) && (stringIcon != null) ) {
-				boolean defaultTexture = false;
-				String iconName;
-				if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
-					logger.info("[" + pack + "] The texture of the gun \"" + name + "\" is missing!");
-					iconName = "guncus:gun_default/";
-					defaultTexture = true;
+			try {
+				// Create customization parts
+				int[] intAttachments;
+				if ((stringAttachments.length > 0) && (!stringAttachments[0].replace(" ", "").equals(""))) {
+					intAttachments = new int[stringAttachments.length];
+					for (int indexAttachment = 0; indexAttachment < stringAttachments.length; indexAttachment++) {
+						intAttachments[indexAttachment] = Integer.parseInt(stringAttachments[indexAttachment]);
+					}
 				} else {
-					iconName = pack + ":gun_" + stringIcon + "/";
+					intAttachments = new int[0];
 				}
-				try {
-					// Create customization parts
-					int[] intAttachments;
-					if ((stringAttachments.length > 0) && (!stringAttachments[0].replace(" ", "").equals(""))) {
-						intAttachments = new int[stringAttachments.length];
-						for (int indexAttachment = 0; indexAttachment < stringAttachments.length; indexAttachment++) {
-							intAttachments[indexAttachment] = Integer.parseInt(stringAttachments[indexAttachment]);
-						}
-					} else {
-						intAttachments = new int[0];
+				int[] intBarrels;
+				if ((stringBarrels.length > 0) && (!stringBarrels[0].replace(" ", "").equals(""))) {
+					intBarrels = new int[stringBarrels.length];
+					for (int indexBarrel = 0; indexBarrel < stringBarrels.length; indexBarrel++) {
+						intBarrels[indexBarrel] = Integer.parseInt(stringBarrels[indexBarrel]);
 					}
-					int[] intBarrels;
-					if ((stringBarrels.length > 0) && (!stringBarrels[0].replace(" ", "").equals(""))) {
-						intBarrels = new int[stringBarrels.length];
-						for (int indexBarrel = 0; indexBarrel < stringBarrels.length; indexBarrel++) {
-							intBarrels[indexBarrel] = Integer.parseInt(stringBarrels[indexBarrel]);
-						}
-					} else {
-						intBarrels = new int[0];
+				} else {
+					intBarrels = new int[0];
+				}
+				int[] intScopes;
+				if ((stringScopes.length > 0) && (!stringScopes[0].replace(" ", "").equals(""))) {
+					intScopes = new int[stringScopes.length];
+					for (int indexScope = 0; indexScope < stringScopes.length; indexScope++) {
+						intScopes[indexScope] = Integer.parseInt(stringScopes[indexScope]);
 					}
-					int[] intScopes;
-					if ((stringScopes.length > 0) && (!stringScopes[0].replace(" ", "").equals(""))) {
-						intScopes = new int[stringScopes.length];
-						for (int indexScope = 0; indexScope < stringScopes.length; indexScope++) {
-							intScopes[indexScope] = Integer.parseInt(stringScopes[indexScope]);
-						}
-					} else {
-						intScopes = new int[0];
-					}
-					
+				} else {
+					intScopes = new int[0];
+				}
+				
+				if (!pack.equalsIgnoreCase("template")) {
 					// Create gun and magazine items
 					ItemGun gun = new ItemGun(pack, false, name, iconName,
-							damage, shootType, delay, magSize,
-							intMagBulletId, magIronIngots, gunIronIngots, gunRedstone,
+							damage, shootType, delay,
+							magSize, magIronIngots, gunIronIngots, gunRedstone,
 							intAttachments, intBarrels, intScopes,
-							!usingMag, intBullets)
+							usingMag, intBullets)
 							.setRecoilModifier(recoilModifier)
 							.setSoundModifier(soundModifier)
 							.defaultTexture(defaultTexture)
@@ -992,21 +836,16 @@ public class GunCus {
 					
 					// Add to gun list unless it failed
 					guns.add(gun);
-				} catch (Exception exception) {
-					logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
-					exception.printStackTrace();
+					logger.info("Added gun " + name);
 				}
-				
-				loadedGuns.add(" - " + name + " (Pack:" + pack + ")");
-			} else if ( (!ItemBullet.bulletsList.containsKey(pack))
-					|| (ItemBullet.bulletsList.get(pack).size() <= intMagBulletId)
-					|| (ItemBullet.bulletsList.get(pack).get(intMagBulletId) == null) ) {
-				logger.info("[" + pack + "] The bullets of the gun \"" + name + "\" do not exist (Bullet ID:" + intMagBulletId + ")! Ignoring this gun!");
-			} else {
-				logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
+			} catch (Exception exception) {
+				logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
+				exception.printStackTrace();
 			}
-			gunConfig.save();
+		} else {
+			logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 		}
+		gunConfig.save();
 	}
 	
 	public static void addChatMessage(final ICommandSender sender, final String message) {

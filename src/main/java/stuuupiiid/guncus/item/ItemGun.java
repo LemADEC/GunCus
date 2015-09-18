@@ -67,9 +67,9 @@ public class ItemGun extends Item {
 	
 	public ItemGun(String parPack, boolean parIsOfficial, String parName, String parIconBasePath,
 			int parDamage, int parShootType, int parDelay,
-			int magSize, int intMagBulletId, int parMagIronIngots, int parGunIronIngots, int parGunRedstone,
+			int magSize, int parMagIronIngots, int parGunIronIngots, int parGunRedstone,
 			int[] parAttach, int[] parBarrel, int[] parScopes,
-			boolean noMag, int[] parBullets) {
+			boolean usingMag, int[] parBullets) {
 		super();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			MinecraftForgeClient.registerItemRenderer(this, new RenderGun());
@@ -106,12 +106,12 @@ public class ItemGun extends Item {
 		
 		actualBullet = 0;
 		
-		if (noMag) {
+		if (usingMag) {
+			mag = new ItemMag(parPack, parName, parIconBasePath, magSize, parBullets[0]);
+			magIronIngots = parMagIronIngots;
+		} else {
 			bullets = parBullets;
 			mag = null;
-		} else {
-			mag = new ItemMag(parPack, parName, parIconBasePath, magSize, intMagBulletId);
-			magIronIngots = parMagIronIngots;
 		}
 		
 		GameRegistry.registerItem(this, getUnlocalizedName());
@@ -560,7 +560,6 @@ public class ItemGun extends Item {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister par1IconRegister) {
-		GunCus.logger.error("Registering icons for " + this);
 		String iconToRegisterName = iconBasePath + "gun";
 		icon = par1IconRegister.registerIcon(iconToRegisterName);
 		if (icon == null) {

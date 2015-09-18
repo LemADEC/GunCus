@@ -30,12 +30,12 @@ public class OfficialGuns {
 		
 		int[] scopes = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 		
-		m16a3  = new ItemGun(pack, true, "m16a3" , "guncusofficial:gun_m16a3/"  ,  5, 2,  3, 31, 1, 3, 5, 3, new int[] { 3, 4 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
-		aek971 = new ItemGun(pack, true, "aek971", "guncusofficial:gun_aek-971/",  5, 2,  3, 31, 2, 3, 5, 3, new int[] { 3, 4 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
-		l96    = new ItemGun(pack, true, "l96"   , "guncusofficial:gun_l96/"    , 17, 0, 25, 11, 4, 3, 5, 3, new int[] { 1, 2 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
-		sv98   = new ItemGun(pack, true, "sv98"  , "guncusofficial:gun_sv98/"   , 17, 0, 25, 11, 6, 3, 5, 3, new int[] { 1, 2 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
-		g17    = new ItemGun(pack, true, "g17"   , "guncusofficial:gun_g17/"    ,  4, 0,  2, 18, 3, 2, 4, 3, new int[] { 5, 6 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
-		g18    = new ItemGun(pack, true, "g18"   , "guncusofficial:gun_g18/"    ,  4, 2,  2, 18, 3, 2, 4, 3, new int[] { 5, 6 }, new int[] { 1, 2, 3 }, scopes, false, new int[0]);
+		m16a3  = new ItemGun(pack, true, "m16a3" , "guncusofficial:gun_m16a3/"  ,  5, 2,  3, 31, 3, 5, 3, new int[] { 3, 4 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 1 });
+		aek971 = new ItemGun(pack, true, "aek971", "guncusofficial:gun_aek-971/",  5, 2,  3, 31, 3, 5, 3, new int[] { 3, 4 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 2 });
+		l96    = new ItemGun(pack, true, "l96"   , "guncusofficial:gun_l96/"    , 17, 0, 25, 11, 3, 5, 3, new int[] { 1, 2 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 4 });
+		sv98   = new ItemGun(pack, true, "sv98"  , "guncusofficial:gun_sv98/"   , 17, 0, 25, 11, 3, 5, 3, new int[] { 1, 2 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 6 });
+		g17    = new ItemGun(pack, true, "g17"   , "guncusofficial:gun_g17/"    ,  4, 0,  2, 18, 2, 4, 3, new int[] { 5, 6 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 3 });
+		g18    = new ItemGun(pack, true, "g18"   , "guncusofficial:gun_g18/"    ,  4, 2,  2, 18, 2, 4, 3, new int[] { 5, 6 }, new int[] { 1, 2, 3 }, scopes, true, new int[] { 3 });
 		
 		GunCusCreativeTab tab;
 		tab = new GunCusCreativeTab(pack + ".m16a3", m16a3);
