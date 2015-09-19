@@ -238,12 +238,10 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		} else {
 			stateTicks++;
 			if (state == STATE_FLYING) {
-				GunCus.logger.info(String.format("2 T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
 				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
 					setDead();
 				}
 			} else if (state == STATE_BOUNCING) {// BOUNCING
-				GunCus.logger.info(String.format("2+ T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
 				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
 					setDead();
 				}
@@ -430,7 +428,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			posY += motionY;
 			posZ += motionZ;
 			
-			GunCus.logger.info(String.format("7 T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
 			// update angulation as per current motion
 			if (motionX != 0.0D || motionY != 0.0D || motionZ != 0.0D) {
 				float f2 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
