@@ -18,6 +18,10 @@ import stuuupiiid.guncus.item.ItemBullet;
 public class RenderBullet extends RenderArrow {
 	private static final ResourceLocation bulletTextures = new ResourceLocation("guncus:textures/entity/bullet.png");
 	
+	public RenderBullet() {
+		shadowSize = 0.0F;
+	}
+	
 	private static final float scale = 0.05625F / 5F;
 	private static final float uSideMin  =  0 / 32.0F;
 	private static final float uSideMax  = 17 / 32.0F;
@@ -27,6 +31,9 @@ public class RenderBullet extends RenderArrow {
 	private static final float uFrontMax = 27 / 32.0F;
 	private static final float vOffset   =  5 / 32.0F;
 	public void renderBullet(EntityBullet entityBullet, double x, double y, double z, float par8, float par9) {
+		if (!renderManager.options.fancyGraphics && entityBullet.state != entityBullet.STATE_FLYING && entityBullet.state != entityBullet.STATE_BOUNCING) {
+			return;
+		}
 		bindEntityTexture(entityBullet);
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float) x, (float) y, (float) z);
@@ -93,7 +100,7 @@ public class RenderBullet extends RenderArrow {
 	
 	@Override
 	public void doRender(Entity entity, double x, double y, double z, float par8, float par9) {
-		if (((EntityBullet) entity).ticksExisted >= 2) {
+		if (((EntityBullet) entity).ticksExisted >= 2) {// TODO needs a better threshold
 			renderBullet((EntityBullet) entity, x, y, z, par8, par9);
 		}
 	}
