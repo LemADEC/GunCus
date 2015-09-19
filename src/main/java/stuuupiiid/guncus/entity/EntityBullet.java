@@ -3,6 +3,8 @@ package stuuupiiid.guncus.entity;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
@@ -12,6 +14,9 @@ import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EntityBubbleFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -124,6 +129,45 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
+	@SideOnly(Side.CLIENT)
+	public void onUpdate_tailParticles() {
+		Minecraft mc = Minecraft.getMinecraft();
+		double dX = mc.renderViewEntity.posX - posX;
+		double dY = mc.renderViewEntity.posY - posY;
+		double dZ = mc.renderViewEntity.posZ - posZ;
+		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+		if (dX * dX + dY * dY + dZ * dZ < range * range && (state == STATE_FLYING || state == STATE_BOUNCING)) {
+			double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
+			
+			// play splash sound
+			float speedFactor = Math.min(1.0F, MathHelper.sqrt_double(motionX * motionX * 0.2D + motionY * motionY + motionZ * motionZ * 0.2D) * 0.2F);
+			playSound(getSplashSound(), speedFactor, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
+			
+			int count = 3 * (4 - mc.gameSettings.particleSetting);
+			double step = 1.0D / count;
+			for (int index = 0; index < count; index++) {
+				double factor = step * index;
+				double x = tailX - motionX * factor;
+				double y = tailY - motionY * factor;
+				double z = tailZ - motionZ * factor;
+				
+				// Directly spawn bubbles as per RenderGlobal.doSpawnParticle
+				if (worldObj.getBlock(
+						(int)Math.floor(x),
+						(int)Math.floor(y),
+						(int)Math.floor(z)) instanceof BlockLiquid) {
+					mc.effectRenderer.addEffect(new EntityBubbleFX(
+							worldObj, x, y, z,
+							0.2D * motionX + (rand.nextDouble() * 2.0D - 1.0D) * width,
+							0.2D * motionY - rand.nextDouble() * 0.2D,
+							0.2D * motionZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void onUpdate() {
 		// skip the arrow computation
@@ -141,6 +185,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			onUpdate_tailParticles();
+			
+			// Do collision resolution on server side only
 			return;
 		}
 		
