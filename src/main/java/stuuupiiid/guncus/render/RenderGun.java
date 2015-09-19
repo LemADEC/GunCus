@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL12;
 
 import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.item.ItemGun;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -37,6 +38,7 @@ public class RenderGun implements IItemRenderer {
 			GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
+			OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 			
 			renderItem.renderIcon(0, 0, icon, 16, 16);
 			
