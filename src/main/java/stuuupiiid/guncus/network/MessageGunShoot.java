@@ -106,10 +106,8 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					damage += 1.0F;
 				}
 				
-				for (int v1 = 0; v1 < bulletItem.split; v1++) {
-					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, 10.0F, damage, accuracy)
-							.setLowerGravity(gun.hasPolygonalBarrel(metadata))
-							.setBullet(bulletItem);
+				for (int splitIndex = 0; splitIndex < bulletItem.split; splitIndex++) {
+					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, 10.0F, damage, accuracy, gun.hasPolygonalBarrel(metadata), bulletItem);
 					playerEntity.worldObj.spawnEntityInWorld(bulletEntity);
 				}
 				

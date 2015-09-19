@@ -41,7 +41,7 @@ import net.minecraftforge.event.world.BlockEvent;
 
 public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	private static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
-	private static double dRadToDegFactor = 180.0D / Math.PI;
+	private static float fRadToDegFactor = 180.0F / ((float)Math.PI);
 	
 	private final static float slowMotionFactor = 1F;
 	private final static int MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
@@ -67,6 +67,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	private boolean lowerGravity = false;
 	private String pack = null;
 	private int bulletId = -1;
+	private boolean isBurning = false;
 	
 	public EntityBullet(World world) {
 		super(world);
@@ -74,7 +75,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		canBePickedUp = 0;
 	}
 	
-	public EntityBullet(World parWorld, EntityPlayer parEntityPlayer, float speed, float parDamage, int accuracy) {
+	public EntityBullet(World parWorld, EntityPlayer parEntityPlayer, float speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
 		super(parWorld);
 		setSize(0.2F, 0.2F);
 		canBePickedUp = 0;
@@ -101,24 +102,15 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			motionZ += accZ2 / 370.0D;
 		}
 		damage = parDamage;
-		setThrowableHeading(motionX, motionY, motionZ, speed / slowMotionFactor, 1.0F);
-	}
-	
-	public EntityBullet setLowerGravity(boolean flag) {
-		lowerGravity = flag;
-		return this;
-	}
-	
-	public EntityBullet setBullet(final String pack, final int bulletId) {
-		this.pack = pack;
-		this.bulletId = bulletId;
-		return this;
-	}
-	
-	public EntityBullet setBullet(final ItemBullet bullet) {
+		lowerGravity = parLowerGravity;
 		pack = bullet.pack;
 		bulletId = bullet.bulletId;
-		return this;
+		isBurning = getBullet().effectModifiers.containsKey(3);
+		
+		setThrowableHeading(motionX, motionY, motionZ, speed / slowMotionFactor, 1.0F);
+		previousX = posX;
+		previousY = posY;
+		previousZ = posZ;
 	}
 	
 	public ItemBullet getBullet() {
@@ -129,43 +121,68 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
+	protected double previousX = Double.NaN;
+	protected double previousY = Double.NaN;
+	protected double previousZ = Double.NaN;
+	
 	@SideOnly(Side.CLIENT)
 	public void onUpdate_tailParticles() {
-		Minecraft mc = Minecraft.getMinecraft();
-		double dX = mc.renderViewEntity.posX - posX;
-		double dY = mc.renderViewEntity.posY - posY;
-		double dZ = mc.renderViewEntity.posZ - posZ;
-		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
-		if (dX * dX + dY * dY + dZ * dZ < range * range && (state == STATE_FLYING || state == STATE_BOUNCING)) {
-			double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-			double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-			double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
+		double deltaX = posX - previousX;
+		double deltaY = posY - previousY;
+		double deltaZ = posZ - previousZ;
+		// skip if we're too slow
+		if (previousX != Double.NaN && Math.abs(deltaX) + Math.abs(deltaY) + Math.abs(deltaZ) > 1.0D) {
 			
-			// play splash sound
-			float speedFactor = Math.min(1.0F, MathHelper.sqrt_double(motionX * motionX * 0.2D + motionY * motionY + motionZ * motionZ * 0.2D) * 0.2F);
-			playSound(getSplashSound(), speedFactor, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
-			
-			int count = 3 * (4 - mc.gameSettings.particleSetting);
-			double step = 1.0D / count;
-			for (int index = 0; index < count; index++) {
-				double factor = step * index;
-				double x = tailX - motionX * factor;
-				double y = tailY - motionY * factor;
-				double z = tailZ - motionZ * factor;
+			// Check render distance
+			Minecraft mc = Minecraft.getMinecraft();
+			double dX = mc.renderViewEntity.posX - posX;
+			double dY = mc.renderViewEntity.posY - posY;
+			double dZ = mc.renderViewEntity.posZ - posZ;
+			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+			if (dX * dX + dY * dY + dZ * dZ < range * range) {
+				// build orientation vector
+				double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+				double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
 				
-				// Directly spawn bubbles as per RenderGlobal.doSpawnParticle
-				if (worldObj.getBlock(
-						(int)Math.floor(x),
-						(int)Math.floor(y),
-						(int)Math.floor(z)) instanceof BlockLiquid) {
-					mc.effectRenderer.addEffect(new EntityBubbleFX(
-							worldObj, x, y, z,
-							0.2D * motionX + (rand.nextDouble() * 2.0D - 1.0D) * width,
-							0.2D * motionY - rand.nextDouble() * 0.2D,
-							0.2D * motionZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
+				// play splash sound
+				float speedFactor = Math.min(1.0F, MathHelper.sqrt_double(motionX * motionX * 0.2D + motionY * motionY + motionZ * motionZ * 0.2D) * 0.2F);
+				playSound(getSplashSound(), speedFactor, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
+				
+				ItemBullet itemBullet = getBullet();
+				int count = 3 * (4 - mc.gameSettings.particleSetting);
+				double step = 1.0D / count;
+				for (int index = 0; index < count; index++) {
+					double factor = step * index;
+					double x = tailX - deltaX * factor;
+					double y = tailY - deltaY * factor;
+					double z = tailZ - deltaZ * factor;
+					
+					// Directly spawn bubbles as per RenderGlobal.doSpawnParticle
+					if (worldObj.getBlock(
+							(int)Math.floor(x),
+							(int)Math.floor(y),
+							(int)Math.floor(z)) instanceof BlockLiquid) {
+						mc.effectRenderer.addEffect(new EntityBubbleFX(
+								worldObj, x, y, z,
+								0.2D * deltaX + (rand.nextDouble() * 2.0D - 1.0D) * width,
+								0.2D * deltaY - rand.nextDouble() * 0.2D,
+								0.2D * deltaZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
+					} else if (itemBullet.effectModifiers.containsKey(3)) {
+						/*
+						mc.effectRenderer.addEffect(new EntityFireball(
+								worldObj, x, y, z,
+								0.2D * deltaX + (rand.nextDouble() * 2.0D - 1.0D) * width,
+								0.2D * deltaY - rand.nextDouble() * 0.2D,
+								0.2D * deltaZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
+						/**/
+					}
 				}
 			}
 		}
+		previousX = posX;
+		previousY = posY;
+		previousZ = posZ;
 	}
 	
 	@Override
@@ -180,8 +197,8 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		// (EntityArrow) Re-orient bullet depending on motion vector - only used after recovering?)
 		if ((prevRotationPitch == 0.0F) && (prevRotationYaw == 0.0F)) {
 			float f = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
-			prevRotationYaw = (rotationYaw = (float) (Math.atan2(motionX, motionZ) * dRadToDegFactor));
-			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f) * dRadToDegFactor));
+			prevRotationYaw = (rotationYaw = (float) (Math.atan2(motionX, motionZ)) * fRadToDegFactor);
+			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f)) * fRadToDegFactor);
 		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -221,10 +238,12 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		} else {
 			stateTicks++;
 			if (state == STATE_FLYING) {
+				GunCus.logger.info(String.format("2 T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
 				if (stateTicks >= MAX_FLIGHT_DURATION_TICKS) {
 					setDead();
 				}
 			} else if (state == STATE_BOUNCING) {// BOUNCING
+				GunCus.logger.info(String.format("2+ T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
 				if (stateTicks >= MAX_BOUNCING_DURATION_TICKS) {
 					setDead();
 				}
@@ -411,12 +430,16 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			posY += motionY;
 			posZ += motionZ;
 			
-			// clamp angulations
-			float f2 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
-			rotationYaw = ((float) (Math.atan2(motionX, motionZ) * dRadToDegFactor));
+			GunCus.logger.info(String.format("7 T %3d State %d %3d Yaw %7f Pitch %7f", ticksExisted, state, stateTicks, rotationYaw, rotationPitch));
+			// update angulation as per current motion
+			if (motionX != 0.0D || motionY != 0.0D || motionZ != 0.0D) {
+				float f2 = MathHelper.sqrt_double(motionX * motionX + motionZ * motionZ);
+				rotationYaw = atan2_approximation3((float)motionX, (float)motionZ) * fRadToDegFactor;
+				rotationPitch = atan2_approximation3((float)motionY, f2) * fRadToDegFactor;
+			}
 			
-			for (rotationPitch = ((float) (Math.atan2(motionY, f2) * dRadToDegFactor)); rotationPitch - prevRotationPitch < -180.0F; prevRotationPitch -= 360.0F) {
-				;
+			while (rotationPitch - prevRotationPitch < -180.0F) {
+				prevRotationPitch -= 360.0F;
 			}
 			while (rotationPitch - prevRotationPitch >= 180.0F) {
 				prevRotationPitch += 360.0F;
@@ -432,18 +455,10 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			
 			rotationPitch = (prevRotationPitch + (rotationPitch - prevRotationPitch) * 0.2F);
 			rotationYaw = (prevRotationYaw + (rotationYaw - prevRotationYaw) * 0.2F);
-			double friction = 0.01;
 			
+			// apply friction
+			double friction = 0.01;
 			if (isInWater()) {
-				for (int bubleIndex = 0; bubleIndex < 4; bubleIndex++) {
-					double factor = 0.20 * bubleIndex;
-					worldObj.spawnParticle("bubble",
-							posX - motionX * factor,
-							posY - motionY * factor,
-							posZ - motionZ * factor,
-							motionX, motionY, motionZ);
-				}
-				
 				friction = 0.2;
 			}
 			
@@ -451,6 +466,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			motionX *= motionFactor;
 			motionY *= motionFactor;
 			motionZ *= motionFactor;
+			
 			// apply gravity when applicable
 			if (state == STATE_FLYING || state == STATE_BOUNCING) { 
 				ItemBullet itemBullet = getBullet();
@@ -592,13 +608,23 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(5), false);
 		}
 		
-		if ((itemBullet.effectModifiers.containsKey(3)) && (blockY > 0)) {
+		if (itemBullet.effectModifiers.containsKey(3) && (blockY > 0)) {
 			if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
 				worldObj.setBlock(blockX, blockY + 1, blockZ, Blocks.fire);
 			} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {
 				worldObj.setBlock(blockX, blockY, blockZ, Blocks.fire);
 			}
 		}
+	}
+	
+	@Override
+	public boolean isSprinting() {// minor speed optimization
+		return false;
+	}
+	
+	@Override
+	public boolean isBurning() {
+		return isBurning;
 	}
 	
 	@Override
@@ -632,20 +658,23 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		lowerGravity = nbttagcompound.getBoolean("lowerGravity");
 		pack = nbttagcompound.getString("pack");
 		bulletId = nbttagcompound.getInteger("bulletId");
+		isBurning = getBullet().effectModifiers.containsKey(3);
 	}
+	
+	// Keep memory allocated
+	protected NBTTagCompound syncDataCompound_cachedWrite = new NBTTagCompound();
 	
 	@Override
 	public NBTTagCompound writeSyncDataCompound() {
-		NBTTagCompound syncDataCompound = new NBTTagCompound();
-		syncDataCompound.setByte("state", (byte)state);
-		syncDataCompound.setInteger("stateTicks", stateTicks);
-		syncDataCompound.setDouble("posX", posX);
-		syncDataCompound.setDouble("posY", posY);
-		syncDataCompound.setDouble("posZ", posZ);
-		syncDataCompound.setDouble("motionX", motionX);
-		syncDataCompound.setDouble("motionY", motionY);
-		syncDataCompound.setDouble("motionZ", motionZ);
-		return syncDataCompound;
+		syncDataCompound_cachedWrite.setByte("state", (byte)state);
+		syncDataCompound_cachedWrite.setInteger("stateTicks", stateTicks);
+		syncDataCompound_cachedWrite.setDouble("posX", posX);
+		syncDataCompound_cachedWrite.setDouble("posY", posY);
+		syncDataCompound_cachedWrite.setDouble("posZ", posZ);
+		syncDataCompound_cachedWrite.setDouble("motionX", motionX);
+		syncDataCompound_cachedWrite.setDouble("motionY", motionY);
+		syncDataCompound_cachedWrite.setDouble("motionZ", motionZ);
+		return syncDataCompound_cachedWrite;
 	}
 	
 	@Override
@@ -670,5 +699,44 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	@Override
 	public void readSpawnData(ByteBuf buffer) {
 		readEntityFromNBT(ByteBufUtils.readTag(buffer));
+	}
+
+	private static final float PI = (float) Math.PI;
+	private static final float PI_1_2 = (float) (Math.PI / 2.0D);
+
+	// |error| < 0.000204 (0.012 deg)
+	float atan2_approximation3(float y, float x) {
+		if (x == 0.0f) {
+			if (y > 0.0F) {
+				return PI_1_2;
+			}
+			if (y == 0.0F) {
+				return 0.0F;
+			}
+			return -PI_1_2;
+		}
+		
+		// From njuffa at http://math.stackexchange.com/questions/1098487/atan2-faster-approximation
+		// a := min (|x|, |y|) / max (|x|, |y|)
+		// s := a * a
+		// r := ((-0.0464964749 * s + 0.15931422) * s - 0.327622764) * s * a + a
+		// if |y| > |x| then r := 1.57079637 - r
+		// if x < 0 then r := 3.14159274 - r
+		// if y < 0 then r := -r
+		float ax = Math.abs(x);
+		float ay = Math.abs(y);
+		float a = (ay > ax) ? ax / ay : ay / ax;
+		float s = a * a;
+		float r = ((-0.0464964749F * s + 0.15931422F) * s - 0.327622764F) * s * a + a;
+		if (ay > ax) {
+			r = PI_1_2 - r;
+		}
+		if (x < 0) {
+			r = PI - r;
+		}
+		if (y < 0) {
+			r = -r;
+		}
+		return r;
 	}
 }
