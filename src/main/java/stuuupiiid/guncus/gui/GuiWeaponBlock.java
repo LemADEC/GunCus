@@ -25,7 +25,6 @@ public class GuiWeaponBlock extends GuiContainer {
 		super(new ContainerWeapon(inventory, world, x, y, z));
 		
 		if (GunCus.guns.size() > 0) {
-			GunCus.gunNames = GunCus.instance.guns.keySet();
 			if (GunCus.clientGUI_actualGunName == null || GunCus.clientGUI_actualGunName.isEmpty() || GunCus.guns.get(GunCus.clientGUI_actualGunName) == null) {
 				GunCus.clientGUI_actualGunName = GunCus.gunNames.toArray(new String[0])[0];
 			}
@@ -55,6 +54,7 @@ public class GuiWeaponBlock extends GuiContainer {
 		fontRendererObj.drawString(I18n.format("Weapon Box", new Object[0]), 8, ySize - 160, 0x404040);
 		fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 96 + 2, 0x404040);
 		
+		// draw buttons tooltip
 		for (Object guibutton : buttonList) {
 			if (((GuiButton) guibutton).func_146115_a()) {
 				((GuiButton) guibutton).func_146111_b(mouseX - guiLeft, mouseY - guiTop);
@@ -62,6 +62,7 @@ public class GuiWeaponBlock extends GuiContainer {
 			}
 		}
 		
+		// draw weapon tooltip
 		if ((GunCus.clientGUI_actualGunName != null) && GunCus.guns.get(GunCus.clientGUI_actualGunName) != null) {
 			if (mouseX >= guiLeft + 101 && mouseY >= guiTop + 14 && mouseX < guiLeft + 101 + 16 && mouseY < guiTop + 14 + 16) {
 				ItemGun itemGun = GunCus.guns.get(GunCus.clientGUI_actualGunName);
