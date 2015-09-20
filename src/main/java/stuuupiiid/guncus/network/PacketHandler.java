@@ -37,11 +37,11 @@ public class PacketHandler {
 	}
 	
 	public static void sendToServer_GUIaction(final int guiId, final int buttonId) {
-		sendToServer_GUIaction(guiId, buttonId, 0);
+		sendToServer_GUIaction(guiId, buttonId, "");
 	}
 	
-	public static void sendToServer_GUIaction(final int guiId, final int buttonId, final int currentGun) {
-		MessageGUIaction guiActionMessage = new MessageGUIaction(guiId, buttonId, currentGun);
+	public static void sendToServer_GUIaction(final int guiId, final int buttonId, final String actualGunName) {
+		MessageGUIaction guiActionMessage = new MessageGUIaction(guiId, buttonId, actualGunName);
 		simpleNetworkManager.sendToServer(guiActionMessage);
 	}
 	

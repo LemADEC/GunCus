@@ -18,8 +18,7 @@ public class ContainerWeapon extends Container {
 	public int posX;
 	public int posY;
 	public int posZ;
-	public ItemGun actualGunItem;
-	public int actualGunIndex;
+	public String actualGunName = null;
 	
 	public ContainerWeapon(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
 		this.worldObj = world;
@@ -27,14 +26,16 @@ public class ContainerWeapon extends Container {
 		this.posY = y;
 		this.posZ = z;
 		
-		actualGunIndex = 0;
-		actualGunItem = null;
-		if (GunCus.instance.guns.size() > 0) {
-			actualGunItem = GunCus.instance.guns.get(0);
+		if (GunCus.guns.size() > 0) {
+			if (actualGunName == null || actualGunName.isEmpty() || GunCus.guns.get(actualGunName) != null) {
+				actualGunName = GunCus.gunNames.toArray(new String[0])[0];
+			}
+		} else {
+			actualGunName = null;
 		}
 		
-		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
-		addSlotToContainer(new Slot(craftMatrix, 1, 80, 35));
+		addSlotToContainer(new Slot(craftMatrix, 0,  59, 35));
+		addSlotToContainer(new Slot(craftMatrix, 1,  80, 35));
 		addSlotToContainer(new Slot(craftMatrix, 2, 101, 35));
 		
 		for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
@@ -62,40 +63,23 @@ public class ContainerWeapon extends Container {
 		}
 	}
 	
-	public String[] info() {
-		String info1 = "Oops! Something went wrong!";
-		String info2 = null;
-		if (GunCus.instance.guns.size() <= 0) {
-			info1 = "No guns defined!";
-			info2 = "Enable official pack or install an GunCus addon, then try again";
-		} else if (actualGunItem == null) {
-			info1 = "No actual gun!";
-			info2 = "Click next to select a gun, then try again";
-		} else {
-			info1 = "In pack '" + actualGunItem.pack + "', gun '" + actualGunItem.getItemStackDisplayName(null) + "' requires";
-			info2 = " " + (actualGunItem.gunIronIngots > 0 ? actualGunItem.gunIronIngots + " iron ingot" + (actualGunItem.gunIronIngots > 1 ? "s " : " no iron ingot") : "")
-					+ " and "
-					+ (actualGunItem.gunRedstone > 0 ? actualGunItem.gunRedstone + " redstone" : " no redstone");
-		}
-		return new String[] { info1, info2 };
-	}
-	
 	public void create() {
 		if (GunCus.instance.guns.size() > 0) {
 			ItemStack itemStackIronIngotsSlot = ((Slot) inventorySlots.get(0)).getStack();
 			ItemStack itemStackRedstoneSlot = ((Slot) inventorySlots.get(1)).getStack();
 			
-			if (actualGunItem != null) {
-				if (((itemStackIronIngotsSlot != null) && (itemStackIronIngotsSlot.stackSize >= actualGunItem.gunIronIngots) && (itemStackIronIngotsSlot.getItem() == Items.iron_ingot))
-						|| ((actualGunItem.gunIronIngots <= 0)
-				  && (((itemStackRedstoneSlot != null) && (itemStackRedstoneSlot.stackSize >= actualGunItem.gunRedstone) && (itemStackRedstoneSlot.getItem() == Items.redstone))
-						|| (actualGunItem.gunRedstone <= 0)))) {
-					((Slot) inventorySlots.get(2)).putStack(new ItemStack(actualGunItem, 1, 0));
+			ItemGun itemGun = GunCus.instance.guns.get(actualGunName);
+			if (itemGun != null) {
+				if (((itemStackIronIngotsSlot != null) && (itemStackIronIngotsSlot.stackSize >= itemGun.gunIronIngots) && (itemStackIronIngotsSlot.getItem() == Items.iron_ingot))
+						|| ((itemGun.gunIronIngots <= 0)
+				  && (((itemStackRedstoneSlot != null) && (itemStackRedstoneSlot.stackSize >= itemGun.gunRedstone) && (itemStackRedstoneSlot.getItem() == Items.redstone))
+						|| (itemGun.gunRedstone <= 0)))) {
+					((Slot) inventorySlots.get(2)).putStack(new ItemStack(itemGun, 1, 0));
 					if (itemStackIronIngotsSlot != null) {
-						((Slot) inventorySlots.get(0)).decrStackSize(actualGunItem.gunIronIngots);
+						((Slot) inventorySlots.get(0)).decrStackSize(itemGun.gunIronIngots);
 					}
 					if (itemStackRedstoneSlot != null) {
-						((Slot) inventorySlots.get(1)).decrStackSize(actualGunItem.gunRedstone);
+						((Slot) inventorySlots.get(1)).decrStackSize(itemGun.gunRedstone);
 					}
 				}
 			}

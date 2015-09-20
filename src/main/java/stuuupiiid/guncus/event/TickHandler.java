@@ -201,8 +201,8 @@ public class TickHandler {
 		if (event.entity instanceof EntityPlayer) {
 			GunCus.logger.info("onEntityJoinWorld " + event.entity);
 			if (!event.world.isRemote) {
-				for (int gunIndex = 0; gunIndex < GunCus.instance.guns.size(); gunIndex++) {
-					MessageClientValidation clientConnectionMessage = new MessageClientValidation(gunIndex);
+				for (ItemGun itemGun : GunCus.instance.guns.values()) {
+					MessageClientValidation clientConnectionMessage = new MessageClientValidation(itemGun);
 					PacketHandler.simpleNetworkManager.sendTo(clientConnectionMessage, (EntityPlayerMP) event.entity);
 				}
 			}

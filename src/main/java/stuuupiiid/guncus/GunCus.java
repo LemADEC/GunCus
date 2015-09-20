@@ -13,8 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
@@ -83,12 +84,13 @@ public class GunCus {
 	public static int breathCounter = 0;
 	public static boolean reloading = false;
 	public static int hitmarker = 0;
-	public static Item actualItem = null;
-	public static int actualIndex = 0;
+	
+	public static String clientGUI_actualGunName = null;
 	
 	public static Field cameraZoom = null;
 	
-	public LinkedList<ItemGun> guns = new LinkedList<ItemGun>();
+	public static HashMap<String, ItemGun> guns = new HashMap<String, ItemGun>();
+	public static Set<String> gunNames = null; 
 	
 	@Mod.Instance(GunCus.MODID)
 	public static GunCus instance;
@@ -459,6 +461,7 @@ public class GunCus {
 				loadGuns(filePack.getAbsolutePath(), filePack.getName());
 			}
 		}
+		gunNames = guns.keySet();
 	}
 	
 	private void createTemplatePack(File fileGunCus) {
@@ -644,7 +647,7 @@ public class GunCus {
 			loadGun(pack, file);
 		}
 	}
-
+	
 	private void loadGun(final String pack, File file) {
 		Configuration gunConfig = new Configuration(file);
 		gunConfig.load();
@@ -836,7 +839,7 @@ public class GunCus {
 					}
 					
 					// Add to gun list unless it failed
-					guns.add(gun);
+					guns.put(gun.getUnlocalizedName(), gun);
 					logger.info("Added gun " + name);
 				}
 			} catch (Exception exception) {

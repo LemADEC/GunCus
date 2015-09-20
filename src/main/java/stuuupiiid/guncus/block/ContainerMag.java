@@ -79,26 +79,22 @@ public class ContainerMag extends Container {
 		}
 	}
 	
-	public String[] info() {
+	public String info() {
 		ItemStack itemStackGunSlot = ((Slot) inventorySlots.get(0)).getStack();
 		
 		ItemGun gun = null;
-		String info1 = "Oops! Something went wrong!";
-		String info2 = null;
 		
 		if ((itemStackGunSlot == null) || (itemStackGunSlot.getItem() == null)) {
-			info1 = "Empty gun slot!";
-			info2 = "Place a GunCus gun in the gun slot and try again...";
+			return "Empty gun slot!\n"
+					+ "Place a GunCus gun in the gun slot and try again...";
 		} else if (itemStackGunSlot.getItem() instanceof ItemGun) {
 			gun = (ItemGun) itemStackGunSlot.getItem();
-			info1 = "In pack '" + gun.pack + "', gun '" + itemStackGunSlot.getDisplayName() + "' magazine requires";
-			info2 = " " + (gun.magIronIngots > 0 ? gun.magIronIngots + " iron ingot" + (gun.magIronIngots > 1 ? "s " : " ") : "");
+			return "This gun magazine requires\n"
+					+ " " + (gun.magIronIngots > 0 ? gun.magIronIngots + " iron ingot" + (gun.magIronIngots > 1 ? "s " : " ") : "");
 		} else {
-			info1 = "Invalid item detected in gun slot!";
-			info2 = "Place a GunCus gun in the gun slot and try again...";
+			return "Invalid item detected in gun slot!\n"
+					+ "Place a GunCus gun in the gun slot and try again...";
 		}
-		
-		return new String[] { info1, info2 };
 	}
 	
 	@Override

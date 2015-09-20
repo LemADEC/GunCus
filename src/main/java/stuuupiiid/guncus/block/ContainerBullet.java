@@ -97,39 +97,35 @@ public class ContainerBullet extends Container {
 		}
 	}
 	
-	public String[] info() {
+	public String info() {
 		ItemStack itemStackMagSlot = ((Slot) inventorySlots.get(0)).getStack();
 		
 		ItemMag itemMag = null;
-		String info1 = "Oops! Something went wrong!";
-		String info2 = null;
 		
 		if ((itemStackMagSlot == null) || (itemStackMagSlot.getItem() == null)) {
-			info1 = "Empty magazine slot!";
-			info2 = "Place a GunCus magazine in the magazine slot and try again...";
+			return "Empty magazine slot!\n"
+					+ "Place a GunCus magazine in the magazine slot and try again...";
 		} else if (itemStackMagSlot.getItem() instanceof ItemMag) {
 			itemMag = (ItemMag) itemStackMagSlot.getItem();
 			
 			ItemBullet bullet = ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
 			if (bullet == null) {
-				info1 = "Invalid bullet defined!";
-				info2 = "Please contact the '" + itemMag.pack + "' addon author to fix it";
+				return "Invalid bullet defined!\n"
+						+ "Please contact the '" + itemMag.pack + "' addon author to fix it";
 			} else {
-				String name = bullet.getItemStackDisplayName(null);
 				if ((bullet.ironIngots >= 0) && (bullet.gunpowder >= 0) && ((bullet.ironIngots > 0) || (bullet.gunpowder > 0))) {
-					info1 = "Gun = \"" + itemMag.gunName + "\", Bullets = \"" + name + "\", Pack = \"" + itemMag.pack + "\"";
-					info2 = "-> " + (bullet.ironIngots > 0 ? bullet.ironIngots + " iron ingot" + (bullet.ironIngots > 1 ? "s, " : ", ") : "")
+					return "Those '" + bullet.getUnlocalizedName() + "' bullets from '" + itemMag.pack + "' requires\n"
+							+ " " + (bullet.ironIngots > 0 ? bullet.ironIngots + " iron ingot" + (bullet.ironIngots > 1 ? "s, " : ", ") : "")
 							+ (bullet.gunpowder > 0 ? bullet.gunpowder + " gunpowder" : "");
 				} else {
-					info1 = "Invalid bullet costs detected!";
-					info2 = "Please contact the '" + bullet.pack + "' addon author to fix it";
+					return "Invalid bullet costs detected!\n"
+							+ "Please contact the '" + bullet.pack + "' addon author to fix it";
 				}
 			}
 		} else {
-			info1 = "Invalid item detected in magazine slot!";
-			info2 = "Place a GunCus magazine in the magazine slot and try again...";
+			return "Invalid item detected in magazine slot!\n"
+					+ "Place a GunCus magazine in the magazine slot and try again...";
 		}
-		return new String[] { info1, info2 };
 	}
 	
 	@Override

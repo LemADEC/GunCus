@@ -1,5 +1,7 @@
 package stuuupiiid.guncus.network;
 
+import java.nio.charset.Charset;
+
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.block.ContainerAmmo;
 import stuuupiiid.guncus.block.ContainerAmmoMan;
@@ -9,7 +11,6 @@ import stuuupiiid.guncus.block.ContainerMag;
 import stuuupiiid.guncus.block.ContainerWeapon;
 import stuuupiiid.guncus.gui.GuiHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentText;
 import io.netty.buffer.ByteBuf;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -18,30 +19,36 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIaction, IMessage> {
 	private int guiId;
 	private int buttonId;
-	private int currentGun;
+	private String gunName;
 	
 	public MessageGUIaction() {
 		// required on receiving side
 	}
 	
-	public MessageGUIaction(final int guiId, final int buttonId, final int currentGun) {
+	public MessageGUIaction(final int guiId, final int buttonId, final String gunName) {
 		this.guiId = guiId;
 		this.buttonId = buttonId;
-		this.currentGun = currentGun;
+		this.gunName = gunName;
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
 		guiId = buffer.readInt();
 		buttonId = buffer.readInt();
-		currentGun = buffer.readInt();
+		
+		int nameLength = buffer.readByte();
+		gunName = buffer.toString(buffer.readerIndex(), nameLength, Charset.forName("UTF8"));
+		buffer.readerIndex(buffer.readerIndex() + nameLength);
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
 		buffer.writeInt(guiId);
 		buffer.writeInt(buttonId);
-		buffer.writeInt(currentGun);
+		
+		byte[] bytesString = gunName.getBytes(Charset.forName("UTF8"));
+		buffer.writeByte(bytesString.length);
+		buffer.writeBytes(bytesString);
 	}
 	
 	private void handle(EntityPlayerMP entityPlayer) {
@@ -75,10 +82,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			if (buttonId == 0) {
 				container.create();
 			} else if (buttonId == 1) {
-				entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
-				if (container.info()[1] != null) {
-					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
-				}
+				GunCus.addChatMessage(entityPlayer, container.info());
 			}
 		} else if (guiId == GuiHandler.bulletBlock) {// 7 GuiBullet (client -> server)
 			ContainerBullet container = (ContainerBullet) entityPlayer.openContainer;
@@ -86,31 +90,37 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 			if (buttonId == 0) {
 				container.create();
 			} else if (buttonId == 1) {
-				entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
-				if (container.info()[1] != null) {
-					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
-				}
+				GunCus.addChatMessage(entityPlayer, container.info());
 			}
 		} else if (guiId == GuiHandler.weaponBlock) {// 9 GuiWeapon
 			ContainerWeapon container = (ContainerWeapon) entityPlayer.openContainer;
 			
-			if (buttonId == 1) {
-				int actual = currentGun;
-				actual++;
-				if (actual >= GunCus.instance.guns.size()) {
-					actual = 0;
+			if (buttonId == 0) {// previous
+				int index = 0;
+				String[] names = GunCus.gunNames.toArray(new String[0]);
+				while (index < names.length && !names[index].equals(gunName)) {
+					index++;
 				}
+				index = (index - 1 + names.length) % names.length;
 				
-				container.actualGunIndex = actual;
-				container.actualGunItem = GunCus.instance.guns.get(actual);
+				container.actualGunName = names[index];
 				
-				MessageWeaponBoxSelection weaponBoxSelectionMessage = new MessageWeaponBoxSelection(actual);
+				MessageWeaponBoxSelection weaponBoxSelectionMessage = new MessageWeaponBoxSelection(container.actualGunName);
 				PacketHandler.simpleNetworkManager.sendTo(weaponBoxSelectionMessage, entityPlayer);
-			} else if (buttonId == 0) {
-				entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[0]));
-				if (container.info()[1] != null) {
-					entityPlayer.addChatComponentMessage(new ChatComponentText(container.info()[1]));
+				
+			} else if (buttonId == 1) {// next
+				int index = 0;
+				String[] names = GunCus.gunNames.toArray(new String[0]);
+				while (index < names.length && !names[index].equals(gunName)) {
+					index++;
 				}
+				index = (index + 1) % names.length;
+				
+				container.actualGunName = names[index];
+				
+				MessageWeaponBoxSelection weaponBoxSelectionMessage = new MessageWeaponBoxSelection(container.actualGunName);
+				PacketHandler.simpleNetworkManager.sendTo(weaponBoxSelectionMessage, entityPlayer);
+				
 			} else if (buttonId == 2) {
 				container.create();
 			}
@@ -122,7 +132,7 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 	@Override
 	public IMessage onMessage(MessageGUIaction guiActionMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received guiAction packet: (GUIid " + guiActionMessage.guiId + " buttonId " + guiActionMessage.buttonId + " currentGun " + guiActionMessage.currentGun + ")");
+			GunCus.logger.info("Received guiAction packet: (GUIid " + guiActionMessage.guiId + " buttonId " + guiActionMessage.buttonId + " gunName " + guiActionMessage.gunName + ")");
 		}
 		
 		guiActionMessage.handle(context.getServerHandler().playerEntity);

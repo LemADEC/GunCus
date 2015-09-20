@@ -1,5 +1,7 @@
 package stuuupiiid.guncus.network;
 
+import java.nio.charset.Charset;
+
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -12,30 +14,33 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class MessageWeaponBoxSelection implements IMessage, IMessageHandler<MessageWeaponBoxSelection, IMessage> {
-	int actualIndex = 0;
+	String gunName = null;
 	
 	public MessageWeaponBoxSelection() {
 		// required on receiving side
 	}
 	
-	public MessageWeaponBoxSelection(final int actualIndex) {
-		this.actualIndex = actualIndex;
+	public MessageWeaponBoxSelection(final String gunName) {
+		this.gunName = gunName;
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
-		actualIndex = buffer.readInt();
+		int nameLength = buffer.readByte();
+		gunName = buffer.toString(buffer.readerIndex(), nameLength, Charset.forName("UTF8"));
+		buffer.readerIndex(buffer.readerIndex() + nameLength);
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
-		buffer.writeInt(actualIndex);
+		byte[] bytesString = gunName.getBytes(Charset.forName("UTF8"));
+		buffer.writeByte(bytesString.length);
+		buffer.writeBytes(bytesString);
 	}
 	
 	@SideOnly(Side.CLIENT)
 	private void handle(EntityClientPlayerMP player) {
-		GunCus.actualIndex = actualIndex;
-		GunCus.actualItem = GunCus.instance.guns.get(actualIndex);
+		GunCus.clientGUI_actualGunName = gunName;
 	}
 	
 	@Override
