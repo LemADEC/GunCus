@@ -17,6 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityBubbleFX;
+import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -34,7 +35,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.world.BlockEvent;
@@ -62,6 +62,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	private int blockZ = -1;	// field_145789_f
 	private Block blockCollided = null;	// field field_145790_g
 	private int blockCollidedMetadata = -1;	// field inData
+	private int brokenCount = 0;
 	
 	private float damage = 0.0F;
 	private boolean lowerGravity = false;
@@ -126,11 +127,11 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	protected double previousZ = Double.NaN;
 	
 	@SideOnly(Side.CLIENT)
-	public void onUpdate_tailParticles() {
+	public void onClientUpdate() {
 		double deltaX = posX - previousX;
 		double deltaY = posY - previousY;
 		double deltaZ = posZ - previousZ;
-		// skip if we're too slow
+		// draw tail if we're fast enough
 		if (previousX != Double.NaN && Math.abs(deltaX) + Math.abs(deltaY) + Math.abs(deltaZ) > 1.0D) {
 			
 			// Check render distance
@@ -149,7 +150,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 				float speedFactor = Math.min(1.0F, MathHelper.sqrt_double(motionX * motionX * 0.2D + motionY * motionY + motionZ * motionZ * 0.2D) * 0.2F);
 				playSound(getSplashSound(), speedFactor, 1.0F + (rand.nextFloat() - rand.nextFloat()) * 0.4F);
 				
-				ItemBullet itemBullet = getBullet();
 				int count = 3 * (4 - mc.gameSettings.particleSetting);
 				double step = 1.0D / count;
 				for (int index = 0; index < count; index++) {
@@ -168,21 +168,92 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 								0.2D * deltaX + (rand.nextDouble() * 2.0D - 1.0D) * width,
 								0.2D * deltaY - rand.nextDouble() * 0.2D,
 								0.2D * deltaZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
-					} else if (itemBullet.effectModifiers.containsKey(3)) {
-						/*
-						mc.effectRenderer.addEffect(new EntityFireball(
-								worldObj, x, y, z,
-								0.2D * deltaX + (rand.nextDouble() * 2.0D - 1.0D) * width,
-								0.2D * deltaY - rand.nextDouble() * 0.2D,
-								0.2D * deltaZ + (rand.nextDouble() * 2.0D - 1.0D) * width));
-						/**/
 					}
 				}
 			}
 		}
+		
+		// save position
 		previousX = posX;
 		previousY = posY;
 		previousZ = posZ;
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public void onClientBlockHit(boolean isBroken) {
+		double hitX = posX + motionX;
+		double hitY = posY + motionY;
+		double hitZ = posZ + motionZ;
+		
+		// Check render distance
+		Minecraft mc = Minecraft.getMinecraft();
+		double dX = mc.renderViewEntity.posX - posX;
+		double dY = mc.renderViewEntity.posY - posY;
+		double dZ = mc.renderViewEntity.posZ - posZ;
+		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+		if (dX * dX + dY * dY + dZ * dZ < range * range) {
+			
+			// play hit sound
+			playSound("guncus:inground", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			
+			// Directly spawn crack particles as per RenderGlobal.doSpawnParticle
+			double particleMotionX = -0.1 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double particleMotionZ = -0.1 * MathHelper.sin(rotationPitch * fDegToRadFactor);
+			double particleMotionY = -0.1 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			
+			float particleSpeed = 0.0F;
+			int particleQuantity = isBroken ? 20 : 3;
+			for (int index = 0; index < particleQuantity; index++) {
+				mc.effectRenderer.addEffect(new EntityDiggingFX(
+						worldObj,
+						hitX + rand.nextGaussian() * particleMotionX,
+						hitY + rand.nextGaussian() * particleMotionY,
+						hitZ + rand.nextGaussian() * particleMotionZ,
+						rand.nextGaussian() * particleSpeed,
+						rand.nextGaussian() * particleSpeed,
+						rand.nextGaussian() * particleSpeed,
+						blockCollided, blockCollidedMetadata).applyRenderColor(blockCollidedMetadata));
+			}
+		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public void onClientEntityHit() {
+		double hitX = posX + motionX;
+		double hitY = posY + motionY;
+		double hitZ = posZ + motionZ;
+		
+		// Check render distance
+		Minecraft mc = Minecraft.getMinecraft();
+		double dX = mc.renderViewEntity.posX - posX;
+		double dY = mc.renderViewEntity.posY - posY;
+		double dZ = mc.renderViewEntity.posZ - posZ;
+		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+		if (dX * dX + dY * dY + dZ * dZ < range * range) {
+			
+			// play hit sound
+			playSound("guncus:inground", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
+			
+			// Directly spawn crack particles as per RenderGlobal.doSpawnParticle
+			double particleMotionX = -0.05 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			double particleMotionZ = -0.05 * MathHelper.sin(rotationPitch * fDegToRadFactor);
+			double particleMotionY = -0.05 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+			
+			// particle effect at collision point
+			float particleSpeed = 0.0F;
+			int particleQuantity = 5;
+			for (int index = 0; index < particleQuantity; index++) {
+				mc.effectRenderer.addEffect(new EntityDiggingFX(
+						worldObj,
+						hitX + rand.nextGaussian() * particleMotionX,
+						hitY + rand.nextGaussian() * particleMotionY,
+						hitZ + rand.nextGaussian() * particleMotionZ,
+						rand.nextGaussian() * particleSpeed,
+						rand.nextGaussian() * particleSpeed,
+						rand.nextGaussian() * particleSpeed,
+						Blocks.redstone_block, 0).applyRenderColor(blockCollidedMetadata));
+			}
+		}
 	}
 	
 	@Override
@@ -202,7 +273,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			onUpdate_tailParticles();
+			onClientUpdate();
 			
 			// Do collision resolution on server side only
 			return;
@@ -310,7 +381,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 					
 					if ((damage > 0.0F) && (mopCollision.entityHit.attackEntityFrom(damagesource, damage))) {
 						
-						onEntityHit(mopCollision.entityHit, mopCollision.hitVec);
+						onServerEntityHit(mopCollision.entityHit, mopCollision.hitVec);
 						
 						if (mopCollision.entityHit instanceof EntityLivingBase) {
 							if (!mopCollision.entityHit.isDead) {
@@ -394,11 +465,13 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 								stateTicks = 0;
 								PacketHandler.sendToClient_syncEntity(this);
 							} else {
+								brokenCount++;
 								posX = mopCollision.hitVec.xCoord - motionX;
 								posZ = mopCollision.hitVec.zCoord - motionY;
 								posY = mopCollision.hitVec.yCoord - motionZ;
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
-								onBlockHit(mopCollision.hitVec, true);
+								PacketHandler.sendToClient_syncEntity(this);
+								onServerBlockHit(mopCollision.hitVec, true);
 							}
 						}
 					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
@@ -418,7 +491,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
 						blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
-						onBlockHit(mopCollision.hitVec, false);
+						onServerBlockHit(mopCollision.hitVec, false);
 					}
 				}
 			}
@@ -499,24 +572,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
-	public void onEntityHit(Entity entity, Vec3 vecHit) {
+	public void onServerEntityHit(Entity entity, Vec3 vecHit) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
-		}
-		
-		// particle effect at collision point
-		WorldServer[] worldServers = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers;
-		for (WorldServer worldServer : worldServers) {
-			if (worldObj.provider.dimensionId == worldServer.provider.dimensionId) {
-				worldServer.func_147487_a(
-						"blockcrack_" + Block.getIdFromBlock(Blocks.redstone_block) + "_" + 0,
-						vecHit.xCoord, vecHit.yCoord + 1.0, vecHit.zCoord,
-						5,
-						-0.05 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
-						-0.05 * MathHelper.sin(rotationPitch * fDegToRadFactor),
-						-0.05 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
-						0.0);
-			}
 		}
 		
 		// bullet effect upon first collision
@@ -570,24 +628,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		}
 	}
 	
-	public void onBlockHit(Vec3 vecHit, boolean isBroken) {
+	public void onServerBlockHit(Vec3 vecHit, boolean isBroken) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
-		}
-		
-		// particle effect at collision point
-		WorldServer[] worldServers = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers;
-		for (WorldServer worldServer : worldServers) {
-			if (worldObj.provider.dimensionId == worldServer.provider.dimensionId) {
-				worldServer.func_147487_a(
-						"blockcrack_" + Block.getIdFromBlock(blockCollided) + "_" + blockCollidedMetadata,
-						vecHit.xCoord, vecHit.yCoord, vecHit.zCoord,
-						isBroken ? 20 : 3,
-						-0.1 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
-						-0.1 * MathHelper.sin(rotationPitch * fDegToRadFactor),
-						-0.1 * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor),
-						0.0);
-			}
 		}
 		
 		// bullet effect upon first collision
@@ -664,26 +707,50 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	@Override
 	public NBTTagCompound writeSyncDataCompound() {
 		syncDataCompound_cachedWrite.setByte("state", (byte)state);
-		syncDataCompound_cachedWrite.setInteger("stateTicks", stateTicks);
 		syncDataCompound_cachedWrite.setDouble("posX", posX);
 		syncDataCompound_cachedWrite.setDouble("posY", posY);
 		syncDataCompound_cachedWrite.setDouble("posZ", posZ);
 		syncDataCompound_cachedWrite.setDouble("motionX", motionX);
 		syncDataCompound_cachedWrite.setDouble("motionY", motionY);
 		syncDataCompound_cachedWrite.setDouble("motionZ", motionZ);
+		if (state == STATE_BLOCKHIT || brokenCount > 0) {
+			syncDataCompound_cachedWrite.setInteger("brokenCount", brokenCount);
+			syncDataCompound_cachedWrite.setInteger("blockX", blockX);
+			syncDataCompound_cachedWrite.setInteger("blockY", blockY);
+			syncDataCompound_cachedWrite.setInteger("blockZ", blockZ);
+			syncDataCompound_cachedWrite.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
+			syncDataCompound_cachedWrite.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
+		}
 		return syncDataCompound_cachedWrite;
 	}
 	
 	@Override
 	public void readSyncDataCompound(NBTTagCompound syncDataCompound) {
+		int previousState = state;
+		int previousBrokenCount = brokenCount;
 		state = syncDataCompound.getByte("state");
-		stateTicks = syncDataCompound.getInteger("stateTicks");
 		posX = syncDataCompound.getDouble("posX");
 		posY = syncDataCompound.getDouble("posY");
 		posZ = syncDataCompound.getDouble("posZ");
 		motionX = syncDataCompound.getDouble("motionX");
 		motionY = syncDataCompound.getDouble("motionY");
 		motionZ = syncDataCompound.getDouble("motionZ");
+		
+		if (syncDataCompound.hasKey("brokenCount")) {
+			brokenCount = syncDataCompound.getInteger("brokenCount");
+			blockX = syncDataCompound.getInteger("blockX");
+			blockY = syncDataCompound.getInteger("blockY");
+			blockZ = syncDataCompound.getInteger("blockZ");
+			blockCollided = Block.getBlockById(syncDataCompound.getInteger("blockCollided"));
+			blockCollidedMetadata = syncDataCompound.getByte("blockCollidedMetadata");
+			if (previousState != state || previousBrokenCount != brokenCount) {
+				onClientBlockHit(previousBrokenCount != brokenCount);
+			}
+		}
+		
+		if (previousState != state && state == STATE_ENTITYHIT) {
+			onClientEntityHit();
+		}
 	}
 	
 	@Override
@@ -697,10 +764,10 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 	public void readSpawnData(ByteBuf buffer) {
 		readEntityFromNBT(ByteBufUtils.readTag(buffer));
 	}
-
+	
 	private static final float PI = (float) Math.PI;
 	private static final float PI_1_2 = (float) (Math.PI / 2.0D);
-
+	
 	// |error| < 0.000204 (0.012 deg)
 	float atan2_approximation3(float y, float x) {
 		if (x == 0.0f) {
