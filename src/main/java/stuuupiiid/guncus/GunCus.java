@@ -54,6 +54,7 @@ import stuuupiiid.guncus.item.ItemMine;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.item.ItemScope;
 import stuuupiiid.guncus.network.PacketHandler;
+import stuuupiiid.guncus.render.RenderGameOverlay;
 
 /**
  * @author LemADEC
@@ -93,7 +94,7 @@ public class GunCus {
 	@Mod.Instance(GunCus.MODID)
 	public static GunCus instance;
 	
-	public GuiHandler guiHandler = new GuiHandler();
+	public GuiHandler guiHandler = null;
 	private boolean enableExplosives;
 	private boolean enableOfficialGuns;
 	public static Item quickKnife;
@@ -233,10 +234,14 @@ public class GunCus {
 			OfficialGuns.load();
 		}
 		
+		TickHandler tickHandler = new TickHandler();
+		FMLCommonHandler.instance().bus().register(tickHandler);
+		MinecraftForge.EVENT_BUS.register(tickHandler);
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			TickHandler tickHandler = new TickHandler();
-			FMLCommonHandler.instance().bus().register(tickHandler);
-			MinecraftForge.EVENT_BUS.register(tickHandler);
+			RenderGameOverlay renderGameOverlay = new RenderGameOverlay();
+			FMLCommonHandler.instance().bus().register(renderGameOverlay);
+			MinecraftForge.EVENT_BUS.register(renderGameOverlay);
 		}
 		
 		File path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
@@ -254,12 +259,13 @@ public class GunCus {
 	public void onFMLInitialization(FMLInitializationEvent event) {
 		PacketHandler.init();
 		
-		commonProxy.render();
+		commonProxy.initRenderingRegistry();
 		
-		EntityRegistry.registerModEntity(EntityBullet.class, "guncusbullet", 200, this, 500, 1, true);
+		EntityRegistry.registerModEntity(EntityBullet.class, "guncus.bullet", 200, this, 500, 1, true);
+		EntityRegistry.registerModEntity(EntityGrenade.class, "guncus.grenade", 201, this, 500, 1, true);
 		
-		EntityRegistry.registerModEntity(EntityGrenade.class, "guncusat", 201, this, 500, 1, true);
-		NetworkRegistry.INSTANCE.registerGuiHandler(this, this.guiHandler);
+		guiHandler = new GuiHandler();
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, guiHandler);
 		
 		GameRegistry.registerBlock(blockGun, blockGun.getUnlocalizedName());
 		GameRegistry.registerBlock(blockAmmo, blockAmmo.getUnlocalizedName());
