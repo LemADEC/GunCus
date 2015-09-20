@@ -4,6 +4,8 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -13,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 import org.lwjgl.input.Mouse;
+
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.item.ItemGun;
@@ -32,6 +35,7 @@ public class RenderGameOverlay {
 	
 	// Called when a new frame is displayed (See FPS)
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
 		if (event.phase == Phase.START) {
 			renderTickStart();
@@ -42,6 +46,7 @@ public class RenderGameOverlay {
 	
 	// Client side
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void onRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
 		if (drawSight) {
 			switch (event.type) {
@@ -77,6 +82,7 @@ public class RenderGameOverlay {
 		return Math.max(0, Math.min(255, start + Math.round(gradient * (end - start))));
 	}
 	
+	@SideOnly(Side.CLIENT)
 	public void renderTickStart() {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		if (client.thePlayer == null) {
@@ -91,6 +97,7 @@ public class RenderGameOverlay {
 		drawSight = hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null);
 	}
 	
+	@SideOnly(Side.CLIENT)
 	public void renderTickEnd() {
 		Minecraft client = FMLClientHandler.instance().getClient();
 		if (client.thePlayer == null) {

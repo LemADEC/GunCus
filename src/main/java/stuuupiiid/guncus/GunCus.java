@@ -54,7 +54,6 @@ import stuuupiiid.guncus.item.ItemMine;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.item.ItemScope;
 import stuuupiiid.guncus.network.PacketHandler;
-import stuuupiiid.guncus.render.RenderGameOverlay;
 
 /**
  * @author LemADEC
@@ -237,12 +236,6 @@ public class GunCus {
 		TickHandler tickHandler = new TickHandler();
 		FMLCommonHandler.instance().bus().register(tickHandler);
 		MinecraftForge.EVENT_BUS.register(tickHandler);
-		
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			RenderGameOverlay renderGameOverlay = new RenderGameOverlay();
-			FMLCommonHandler.instance().bus().register(renderGameOverlay);
-			MinecraftForge.EVENT_BUS.register(renderGameOverlay);
-		}
 		
 		File path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
 		

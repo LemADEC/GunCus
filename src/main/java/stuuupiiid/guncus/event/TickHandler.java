@@ -3,6 +3,8 @@ package stuuupiiid.guncus.event;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +31,7 @@ public class TickHandler {
 	
 	// Called when the client ticks.
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void onClientTick(TickEvent.ClientTickEvent event) {
 		if (GunCus.switchTime > 0) {
 			GunCus.switchTime -= 1;
