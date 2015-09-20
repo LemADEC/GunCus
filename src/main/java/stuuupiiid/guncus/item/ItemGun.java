@@ -115,6 +115,10 @@ public class ItemGun extends Item {
 		}
 		
 		GameRegistry.registerItem(this, getUnlocalizedName());
+		
+		// Add to gun list
+		GunCus.guns.put(this.getUnlocalizedName(), this);
+		GunCus.logger.info("Added gun " + parName);
 	}
 	
 	public ItemGun setZoom(float zoom) {

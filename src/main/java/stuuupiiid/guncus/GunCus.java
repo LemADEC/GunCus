@@ -837,10 +837,6 @@ public class GunCus {
 					if (!sound_silenced.trim().isEmpty()) {
 						gun.setSilencedSound(pack  + ":" + sound_silenced);
 					}
-					
-					// Add to gun list unless it failed
-					guns.put(gun.getUnlocalizedName(), gun);
-					logger.info("Added gun " + name);
 				}
 			} catch (Exception exception) {
 				logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
