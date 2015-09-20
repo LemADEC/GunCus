@@ -34,6 +34,8 @@ public class RenderBullet extends RenderArrow {
 		if (!renderManager.options.fancyGraphics && entityBullet.state != entityBullet.STATE_FLYING && entityBullet.state != entityBullet.STATE_BOUNCING) {
 			return;
 		}
+		boolean isClose = x < 64.0D || y < 64.0D || z < 64.0D;
+		
 		bindEntityTexture(entityBullet);
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float) x, (float) y, (float) z);
@@ -73,15 +75,17 @@ public class RenderBullet extends RenderArrow {
 		tessellator.draw();
 		
 		// 4 sides
-		for (int i = 0; i < 4; i++) {
-			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
-			GL11.glNormal3f(0.0F, 0.0F, scale);
-			tessellator.startDrawingQuads();
-			tessellator.addVertexWithUV(-8.0D, -2.0D, 0.0D, uSideMin, vMin);
-			tessellator.addVertexWithUV( 8.0D, -2.0D, 0.0D, uSideMax, vMin);
-			tessellator.addVertexWithUV( 8.0D,  2.0D, 0.0D, uSideMax, vMax);
-			tessellator.addVertexWithUV(-8.0D,  2.0D, 0.0D, uSideMin, vMax);
-			tessellator.draw();
+		if (isClose) {
+			for (int i = 0; i < 4; i++) {
+				GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				GL11.glNormal3f(0.0F, 0.0F, scale);
+				tessellator.startDrawingQuads();
+				tessellator.addVertexWithUV(-8.0D, -2.0D, 0.0D, uSideMin, vMin);
+				tessellator.addVertexWithUV( 8.0D, -2.0D, 0.0D, uSideMax, vMin);
+				tessellator.addVertexWithUV( 8.0D,  2.0D, 0.0D, uSideMax, vMax);
+				tessellator.addVertexWithUV(-8.0D,  2.0D, 0.0D, uSideMin, vMax);
+				tessellator.draw();
+			}
 		}
 		
 		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
