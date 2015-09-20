@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
@@ -79,11 +80,16 @@ public class BlockMine extends GunCusBlock {
 		}
 	}
 	
+	@Override
+	public boolean canDropFromExplosion(Explosion p_149659_1_) {
+		return false;
+	}
+	
 	public void explode(World world, int x, int y, int z) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+			world.setBlockToAir(x, y, z);
 			world.createExplosion(null, x + 0.5D, y + 1, z + 0.5D, 1.3F, GunCus.enableBlockDamage);
 			world.createExplosion(null, x + 0.5D, y + 1, z + 0.5D, 3.0F, false);
-			world.setBlockToAir(x, y, z);
 		}
 	}
 	
