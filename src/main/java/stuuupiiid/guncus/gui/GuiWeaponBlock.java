@@ -36,14 +36,6 @@ public class GuiWeaponBlock extends GuiContainer {
 		// default size
 		xSize = 176;
 		ySize = 166;
-		
-		// FIXME: GUI is constructed twice?
-		GunCus.logger.info("GuiWeaponBlock constructor");
-		try {
-			throw new RuntimeException();
-		} catch(Exception exception) {
-			exception.printStackTrace();
-		}
 	}
 	
 	@Override
