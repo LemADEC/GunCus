@@ -28,9 +28,8 @@ public class GuiBulletBlock extends GuiContainer {
 		// default size
 		xSize = 176;
 		ySize = 166;
-		
-	
 	}
+	
 	@Override
 	public void initGui() {
 		super.initGui();
@@ -45,6 +44,7 @@ public class GuiBulletBlock extends GuiContainer {
 		RenderHelper.disableStandardItemLighting();
 		this.fontRendererObj.drawString(I18n.format("Bullet Box", new Object[0]), 8, this.ySize - 160, 0x404040);
 		this.fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 0x40404);
+		
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {
 			if (((GuiButton) guibutton).func_146115_a()) {
@@ -62,7 +62,7 @@ public class GuiBulletBlock extends GuiContainer {
 		
 		RenderHelper.enableGUIStandardItemLighting();
 	}
-
+	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int x, int y) {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -88,15 +88,12 @@ public class GuiBulletBlock extends GuiContainer {
 	
 	protected ItemBullet getBullet() {
 		if (inventorySlots.getSlot(0).getStack() != null && inventorySlots.getSlot(0).getStack().getItem() instanceof ItemMag) {
-			ItemMag itemMag = (ItemMag) inventorySlots.getSlot(0).getStack().getItem();		
+			ItemMag itemMag = (ItemMag) inventorySlots.getSlot(0).getStack().getItem();
 			return ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
 		}
 		return null;
-		
-		
 	}
 	
-
 	@Override
 	protected void actionPerformed(GuiButton button) {
 		PacketHandler.sendToServer_GUIaction(GuiHandler.bulletBlock, button.id);
