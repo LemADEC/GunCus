@@ -34,6 +34,9 @@ public class RenderBullet extends RenderArrow {
 		if (!renderManager.options.fancyGraphics && entityBullet.state != entityBullet.STATE_FLYING && entityBullet.state != entityBullet.STATE_BOUNCING) {
 			return;
 		}
+		if (entityBullet.ticksExisted < 20 && x < 1.0D && y < 1.0D && z < 1.0D) {
+			return;
+		}
 		boolean isClose = x < 64.0D || y < 64.0D || z < 64.0D;
 		
 		bindEntityTexture(entityBullet);
@@ -104,9 +107,6 @@ public class RenderBullet extends RenderArrow {
 	
 	@Override
 	public void doRender(Entity entity, double x, double y, double z, float par8, float par9) {
-		if (((EntityBullet) entity).ticksExisted >= -2) {// TODO needs a better threshold
-			renderBullet((EntityBullet) entity, x, y, z, par8, par9);
-		}
+		renderBullet((EntityBullet) entity, x, y, z, par8, par9);
 	}
-	
 }

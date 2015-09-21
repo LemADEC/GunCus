@@ -76,21 +76,23 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		canBePickedUp = 0;
 	}
 	
-	public EntityBullet(World parWorld, EntityPlayer parEntityPlayer, float speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
+	public EntityBullet(World parWorld, EntityPlayer entityPlayer, float speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
 		super(parWorld);
 		setSize(0.2F, 0.2F);
 		canBePickedUp = 0;
 		renderDistanceWeight = 10.0D;
-		shootingEntity = parEntityPlayer;
-		setLocationAndAngles(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ, parEntityPlayer.rotationYaw, parEntityPlayer.rotationPitch);
-		posX -= MathHelper.cos(rotationYaw * fDegToRadFactor) * 0.16F;
-		posY -= 0.1D;
-		posZ -= MathHelper.sin(rotationYaw * fDegToRadFactor) * 0.16F;
-		setPosition(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ);
-		yOffset = 0.0F;
+		shootingEntity = entityPlayer;
+		rotationYaw = entityPlayer.rotationYaw;
+		rotationPitch = entityPlayer.rotationPitch;
 		motionX = - MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
 		motionZ =   MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
 		motionY = - MathHelper.sin(rotationPitch * fDegToRadFactor);
+		posX = entityPlayer.posX - motionX * 0.16F;
+		posY = entityPlayer.posY + entityPlayer.getEyeHeight() - 0.0D;
+		posZ = entityPlayer.posZ - motionZ * 0.16F;
+		setLocationAndAngles(posX, posY, posZ, rotationYaw, rotationPitch);
+		
+		yOffset = 0.0F;
 		if (accuracy < 100) {
 			int accX1 = rand.nextInt(101 - accuracy);
 			int accY1 = rand.nextInt(101 - accuracy);
