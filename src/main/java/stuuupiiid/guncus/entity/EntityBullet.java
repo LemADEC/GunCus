@@ -84,7 +84,7 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		shootingEntity = parEntityPlayer;
 		setLocationAndAngles(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ, parEntityPlayer.rotationYaw, parEntityPlayer.rotationPitch);
 		posX -= MathHelper.cos(rotationYaw * fDegToRadFactor) * 0.16F;
-		posY -= 0.1000000014901161D;
+		posY -= 0.1D;
 		posZ -= MathHelper.sin(rotationYaw * fDegToRadFactor) * 0.16F;
 		setPosition(parEntityPlayer.posX, parEntityPlayer.posY + parEntityPlayer.getEyeHeight(), parEntityPlayer.posZ);
 		yOffset = 0.0F;
@@ -193,9 +193,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
 			
-			// play hit sound
-			playSound("guncus:inground", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-			
 			// Directly spawn crack particles as per RenderGlobal.doSpawnParticle
 			double particleMotionX = -0.1 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
 			double particleMotionZ = -0.1 * MathHelper.sin(rotationPitch * fDegToRadFactor);
@@ -230,9 +227,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		double dZ = mc.renderViewEntity.posZ - posZ;
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
-			
-			// play hit sound
-			playSound("guncus:inground", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
 			
 			// Directly spawn crack particles as per RenderGlobal.doSpawnParticle
 			double particleMotionX = -0.05 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
@@ -403,8 +397,6 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							}
 						}
 						
-						playSound("guncus:inground", 1.0F, 1.2F / (rand.nextFloat() * 0.2F + 0.9F));
-						
 						// no marks on Mob
 						if (!(mopCollision.entityHit instanceof EntityPlayer)) {
 							// setDead();
@@ -429,8 +421,8 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 						rotationYaw += 180.0F;
 						prevRotationYaw += 180.0F;
 						posX = mopCollision.hitVec.xCoord - motionX;
-						posZ = mopCollision.hitVec.zCoord - motionY;
-						posY = mopCollision.hitVec.yCoord - motionZ;
+						posY = mopCollision.hitVec.yCoord - motionY;
+						posZ = mopCollision.hitVec.zCoord - motionZ;
 						state = STATE_BOUNCING;
 						stateTicks = 0;
 						PacketHandler.sendToClient_syncEntity(this);
@@ -467,8 +459,8 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 							} else {
 								brokenCount++;
 								posX = mopCollision.hitVec.xCoord - motionX;
-								posZ = mopCollision.hitVec.zCoord - motionY;
-								posY = mopCollision.hitVec.yCoord - motionZ;
+								posY = mopCollision.hitVec.yCoord - motionY;
+								posZ = mopCollision.hitVec.zCoord - motionZ;
 								worldObj.setBlockToAir(blockX, blockY, blockZ);
 								PacketHandler.sendToClient_syncEntity(this);
 								onServerBlockHit(mopCollision.hitVec, true);
@@ -577,6 +569,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 			return;
 		}
 		
+		// play hit sound
+		playSound("guncus:inground", 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
+		
 		// bullet effect upon first collision
 		if (!isFirstHit) {
 			return;
@@ -632,6 +627,9 @@ public class EntityBullet extends EntityArrow implements IProjectile, IEntityAdd
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
+		
+		// play hit sound
+		playSound("guncus:inground", 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
 		
 		// bullet effect upon first collision
 		if (!isFirstHit) {

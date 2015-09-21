@@ -104,7 +104,7 @@ public class RenderBullet extends RenderArrow {
 	
 	@Override
 	public void doRender(Entity entity, double x, double y, double z, float par8, float par9) {
-		if (((EntityBullet) entity).ticksExisted >= 2) {// TODO needs a better threshold
+		if (((EntityBullet) entity).ticksExisted >= -2) {// TODO needs a better threshold
 			renderBullet((EntityBullet) entity, x, y, z, par8, par9);
 		}
 	}
