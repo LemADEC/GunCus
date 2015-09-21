@@ -31,7 +31,7 @@ item.attachment5.name=Strong Spiral Spring
 item.attachment6.name=Improved Grip
 item.attachment7.name=Laser Pointer
 
-tile.blockWeapon.name=Weapon box
+tile.blockWeapon.name=Weapon Box
 tile.blockAmmo.name=Ammo Box
 tile.blockBullet.name=Bullet Box
 tile.blockGun.name=Gun Box
@@ -44,4 +44,4 @@ item.explosive.rpg.name=GunCus RPG-7V2
 item.explosive.smaw.name=GunCus SMAW
 
 itemGroup.GunCus.modifications=Gun Customization
-itemGroup.GunCus.bullets=GunCus bullets
+itemGroup.GunCus.bullets=GunCus Bullets

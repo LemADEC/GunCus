@@ -1,0 +1,47 @@
+item.quickKnife.name=Quick Knife
+item.boxpart.name=Часть коробки
+item.ammo_M320.name=Снаряд для M320
+item.magFiller.name=Предмет для ручной зарядки
+item.mine.name=Мина
+
+item.scope1.name=Коллиматорный прицел
+item.scope2.name=Коллиматорный прицел "Кобра"
+item.scope3.name=Голографический прицел
+item.scope4.name=Голографический прицел ПКА-С
+item.scope5.name=Прицел M145 (3.4x)
+item.scope6.name=Прицел ПК-A (3.4x)
+item.scope7.name=Прицел ACOG (4x)
+item.scope8.name=Прицел ПСО-1 (4x)
+item.scope9.name=Снайперский прицел (6x)
+item.scope10.name=Прицел ПКС-07 (7x)
+item.scope11.name=Снайперский прицел (8x)
+item.scope12.name=Баллистический прицел (12x)
+item.scope13.name=Баллистический прицел (20x)
+
+item.barrel1.name=Глушитель
+item.barrel2.name=Тяжёлый ствол
+item.barrel3.name=Нарезной ствол
+item.barrel4.name=Полигональный ствол
+
+item.attachment1.name=Затвор прямого действия
+item.attachment2.name=Сошки
+item.attachment3.name=Вертикальная рукоятка
+item.attachment4.name=M320
+item.attachment5.name=Крепкая спиральная пружина
+item.attachment6.name=Улучшенная рукоятка
+item.attachment7.name=Лазерный целеуказатель
+
+tile.blockWeapon.name=Коробка оружия
+tile.blockAmmo.name=Коробка зарядки
+tile.blockBullet.name=Коробка пуль
+tile.blockGun.name=Коробка модификации
+tile.blockMag.name=Коробка магазинов
+tile.mine.name=Мина
+
+item.explosive.ammo_rpg.name=Снаряд ПГ-7ВЛ
+item.explosive.ammo_smaw.name=Снаряд HEDP
+item.explosive.rpg.name=РПГ-7V2
+item.explosive.smaw.name=SMAW
+
+itemGroup.GunCus.modifications=Модификации оружия
+itemGroup.GunCus.bullets=GunCus: Патроны
