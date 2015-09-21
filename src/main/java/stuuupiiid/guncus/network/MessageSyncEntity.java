@@ -58,7 +58,7 @@ public class MessageSyncEntity implements IMessage, IMessageHandler<MessageSyncE
 		}
 		
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received syncEntity packet for entityId " + entityId);
+			GunCus.logger.info("Received syncEntity packet for entityId " + syncEntityMessage.entityId);
 		}
 		
 		EntityPlayer player = (context.side.isClient() ? Minecraft.getMinecraft().thePlayer : context.getServerHandler().playerEntity);

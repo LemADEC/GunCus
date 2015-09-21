@@ -92,11 +92,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			  || (delay != gun.delay)
 			  || (!bullets.equals(encoded_bullets))
 			  || (recoilModifier != gun.recoilModifier)) {
-				GunCus.logger.info("Validation failed!");
-				GunCus.logger.info("Found"
-						+ " '" + gun.getUnlocalizedName() + "' "
-						+ gun.shootType + " " + gun.delay + " "
-						+ "'" + encoded_bullets + "' " + gun.recoilModifier);
+				GunCus.logger.info("Validation failed for '" + gun.getUnlocalizedName() + "'!");
 				MessageKickPlayer kickPlayerMessage = new MessageKickPlayer(gunName, 1);
 				PacketHandler.simpleNetworkManager.sendToServer(kickPlayerMessage);
 			}
@@ -115,7 +111,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 			return null;
 		}
 		
-		if (GunCus.logging_enableNetwork) {
+		if (GunCus.logging_enableNetwork && false) {
 			GunCus.logger.info("Received clientValidation packet"
 					+ " '" + clientValidationMessage.gunName + "' "
 					+ clientValidationMessage.shootType + " " + clientValidationMessage.delay + " "
