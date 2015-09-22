@@ -11,13 +11,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -28,8 +25,6 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 			Blocks.glass_pane, Blocks.stained_glass_pane,
 			Blocks.web, Blocks.glowstone));
 	
-	private boolean isRocket = false;
-	
 	{
 		// slowMotionFactor = 1.0F;
 		MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
@@ -37,7 +32,7 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 		MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
 		MAX_BLOCKHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on the ground
 		MAX_LIFE_DURATION_TICKS = Math.round(6000 * slowMotionFactor);	// 5 mn max total time
-		SAFETY_FUSE_TICKS = 5;	// 250 ms flight
+		SAFETY_FUSE_TICKS = 4;	// 200 ms flight
 		
 		WEAK_BLOCKS = weakBlocks;
 	}
@@ -48,46 +43,17 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 		canBePickedUp = 0;
 	}
 	
-	public EntityGrenade(World parWorld, EntityPlayer entityPlayer, int accuracy, boolean isRocket) {
-		super(parWorld, entityPlayer, (isRocket ? 3.0F : 4.2F), accuracy);
+	public EntityGrenade(World parWorld, EntityPlayer entityPlayer, float speed, int accuracy) {
+		super(parWorld, entityPlayer, speed, accuracy);
+		
 		setSize(0.5F, 0.5F);
 		canBePickedUp = 0;
-		
-		this.isRocket = isRocket;
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void onClientUpdate() {
 		super.onClientUpdate();
-		
-		// (always draw rocket fume trails)
-		if (isRocket) {
-			// Check render distance
-			Minecraft mc = Minecraft.getMinecraft();
-			double dX = mc.renderViewEntity.posX - posX;
-			double dY = mc.renderViewEntity.posY - posY;
-			double dZ = mc.renderViewEntity.posZ - posZ;
-			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
-			if (dX * dX + dY * dY + dZ * dZ < range * range) {
-				// build orientation vector
-				double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
-				double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
-				
-				for (int smokeIndex = 0; smokeIndex < (4 - mc.gameSettings.particleSetting); smokeIndex++) {
-					double factor = 0.20 * smokeIndex;
-					// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
-					mc.effectRenderer.addEffect(new EntitySmokeFX(
-							worldObj,
-							tailX - motionX * factor,
-							tailY - motionY * factor,
-							tailZ - motionZ * factor,
-							motionX, motionY + 0.3, motionZ,
-							1.5F));
-				}
-			}
-		}
 	}
 	
 	@Override
@@ -190,30 +156,16 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 	@Override
 	protected double getGravity() {
 		if (state == STATE_FLYING || state == STATE_BOUNCING) { 
-			return (isRocket ? 0.0122D : 0.15D);
+			return 0.15D;
 		} else if (state == STATE_BLOCKHIT) {
-			return (isRocket ? 0.007D : 0.15D);
+			return 0.15D;
 		}
 		return 0.0D;
 	}
 	
-	@Override
-	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeEntityToNBT(nbttagcompound);
-		
-		nbttagcompound.setBoolean("isRocket", isRocket);
-	}
-	
-	@Override
-	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readEntityFromNBT(nbttagcompound);
-		
-		isRocket = nbttagcompound.getBoolean("isRocket");
-	}
-	
 	public void explode() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			worldObj.createExplosion(shootingEntity, posX, posY, posZ, isRocket ? 7.0F : 3.5F, GunCus.enableBlockDamage);
+			worldObj.createExplosion(shootingEntity, posX, posY, posZ, 3.5F, GunCus.enableBlockDamage);
 		}
 	}
 }

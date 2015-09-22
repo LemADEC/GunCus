@@ -42,6 +42,7 @@ import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.entity.EntityGrenade;
 import stuuupiiid.guncus.entity.EntityBullet;
+import stuuupiiid.guncus.entity.EntityRocket;
 import stuuupiiid.guncus.event.TickHandler;
 import stuuupiiid.guncus.gui.GuiHandler;
 import stuuupiiid.guncus.item.GunCusItem;
@@ -256,8 +257,9 @@ public class GunCus {
 		
 		commonProxy.initRenderingRegistry();
 		
-		EntityRegistry.registerModEntity(EntityBullet.class, "guncus.bullet", 200, this, 500, 1, true);
-		EntityRegistry.registerModEntity(EntityGrenade.class, "guncus.grenade", 201, this, 500, 1, true);
+		EntityRegistry.registerModEntity(EntityBullet.class, "guncus.bullet", 200, this, 80, 1, true);
+		EntityRegistry.registerModEntity(EntityGrenade.class, "guncus.grenade", 201, this, 80, 1, true);
+		EntityRegistry.registerModEntity(EntityRocket.class, "guncus.rocket", 202, this, 100, 1, true);
 		
 		guiHandler = new GuiHandler();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, guiHandler);

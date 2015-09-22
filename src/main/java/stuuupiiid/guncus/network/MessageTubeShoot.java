@@ -2,6 +2,7 @@ package stuuupiiid.guncus.network;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.entity.EntityGrenade;
+import stuuupiiid.guncus.entity.EntityRocket;
 import stuuupiiid.guncus.item.ItemGun;
 import stuuupiiid.guncus.item.ItemRPG;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -39,21 +40,26 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				
 				if ( gun.hasM320(metadata)
 				  && (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) ) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
+					// m320 - 75m/s  => 3.75 blocks per tick
+					EntityGrenade grenade = new EntityGrenade(entityPlayer.worldObj, entityPlayer, 3.75F, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
-					entityPlayer.worldObj.spawnEntityInWorld(rocket);
+					entityPlayer.worldObj.spawnEntityInWorld(grenade);
 				}
 			} else if ((entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
 					&& (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)) {
 				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, false);
+					// m320 - 75m/s  => 3.75 blocks per tick
+					EntityGrenade grenade = new EntityGrenade(entityPlayer.worldObj, entityPlayer, 3.75F, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
-					entityPlayer.worldObj.spawnEntityInWorld(rocket);
+					entityPlayer.worldObj.spawnEntityInWorld(grenade);
 				}
 			} else if (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) {
 				ItemRPG rpg = (ItemRPG) entityPlayer.inventory.getCurrentItem().getItem();
 				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(rpg.ammo)) {
-					EntityGrenade rocket = new EntityGrenade(entityPlayer.worldObj, entityPlayer, accuracy, true);
+					// rpg  - 115m/s => 5.75 blocks per tick
+					// smaw - 220m/s => 11 blocks per tick
+					float speed = (rpg == GunCus.rpg) ? 5.75F : 11.0F;
+					EntityGrenade rocket = new EntityRocket(entityPlayer.worldObj, entityPlayer, speed, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);
 				}
