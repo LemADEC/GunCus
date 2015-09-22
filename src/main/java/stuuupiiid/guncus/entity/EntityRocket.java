@@ -54,13 +54,17 @@ public class EntityRocket extends EntityGrenade implements IProjectile, IEntityA
 			for (int smokeIndex = 0; smokeIndex < count; smokeIndex++) {
 				double factor = 0.20 * smokeIndex;
 				// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
-				mc.effectRenderer.addEffect(new EntitySmokeFX(
+				// adjust color to be more rocket style (white/yellowish)
+				EntitySmokeFX effect = new EntitySmokeFX(
 						worldObj,
 						tailX - motionX * factor,
 						tailY - motionY * factor,
 						tailZ - motionZ * factor,
-						-0.3 * motionX, -0.3 * motionY + 0.1, -0.3 * motionZ,
-						1.5F));
+						-0.5 * motionX, -0.5 * motionY + 0.1, -0.5 * motionZ,
+						1.5F);
+				float color = 0.7F + rand.nextFloat() * 0.15F; 
+				effect.setRBGColorF(color, color + 0.05F, color + 0.05F);
+				mc.effectRenderer.addEffect(effect);
 			}
 		}
 	}
