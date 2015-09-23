@@ -311,7 +311,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 				}
 				
 				// Prevent immediate self-shooting
-				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < 5))) {
+				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < SAFETY_FUSE_TICKS))) {
 					continue;
 				}
 				
@@ -413,7 +413,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			motionZ *= motionFactor;
 			
 			// apply gravity when applicable
-			motionY -= getGravity() / slowMotionFactor;
+			if (state == STATE_FLYING || state == STATE_BOUNCING) {
+				motionY -= getGravity() / slowMotionFactor;
+			}
 			
 			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
