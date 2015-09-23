@@ -85,42 +85,41 @@ public class ContainerAmmo extends Container {
 	
 	public void empty() {
 		ItemStack itemStackMag = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack itemStackAmmo = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack itemStackBullet = ((Slot) inventorySlots.get(1)).getStack();
 		
 		if ( (itemStackMag != null) && (itemStackMag.getItem() instanceof ItemMag)
-		  && ((itemStackAmmo == null) || (itemStackAmmo.getItem() instanceof ItemBullet))
+		  && ((itemStackBullet == null) || (itemStackBullet.getItem() instanceof ItemBullet))
 		  && (itemStackMag.getItemDamage() < itemStackMag.getMaxDamage())) {
 			ItemMag itemMag = (ItemMag) itemStackMag.getItem();
 			int magBulletId = itemMag.bulletId;
 			int ammoBulletId = magBulletId;
 			String magPack = itemMag.pack;
-			String ammoPack = magPack;
-			ItemBullet itemAmmoBullet = null;
+			String bulletPack = magPack;
 			
-			if (itemStackAmmo != null) {
-				itemAmmoBullet = (ItemBullet) itemStackAmmo.getItem();
-				ammoBulletId = itemAmmoBullet.bulletId;
-				ammoPack = itemAmmoBullet.pack;
+			if (itemStackBullet != null) {
+				ItemBullet itemBullet = (ItemBullet) itemStackBullet.getItem();
+				ammoBulletId = itemBullet.bulletId;
+				bulletPack = itemBullet.pack;
 			}
 			
-			if ((magBulletId == ammoBulletId) && magPack.equals(ammoPack)) {
+			if ((magBulletId == ammoBulletId) && magPack.equals(bulletPack)) {
 				int damage = itemStackMag.getItemDamage();
 				int size = 0;
-				if (itemStackAmmo != null) {
-					for (size = itemStackAmmo.stackSize; (size < itemStackAmmo.getMaxStackSize()) && (damage < itemStackMag.getMaxDamage()); size++) {
-						damage++;
-					}
-				}
 				
-				if (itemAmmoBullet == null) {
-					itemAmmoBullet = ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId);
+				if (itemStackBullet != null) {
+					size = itemStackBullet.stackSize;
+				}
+				int maxBulletStackSize = ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId).getItemStackLimit(null);
+				while ((size < maxBulletStackSize) && (damage < itemStackMag.getMaxDamage())) {
+					size++;
+					damage++;
 				}
 				
 				((Slot) inventorySlots.get(0)).putStack(new ItemStack(itemMag, 1, damage));
 				
 				if (size > 0) {
 					try {
-						((Slot) inventorySlots.get(1)).putStack(new ItemStack(itemAmmoBullet, size));
+						((Slot) inventorySlots.get(1)).putStack(new ItemStack(ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId), size));
 					} catch (NullPointerException exception) {
 						exception.printStackTrace();
 					}
