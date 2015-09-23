@@ -7,7 +7,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
@@ -28,7 +27,7 @@ public class GuiAmmoBlock extends GuiContainer {
 		xSize = 176;
 		ySize = 166;
 	}
-
+	
 	@Override
 	public void initGui(){
 		super.initGui();
@@ -42,8 +41,8 @@ public class GuiAmmoBlock extends GuiContainer {
 		// (ancestor is empty)
 		
 		RenderHelper.disableStandardItemLighting();
-		fontRendererObj.drawString("Ammo Box", 8, ySize - 160, 0x404040);
-		fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 96 + 2, 0x404040);
+		fontRendererObj.drawString(I18n.format("container.ammobox", new Object[0]), 8, ySize - 160, 0x404040);
+		fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, ySize - 96 + 2, 0x404040);
 		
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {
@@ -61,9 +60,9 @@ public class GuiAmmoBlock extends GuiContainer {
 			}
 		}
 		
-		RenderHelper.enableGUIStandardItemLighting();		
+		RenderHelper.enableGUIStandardItemLighting();
 	}
-
+	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int x, int y) {
 		// (ancestor is abstract)
@@ -97,12 +96,12 @@ public class GuiAmmoBlock extends GuiContainer {
 	@SideOnly(Side.CLIENT)
 	class ButtonWithTooltip extends GuiButton {
 		private String helpString = "";
-	
+		
 		public ButtonWithTooltip(int id, int xPosition, int yPosition, int width, int height, String displayString, String helpString) {
 			super(id, xPosition, yPosition, width, height, displayString);
 			this.helpString = helpString;
 		}
-	
+		
 		@Override
 		public void func_146111_b(int mouseX, int mouseY) {
 			drawCreativeTabHoveringText(I18n.format(helpString, new Object[0]), mouseX, mouseY);

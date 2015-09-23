@@ -8,7 +8,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
@@ -42,8 +41,8 @@ public class GuiBulletBlock extends GuiContainer {
 		// (ancestor is empty)
 		
 		RenderHelper.disableStandardItemLighting();
-		this.fontRendererObj.drawString(I18n.format("Bullet Box", new Object[0]), 8, this.ySize - 160, 0x404040);
-		this.fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 0x40404);
+		this.fontRendererObj.drawString(I18n.format("container.bulletbox", new Object[0]), 8, this.ySize - 160, 0x404040);
+		this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 0x40404);
 		
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {

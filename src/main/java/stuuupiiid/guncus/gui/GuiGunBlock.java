@@ -2,9 +2,9 @@ package stuuupiiid.guncus.gui;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
@@ -19,8 +19,8 @@ public class GuiGunBlock extends GuiContainer {
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		this.fontRendererObj.drawString("Gun Box", 8, this.ySize - 160, 0x404040);
-		this.fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 0x404040);
+		this.fontRendererObj.drawString(I18n.format("container.gunbox", new Object[0]), 8, this.ySize - 160, 0x404040);
+		this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 0x404040);
 		this.buttonList.clear();
 		int var5 = (this.width - this.xSize) / 2;
 		int var6 = (this.height - this.ySize) / 2;

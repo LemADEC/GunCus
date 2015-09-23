@@ -8,7 +8,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
@@ -51,8 +50,8 @@ public class GuiWeaponBlock extends GuiContainer {
 		// (ancestor is empty)
 		
 		RenderHelper.disableStandardItemLighting();
-		fontRendererObj.drawString(I18n.format("Weapon Box", new Object[0]), 8, ySize - 160, 0x404040);
-		fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 96 + 2, 0x404040);
+		fontRendererObj.drawString(I18n.format("container.weaponbox", new Object[0]), 8, ySize - 160, 0x404040);
+		fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, ySize - 96 + 2, 0x404040);
 		
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {

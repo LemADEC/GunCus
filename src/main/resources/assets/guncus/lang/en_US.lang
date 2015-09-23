@@ -45,3 +45,10 @@ item.explosive.smaw.name=GunCus SMAW
 
 itemGroup.GunCus.modifications=Gun Customization
 itemGroup.GunCus.bullets=GunCus Bullets
+
+container.ammobox=Ammo Box
+container.bulletbox=Bullet Box
+container.gunbox=Gun Box
+container.magbox=Magazine Box
+container.manualmagfiller=Manual Magazine Filler
+container.weaponbox=Weapon Box
