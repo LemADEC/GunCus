@@ -75,6 +75,8 @@ public class GuiWeaponBlock extends GuiContainer {
 	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float f, int x, int y) {
+		// (ancestor is abstract)
+		
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.mc.getTextureManager().bindTexture(new ResourceLocation("guncus:textures/gui/gui_weapon.png"));
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
