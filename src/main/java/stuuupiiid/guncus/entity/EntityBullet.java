@@ -118,7 +118,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 								0.15 * motionX + rand.nextFloat() * 0.2F - 0.1F,
 								0.15 * motionY + rand.nextFloat() * 0.1F,
 								0.15 * motionZ + rand.nextFloat() * 0.2F - 0.1F,
-								Math.max(1.0F, 0.05F * ticksExisted));
+								Math.min(Math.max(1.0F, 0.05F * ticksExisted), 4.0F));
 						effect.setRBGColorF(
 								0.95F + rand.nextFloat() * 0.10F,
 								0.65F + rand.nextFloat() * 0.35F,
