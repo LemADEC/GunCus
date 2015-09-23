@@ -203,39 +203,49 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		
 		// (no critical hits)
 		
-		DamageSource damagesource = null;
-		if (shootingEntity instanceof EntityPlayer) {
-			damagesource = DamageSource.causePlayerDamage((EntityPlayer)shootingEntity);
-		} else if (shootingEntity != null) {
-			damagesource = DamageSource.causeArrowDamage(this, shootingEntity);
-		} else {
-			damagesource = DamageSource.causeArrowDamage(this, this);
-		}
-		
-		if ((damage > 0.0F) && entityHit.attackEntityFrom(damagesource, damage)) {
-			
-			applyEffectOnEntityCollision(entityHit, hitVec);
-			
-			if (entityHit instanceof EntityLivingBase) {
-				if (!entityHit.isDead) {
-					EntityLivingBase entityLivingBase = (EntityLivingBase) entityHit;
-					entityLivingBase.hurtResistantTime = 0;
-				}
-				
-				// (Vanilla arrow) Play random.successful_hit when player hits another player
-				if ( entityHit != shootingEntity
-				  && entityHit instanceof EntityPlayer
-				  && shootingEntity instanceof EntityPlayerMP) {
-					((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
-				}
-				
-				if ( entityHit != shootingEntity
-				  && !entityHit.isDead
-				  && shootingEntity instanceof EntityPlayer) {
-					PacketHandler.sendToClient_showHitMarker(worldObj, hitVec, (EntityPlayer)shootingEntity);
-				}
+		boolean isAttaching = false;
+		if (entityHit instanceof EntityLivingBase) {
+			DamageSource damagesource = null;
+			if (shootingEntity instanceof EntityPlayer) {
+				damagesource = DamageSource.causePlayerDamage((EntityPlayer)shootingEntity);
+			} else if (shootingEntity != null) {
+				damagesource = DamageSource.causeArrowDamage(this, shootingEntity);
+			} else {
+				damagesource = DamageSource.causeArrowDamage(this, this);
 			}
 			
+			if ((damage > 0.0F) && entityHit.attackEntityFrom(damagesource, damage)) {
+				
+				applyEffectOnEntityCollision(entityHit, hitVec);
+				
+				if (entityHit instanceof EntityLivingBase) {
+					if (!entityHit.isDead) {
+						EntityLivingBase entityLivingBase = (EntityLivingBase) entityHit;
+						entityLivingBase.hurtResistantTime = 0;
+					}
+					
+					// (Vanilla arrow) Play random.successful_hit when player hits another player
+					if ( entityHit != shootingEntity
+					  && entityHit instanceof EntityPlayer
+					  && shootingEntity instanceof EntityPlayerMP) {
+						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
+					}
+					
+					if ( entityHit != shootingEntity
+					  && !entityHit.isDead
+					  && shootingEntity instanceof EntityPlayer) {
+						PacketHandler.sendToClient_showHitMarker(worldObj, hitVec, (EntityPlayer)shootingEntity);
+					}
+				}
+				
+				isAttaching = true;
+				
+			} else if (((EntityLivingBase) entityHit).getHealth() <= 0.0F) {
+				isAttaching = true;
+			}
+		}
+		
+		if (isAttaching) {
 			// Fix the bullet 25% in the entity
 			motionX = ((float) (hitVec.xCoord - posX));
 			motionY = ((float) (hitVec.yCoord - posY));
