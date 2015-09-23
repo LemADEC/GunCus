@@ -109,7 +109,7 @@ public class ContainerAmmo extends Container {
 				if (itemStackBullet != null) {
 					size = itemStackBullet.stackSize;
 				}
-				int maxBulletStackSize = ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId).getItemStackLimit(null);
+				int maxBulletStackSize = ItemBullet.bullets.get(itemMag.pack).get(magBulletId).getItemStackLimit(null);
 				while ((size < maxBulletStackSize) && (damage < itemStackMag.getMaxDamage())) {
 					size++;
 					damage++;
@@ -119,7 +119,7 @@ public class ContainerAmmo extends Container {
 				
 				if (size > 0) {
 					try {
-						((Slot) inventorySlots.get(1)).putStack(new ItemStack(ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId), size));
+						((Slot) inventorySlots.get(1)).putStack(new ItemStack(ItemBullet.bullets.get(itemMag.pack).get(magBulletId), size));
 					} catch (NullPointerException exception) {
 						exception.printStackTrace();
 					}

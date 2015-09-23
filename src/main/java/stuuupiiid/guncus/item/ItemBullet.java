@@ -25,15 +25,15 @@ public class ItemBullet extends GunCusItem {
 	public double frictionInAir = 0.01D;
 	public double frictionInLiquid = 0.5D;
 	
-	public static HashMap<String, List<ItemBullet>> bulletsList = new HashMap();
+	public static HashMap<String, List<ItemBullet>> bullets = new HashMap();
 	
 	public ItemBullet(String pack, String name, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
 		super(iconName, pack + ".bullet." + name);
 		setCreativeTab(GunCus.creativeTabBullets);
 		setMaxStackSize(64);
 		
-		if (!bulletsList.containsKey(pack)) {
-			bulletsList.put(pack, new ArrayList());
+		if (!bullets.containsKey(pack)) {
+			bullets.put(pack, new ArrayList());
 		}
 		
 		this.damageModifier = damageModifier;
@@ -43,12 +43,12 @@ public class ItemBullet extends GunCusItem {
 		this.ironIngots = ironIngot;
 		this.stackOnCreate = stackOnCreate;
 		this.pack = pack;
-		if (bulletsList.get(pack).size() <= bulletId) {
-			for (int bulletIndex = bulletsList.get(pack).size(); bulletIndex <= bulletId; bulletIndex++) {
-				bulletsList.get(pack).add(null);
+		if (bullets.get(pack).size() <= bulletId) {
+			for (int bulletIndex = bullets.get(pack).size(); bulletIndex <= bulletId; bulletIndex++) {
+				bullets.get(pack).add(null);
 			}
 		}
-		bulletsList.get(pack).set(bulletId, this);
+		bullets.get(pack).set(bulletId, this);
 	}
 	
 	public ItemBullet setGravityModifier(final double gravityModifier) {

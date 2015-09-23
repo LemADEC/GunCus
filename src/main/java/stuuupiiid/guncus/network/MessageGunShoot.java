@@ -73,12 +73,12 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 			}
 			
 			if ( ((mag != null) && (gun.mag != null))
-					|| ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bulletsList.get(gun.pack).get(bulletId))))
+					|| ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bullets.get(gun.pack).get(bulletId))))
 					|| (playerEntity.capabilities.isCreativeMode)) {
 				if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag != null) && (mag != null)) {
 					mag.damageItem(1, playerEntity);
 				} else if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag == null)) {
-					playerEntity.inventory.consumeInventoryItem(ItemBullet.bulletsList.get(gun.pack).get(bulletId));
+					playerEntity.inventory.consumeInventoryItem(ItemBullet.bullets.get(gun.pack).get(bulletId));
 				}
 
 				if (gun.hasSilencer(metadata)) {
@@ -88,9 +88,9 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				}
 				ItemBullet itemBullet;
 				if (gun.mag != null) {
-					itemBullet = ItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletId);
+					itemBullet = ItemBullet.bullets.get(gun.pack).get(gun.mag.bulletId);
 				} else {
-					itemBullet = ItemBullet.bulletsList.get(gun.pack).get(bulletId);
+					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}
 				
 				GunCus.logger.info("accuracy " + accuracy + " vs spray " + itemBullet.spray);

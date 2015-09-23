@@ -206,7 +206,7 @@ public class ItemGun extends Item {
 				&& ((client.currentScreen == null) || Mouse.isButtonDown(1))
 				&& ((playerMag != null) || (entityPlayer.capabilities.isCreativeMode)
 						|| ((bullets != null)
-								&& entityPlayer.inventory.hasItem((ItemBullet.bulletsList.get(pack)).get(bullets[actualBullet]))))
+								&& entityPlayer.inventory.hasItem((ItemBullet.bullets.get(pack)).get(bullets[actualBullet]))))
 				&& (!isInTubingMode)) {
 			GunCus.shootTime += this.delay;
 			this.reloadBurst = 0;
@@ -225,9 +225,9 @@ public class ItemGun extends Item {
 			PacketHandler.sendToServer_playerAction_shoot(entityPlayer, mag, bullets, actualBullet);
 			ItemBullet bulletItem;
 			if (mag != null) {
-				bulletItem = ItemBullet.bulletsList.get(pack).get(mag.bulletId);
+				bulletItem = ItemBullet.bullets.get(pack).get(mag.bulletId);
 			} else {
-				bulletItem = ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]);
+				bulletItem = ItemBullet.bullets.get(pack).get(bullets[actualBullet]);
 			}
 			
 			float damage1 = this.damage * bulletItem.damageModifier;
@@ -346,7 +346,7 @@ public class ItemGun extends Item {
 			if (actualBullet >= bullets.length) {
 				actualBullet = 0;
 			}
-			ItemStack itemStackBullet = new ItemStack(ItemBullet.bulletsList.get(pack).get(bullets[actualBullet]));
+			ItemStack itemStackBullet = new ItemStack(ItemBullet.bullets.get(pack).get(bullets[actualBullet]));
 			entityPlayer.addChatComponentMessage(new ChatComponentText("You are now using " + itemStackBullet.getDisplayName() + " ammunition!"));
 		}
 	}

@@ -20,7 +20,7 @@ public class ItemMag extends GunCusItem {
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		ItemStack itemStackBullet = new ItemStack(ItemBullet.bulletsList.get(pack).get(bulletId), 0);
+		ItemStack itemStackBullet = new ItemStack(ItemBullet.bullets.get(pack).get(bulletId), 0);
 		int bulletCount = getMaxDamage() - itemStack.getItemDamage();
 		if (bulletCount == getMaxDamage()) {
 			list.add("Full magazine of " + itemStackBullet.getDisplayName());

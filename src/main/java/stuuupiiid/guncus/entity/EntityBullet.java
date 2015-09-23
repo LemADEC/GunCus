@@ -75,7 +75,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	
 	public ItemBullet getBullet() {
 		if (pack != null) {
-			return ItemBullet.bulletsList.get(pack).get(bulletId);
+			return ItemBullet.bullets.get(pack).get(bulletId);
 		} else {
 			return null;
 		}

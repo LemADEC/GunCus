@@ -98,7 +98,7 @@ public class ContainerAmmoMan extends Container {
 				damage++;
 				
 				if (ammoItemBullet == null) {
-					ammoItemBullet = ItemBullet.bulletsList.get(itemMag.pack).get(magBulletId);
+					ammoItemBullet = ItemBullet.bullets.get(itemMag.pack).get(magBulletId);
 				}
 				
 				((Slot) inventorySlots.get(0)).putStack(new ItemStack(itemMag, 1, damage));

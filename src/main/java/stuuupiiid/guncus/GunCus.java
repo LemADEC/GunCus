@@ -553,7 +553,7 @@ public class GunCus {
 			hasError = true;
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid bullet ID. Expecting a strictly positive integer, found " + bulletId + ".");
 		}
-		if (ItemBullet.bulletsList.get(pack) != null && ItemBullet.bulletsList.get(pack).size() > bulletId && ItemBullet.bulletsList.get(pack).get(bulletId) != null) {
+		if (ItemBullet.bullets.get(pack) != null && ItemBullet.bullets.get(pack).size() > bulletId && ItemBullet.bullets.get(pack).get(bulletId) != null) {
 			hasError = true;
 			logger.error("[" + pack + "] Bullet " + file.getName() + " defines a duplicated bullet ID. Each bullet needs a unique ID for their pack.");
 		}
@@ -635,8 +635,8 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInLiquids. Expecting a strictly positive integer, up to 100, found " + frictionInLiquid + ".");
 		}
 		
-		if (!ItemBullet.bulletsList.containsKey(pack)) {
-			ItemBullet.bulletsList.put(pack, new ArrayList());
+		if (!ItemBullet.bullets.containsKey(pack)) {
+			ItemBullet.bullets.put(pack, new ArrayList());
 		}
 		
 		if (!hasError) {
@@ -790,7 +790,7 @@ public class GunCus {
 			}
 			
 			if (!pack.equalsIgnoreCase("template")) {
-				if (ItemBullet.bulletsList.get(pack) == null || ItemBullet.bulletsList.get(pack).get(intBullets[indexBullet]) == null) {
+				if (ItemBullet.bullets.get(pack) == null || ItemBullet.bullets.get(pack).get(intBullets[indexBullet]) == null) {
 					logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intBullets[indexBullet] + "");
 					errored = true;
 				}

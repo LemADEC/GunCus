@@ -67,7 +67,7 @@ public class ContainerBullet extends Container {
 		
 		if ((itemStackMagazineSlot != null) && (itemStackMagazineSlot.getItem() != null) && (itemStackMagazineSlot.getItem() instanceof ItemMag)) {
 			mag = (ItemMag) itemStackMagazineSlot.getItem();
-			bullet = ItemBullet.bulletsList.get(mag.pack).get(mag.bulletId);
+			bullet = ItemBullet.bullets.get(mag.pack).get(mag.bulletId);
 			
 			if ( (bullet.gunpowder >= 0)
 			  && (bullet.ironIngots >= 0)
@@ -108,7 +108,7 @@ public class ContainerBullet extends Container {
 		} else if (itemStackMagSlot.getItem() instanceof ItemMag) {
 			itemMag = (ItemMag) itemStackMagSlot.getItem();
 			
-			ItemBullet bullet = ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
+			ItemBullet bullet = ItemBullet.bullets.get(itemMag.pack).get(itemMag.bulletId);
 			if (bullet == null) {
 				return "Invalid bullet defined!\n"
 						+ "Please contact the '" + itemMag.pack + "' addon author to fix it";

@@ -89,7 +89,7 @@ public class GuiBulletBlock extends GuiContainer {
 	protected ItemBullet getBullet() {
 		if (inventorySlots.getSlot(0).getStack() != null && inventorySlots.getSlot(0).getStack().getItem() instanceof ItemMag) {
 			ItemMag itemMag = (ItemMag) inventorySlots.getSlot(0).getStack().getItem();
-			return ItemBullet.bulletsList.get(itemMag.pack).get(itemMag.bulletId);
+			return ItemBullet.bullets.get(itemMag.pack).get(itemMag.bulletId);
 		}
 		return null;
 	}
