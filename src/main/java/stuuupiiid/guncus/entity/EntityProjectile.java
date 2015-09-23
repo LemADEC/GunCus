@@ -39,7 +39,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	protected static float fRadToDegFactor = 180.0F / ((float)Math.PI);
 	
 	// Bullet time effect: 1 is default, higher is slower
-	protected float slowMotionFactor = 1.0F;
+	protected double slowMotionFactor = 1.0D;
 	// Maximum duration before hitting a target block or entity
 	protected int MAX_FLIGHT_DURATION_TICKS;
 	// Maximum duration while bouncing between targets
@@ -77,8 +77,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		super(world);
 	}
 	
-	public EntityProjectile(World parWorld, EntityPlayer entityPlayer, float speed, int accuracy) {
+	public EntityProjectile(World parWorld, EntityPlayer entityPlayer, double speed, int accuracy) {
 		super(parWorld);
+		isImmuneToFire = true;
 		renderDistanceWeight = 10.0D;
 		shootingEntity = entityPlayer;
 		rotationYaw = entityPlayer.rotationYaw;
@@ -104,7 +105,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			motionZ += accZ2 / 370.0D;
 		}
 		
-		setThrowableHeading(motionX, motionY, motionZ, speed / slowMotionFactor, 1.0F);
+		setThrowableHeading(motionX, motionY, motionZ, (float) (speed * (1.0D + 0.1D * rand.nextGaussian()) / slowMotionFactor), 1.0F);
 		previousX = posX;
 		previousY = posY;
 		previousZ = posZ;
@@ -216,7 +217,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	
 	abstract protected void onServerBlockCollision(final boolean isWeakBlock, Vec3 hitVec);
 	
-	abstract protected float getFriction();
+	abstract protected double getFriction();
 	
 	abstract protected double getGravity();
 	

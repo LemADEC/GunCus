@@ -21,6 +21,9 @@ public class ItemBullet extends GunCusItem {
 	public HashMap<Integer, Float> effectModifiers = new HashMap();
 	public HashMap<Integer, Integer> effectAmplifiers = new HashMap();
 	public double gravityModifier = 1.0D;
+	public double initialSpeed = 10.0D;
+	public double frictionInAir = 0.01D;
+	public double frictionInLiquid = 0.5D;
 	
 	public static HashMap<String, List<ItemBullet>> bulletsList = new HashMap();
 	
@@ -48,7 +51,7 @@ public class ItemBullet extends GunCusItem {
 		bulletsList.get(pack).set(bulletId, this);
 	}
 	
-	public ItemBullet setGravityModifier(double gravityModifier) {
+	public ItemBullet setGravityModifier(final double gravityModifier) {
 		this.gravityModifier = gravityModifier;
 		return this;
 	}
@@ -57,13 +60,20 @@ public class ItemBullet extends GunCusItem {
 		return this.effectModifiers.size() > 0;
 	}
 	
-	public ItemBullet setSplit(int split) {
+	public ItemBullet setSplit(final int split) {
 		this.split = split;
 		return this;
 	}
 	
-	public ItemBullet setSpray(int spray) {
+	public ItemBullet setSpray(final int spray) {
 		this.spray = spray;
+		return this;
+	}
+
+	public ItemBullet setSpeedStats(final double initialSpeed, final double frictionInAir, final double frictionInLiquid) {
+		this.initialSpeed = initialSpeed;
+		this.frictionInAir = frictionInAir;
+		this.frictionInLiquid = frictionInLiquid;
 		return this;
 	}
 	

@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +15,7 @@ import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
@@ -43,23 +45,23 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	
 	{
 		// slowMotionFactor = 1.0F;
-		MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
-		MAX_BOUNCING_DURATION_TICKS = Math.round(600 * slowMotionFactor);	// 30 s bouncing around
-		MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
-		MAX_BLOCKHIT_DURATION_TICKS = Math.round(400 * slowMotionFactor);	// 20 s on the ground
-		MAX_LIFE_DURATION_TICKS = Math.round(6000 * slowMotionFactor);	// 5 mn max total time
+		MAX_FLIGHT_DURATION_TICKS    = (int) Math.round(60 * slowMotionFactor);	// 3 s to reach a target
+		MAX_BOUNCING_DURATION_TICKS  = (int) Math.round(600 * slowMotionFactor);	// 30 s bouncing around
+		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round(100 * slowMotionFactor);	// 5 s on an entity
+		MAX_BLOCKHIT_DURATION_TICKS  = (int) Math.round(400 * slowMotionFactor);	// 20 s on the ground
+		MAX_LIFE_DURATION_TICKS      = (int) Math.round(6000 * slowMotionFactor);	// 5 mn max total time
 		SAFETY_FUSE_TICKS = 2;	// 2 ticks since bullet starts inside shooting player...
 		
 		WEAK_BLOCKS = weakBlocks;
 	}
-
+	
 	public EntityBullet(World world) {
 		super(world);
 		setSize(0.2F, 0.2F);
 		canBePickedUp = 0;
 	}
 	
-	public EntityBullet(World parWorld, EntityPlayer entityPlayer, float speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
+	public EntityBullet(World parWorld, EntityPlayer entityPlayer, double speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
 		super(parWorld, entityPlayer, speed, accuracy);
 		setSize(0.2F, 0.2F);
 		canBePickedUp = 0;
@@ -83,6 +85,49 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	@SideOnly(Side.CLIENT)
 	public void onClientUpdate() {
 		super.onClientUpdate();
+		
+		// (always draw flaming bullet fumes)
+		if (isBurning) {
+			if (isInWater() || state == STATE_BLOCKHIT) {
+				setDead();
+			}
+			
+			if (ticksExisted > 3) {
+				// Check render distance
+				Minecraft mc = Minecraft.getMinecraft();
+				double dX = mc.renderViewEntity.posX - posX;
+				double dY = mc.renderViewEntity.posY - posY;
+				double dZ = mc.renderViewEntity.posZ - posZ;
+				double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
+				if (dX * dX + dY * dY + dZ * dZ < range * range) {
+					// build orientation vector
+					double tailX = posX - 1.75 * width * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+					double tailZ = posZ - 1.75 * width * MathHelper.cos(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
+					double tailY = posY - 1.75 * width * MathHelper.sin(rotationPitch * fDegToRadFactor);
+					
+					int count = 2 * (4 - mc.gameSettings.particleSetting);
+					for (int smokeIndex = 0; smokeIndex < count; smokeIndex++) {
+						double factor = 0.20 * smokeIndex;
+						// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
+						// adjust color to be more rocket style (white/yellowish)
+						EntitySmokeFX effect = new EntitySmokeFX(
+								worldObj,
+								tailX - motionX * factor,
+								tailY - motionY * factor,
+								tailZ - motionZ * factor,
+								0.15 * motionX + rand.nextFloat() * 0.2F - 0.1F,
+								0.15 * motionY + rand.nextFloat() * 0.1F,
+								0.15 * motionZ + rand.nextFloat() * 0.2F - 0.1F,
+								Math.max(1.0F, 0.05F * ticksExisted));
+						effect.setRBGColorF(
+								0.95F + rand.nextFloat() * 0.10F,
+								0.65F + rand.nextFloat() * 0.35F,
+								0.05F + rand.nextFloat() * 0.15F);
+						mc.effectRenderer.addEffect(effect);
+					}
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -247,11 +292,11 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	}
 	
 	@Override
-	protected float getFriction() {
+	protected double getFriction() {
 		if (isInWater()) {
-			return 0.5F;
+			return getBullet().frictionInLiquid;
 		} else {
-			return 0.01F;
+			return getBullet().frictionInAir;
 		}
 	}
 	

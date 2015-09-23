@@ -86,18 +86,20 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				} else {
 					playerEntity.worldObj.playSoundAtEntity(playerEntity, gun.soundNormal, 5.0F * (float) gun.soundModifier, 1.0F / (playerEntity.worldObj.rand.nextFloat() * 0.4F + 0.8F));
 				}
-				ItemBullet bulletItem;
+				ItemBullet itemBullet;
 				if (gun.mag != null) {
-					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletId);
+					itemBullet = ItemBullet.bulletsList.get(gun.pack).get(gun.mag.bulletId);
 				} else {
-					bulletItem = ItemBullet.bulletsList.get(gun.pack).get(bulletId);
+					itemBullet = ItemBullet.bulletsList.get(gun.pack).get(bulletId);
 				}
 				
-				if (accuracy > bulletItem.spray) {
-					accuracy = bulletItem.spray;
+				GunCus.logger.info("accuracy " + accuracy + " vs spray " + itemBullet.spray);
+				if (accuracy > itemBullet.spray) {
+					accuracy = itemBullet.spray;
 				}
 				
-				float damage = gun.damage * bulletItem.damageModifier;
+				float damage = gun.damage * itemBullet.damageModifier;
+				double speed = itemBullet.initialSpeed; 
 				
 				if (gun.hasHeavyBarrel(metadata)) {
 					damage += 2.0F;
@@ -106,8 +108,8 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					damage += 1.0F;
 				}
 				
-				for (int splitIndex = 0; splitIndex < bulletItem.split; splitIndex++) {
-					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, 10.0F, damage, accuracy, gun.hasPolygonalBarrel(metadata), bulletItem);
+				for (int splitIndex = 0; splitIndex < itemBullet.split; splitIndex++) {
+					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, speed, damage, accuracy, gun.hasPolygonalBarrel(metadata), itemBullet);
 					playerEntity.worldObj.spawnEntityInWorld(bulletEntity);
 				}
 				

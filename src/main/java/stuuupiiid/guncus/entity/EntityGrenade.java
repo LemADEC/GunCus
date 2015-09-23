@@ -26,12 +26,12 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 			Blocks.web, Blocks.glowstone));
 	
 	{
-		// slowMotionFactor = 1.0F;
-		MAX_FLIGHT_DURATION_TICKS = Math.round(60 * slowMotionFactor);	// 3 s to reach a target
-		MAX_BOUNCING_DURATION_TICKS = Math.round(600 * slowMotionFactor);	// 30 s bouncing around
-		MAX_ENTITYHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on an entity
-		MAX_BLOCKHIT_DURATION_TICKS = Math.round(100 * slowMotionFactor);	// 5 s on the ground
-		MAX_LIFE_DURATION_TICKS = Math.round(6000 * slowMotionFactor);	// 5 mn max total time
+		// slowMotionFactor = 1.0D;
+		MAX_FLIGHT_DURATION_TICKS    = (int) Math.round(  60 * slowMotionFactor);	// 3 s to reach a target
+		MAX_BOUNCING_DURATION_TICKS  = (int) Math.round( 600 * slowMotionFactor);	// 30 s bouncing around
+		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round( 100 * slowMotionFactor);	// 5 s on an entity
+		MAX_BLOCKHIT_DURATION_TICKS  = (int) Math.round( 100 * slowMotionFactor);	// 5 s on the ground
+		MAX_LIFE_DURATION_TICKS      = (int) Math.round(6000 * slowMotionFactor);	// 5 mn max total time
 		SAFETY_FUSE_TICKS = 4;	// 200 ms flight
 		
 		WEAK_BLOCKS = weakBlocks;
@@ -43,7 +43,7 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 		canBePickedUp = 0;
 	}
 	
-	public EntityGrenade(World parWorld, EntityPlayer entityPlayer, float speed, int accuracy) {
+	public EntityGrenade(World parWorld, EntityPlayer entityPlayer, double speed, int accuracy) {
 		super(parWorld, entityPlayer, speed, accuracy);
 		
 		setSize(0.5F, 0.5F);
@@ -145,11 +145,11 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 	}
 	
 	@Override
-	protected float getFriction() {
+	protected double getFriction() {
 		if (isInWater()) {
-			return 0.5F;
+			return 0.5D;
 		} else {
-			return 0.01F;
+			return 0.01D;
 		}
 	}
 	

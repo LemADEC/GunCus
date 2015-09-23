@@ -547,21 +547,58 @@ public class GunCus {
 		Configuration configBullet = new Configuration(file);
 		configBullet.load();
 		
+		boolean hasError = false; 
 		int bulletId = configBullet.get("general", "Bullet ID", 1, "Bullet ID of the bullet (guns refer to bullet by this ID)").getInt();
+		if (bulletId <= 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid bullet ID. Expecting a strictly positive integer, found " + bulletId + ".");
+		}
+		if (ItemBullet.bulletsList.get(pack) != null && ItemBullet.bulletsList.get(pack).size() > bulletId && ItemBullet.bulletsList.get(pack).get(bulletId) != null) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " defines a duplicated bullet ID. Each bullet needs a unique ID for their pack.");
+		}
 		
 		int ironIngot = configBullet.get("general", "Iron", 1, "How much iron ingots you need to craft this bullet type").getInt();
+		if (ironIngot < 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Iron ingots count. Expecting a positive integer, found " + ironIngot + ".");
+		}
 		
 		int gunpowder = configBullet.get("general", "Gunpowder", 3, "How much gunpowder you need to craft this bullet type").getInt();
+		if (gunpowder < 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Gunpowder count. Expecting a positive integer, found " + gunpowder + ".");
+		}
+		if (ironIngot == 0 && gunpowder == 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has no cost, need at least 1 Iron ingot or 1 Gunpowder.");
+		}
 		
 		int stackOnCreate = configBullet.get("general", "stackSize", 4, "How much bullets you get at a time by crafting this bullet type").getInt();
+		if (stackOnCreate <= 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid stackSize. Expecting a strictly positive integer, found " + stackOnCreate + ".");
+		}
 		
 		String name = configBullet.get("general", "Name", "default", "Name of the bullet").getString();;
+		if (name == null || name.isEmpty()) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid/missing name.");
+		}
 		
 		String iconName = configBullet.get("general", "Icon", "", "Texture of this bullet. Leave blanc for default").getString();
 		
 		int split = configBullet.get("general", "Split", 1, "How much bullets are being shot at a time (only one ammo is consumed)").getInt();
+		if (split <= 0) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Split. Expecting a strictly positive integer, found " + split + ".");
+		}
 		
 		int spray = configBullet.get("general", "Spray", 100, "Maximum accuracy by using this bullet in %. 100 is perfect accuracy while 30 is a shotgun spray.").getInt();
+		if (spray <= 0 || spray > 100) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Spray. Expecting a strictly positive integer, up to 100, found " + spray + ".");
+		}
 		
 		int texture = configBullet.get("general", "Texture", 0, "Texture variation of the bullet (0 to 5)."
 				+ "\n0 is normal, 1 is poison/rust, 2 is purple, 3 is red, 4 is fat metal, 5 is needle green.").getInt(0);;
@@ -579,22 +616,30 @@ public class GunCus {
 				+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds"
 				+ "\n10:X:Y = knockback +X horizontally +Y vertically.").getString().split(";");
 		
-		double gravityModifier = configBullet.get("general", "GravityModifier", 1.0D, "Applied gravity is (normal gravity) x gun.Gravity x bullet.GravityModifier").getDouble();
+		double gravityModifier = configBullet.get("general", "GravityModifier", 0.45D, "Gravity is vertical down acceleration applied every tick.").getDouble();
 		
 		float damageModifier = (float) configBullet.get("general", "Damage Modifier", 1.0D, "Applied damage is Gun Damage x Damage Modifier").getDouble();
+		
+		double initialSpeed = configBullet.get("general", "InitialSpeed", 200.0D, "Initial speed of the bullet in m/s. Actual speed decrease with friction and gun's attachment/barret.").getDouble();
+		initialSpeed /= 20.0D;	// converts to blocks per tick
+		
+		double frictionInAir = configBullet.get("general", "FrictionInAir", 0.01D, "Friction factor while in air. Factor is applied every tick. 0.00 means no friction, while 1.00 means instant stop.").getDouble();
+		if (frictionInAir <= 0.0D || frictionInAir > 1.0D) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInAir. Expecting a strictly positive integer, up to 100, found " + frictionInAir + ".");
+		}
+		
+		double frictionInLiquid = configBullet.get("general", "FrictionInLiquids", 0.5D, "Friction factor while in a liquid. Factor is applied every tick. 0.00 means no friction, while 1.00 means instant stop.").getDouble();
+		if (frictionInLiquid <= 0.0D || frictionInLiquid > 1.0D) {
+			hasError = true;
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInLiquids. Expecting a strictly positive integer, up to 100, found " + frictionInLiquid + ".");
+		}
 		
 		if (!ItemBullet.bulletsList.containsKey(pack)) {
 			ItemBullet.bulletsList.put(pack, new ArrayList());
 		}
 		
-		if ( (name != null)
-		  && (bulletId > 0)
-		  && (ironIngot >= 0)
-		  && (gunpowder >= 0)
-		  && ((ironIngot > 0) || (gunpowder > 0))
-		  && (stackOnCreate > 0)
-		  && ( ( (ItemBullet.bulletsList.get(pack).size() > bulletId) && (ItemBullet.bulletsList.get(pack).get(bulletId) == null) )
-			|| (ItemBullet.bulletsList.get(pack).size() <= bulletId) ) ) {
+		if (!hasError) {
 			if (iconName.equals("") || iconName.equals(" ")) {
 				iconName = "guncus:bullet";
 			} else {
@@ -605,7 +650,8 @@ public class GunCus {
 				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
-					.setSpray(spray);
+					.setSpray(spray)
+					.setSpeedStats(initialSpeed, frictionInAir, frictionInLiquid);
 				
 				for (String effect : effects) {
 					try {
@@ -627,7 +673,7 @@ public class GunCus {
 				logger.info("Added bullet #" + bulletId + ": "+ name);
 			}
 		} else {
-			logger.info("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
+			logger.error("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 		}
 		
 		configBullet.save();
