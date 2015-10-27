@@ -102,6 +102,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	@SideOnly(Side.CLIENT)
 	public IMessage onMessage(MessageClientValidation clientValidationMessage, MessageContext context) {
