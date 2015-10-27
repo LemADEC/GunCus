@@ -7,6 +7,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import stuuupiiid.guncus.GunCus;
@@ -75,10 +76,12 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	
 	public ItemBullet getBullet() {
 		if (pack != null) {
-			return ItemBullet.bullets.get(pack).get(bulletId);
-		} else {
-			return null;
+			List<ItemBullet> itemBullet = ItemBullet.bullets.get(pack);
+			if (itemBullet != null) {
+				return itemBullet.get(bulletId);
+			}
 		}
+		return null;
 	}
 	
 	@Override
