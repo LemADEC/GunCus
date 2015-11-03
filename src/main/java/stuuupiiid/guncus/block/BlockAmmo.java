@@ -24,8 +24,8 @@ public class BlockAmmo extends GunCusBlock {
 	
 	@Override
 	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int par1, int par2) {
-		return par1 == 0 ? iconBottom : par1 == 1 ? iconTop : blockIcon;
+	public IIcon getIcon(int side, int metadata) {
+		return side == 0 ? iconBottom : side == 1 ? iconTop : blockIcon;
 	}
 	
 	@Override
