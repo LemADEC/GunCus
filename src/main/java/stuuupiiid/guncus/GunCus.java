@@ -183,7 +183,7 @@ public class GunCus {
 		blockGun = new BlockGun();
 		
 		magFill = new ItemMagFiller();
-		part = new GunCusItem("guncus:boxpart", "boxpart");
+		part = new GunCusItem("guncus:boxpart", "boxpart").setMaxStackSize(16);
 		
 		scope = new ItemScope("scope", "scope",
 				new ScopePart[] {
