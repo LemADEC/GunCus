@@ -93,7 +93,6 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}
 				
-				GunCus.logger.info("accuracy " + accuracy + " vs spray " + itemBullet.spray);
 				if (accuracy > itemBullet.spray) {
 					accuracy = itemBullet.spray;
 				}
