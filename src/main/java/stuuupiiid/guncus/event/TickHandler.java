@@ -1,5 +1,6 @@
 package stuuupiiid.guncus.event;
 
+import java.lang.reflect.Field;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
@@ -28,6 +29,29 @@ public class TickHandler {
 	public void onServerTick(TickEvent.ServerTickEvent event) {
 		
 	}
+	
+	// Minecraft support for disabling swing movement
+	private static Field Minecraft_leftClickCounter;
+	private static void noSwing(final int counter) {
+		try {
+			if (Minecraft_leftClickCounter == null) {
+				try {
+					try {
+						Minecraft_leftClickCounter = Class.forName("net.minecraft.client.Minecraft").getDeclaredField("field_71429_W");	// obfuscated
+					} catch (NoSuchFieldException exception) {
+						Minecraft_leftClickCounter = Class.forName("net.minecraft.client.Minecraft").getDeclaredField("leftClickCounter");	// dev
+					}
+					Minecraft_leftClickCounter.setAccessible(true);
+				} catch (Exception exception) {
+					throw new RuntimeException(exception);
+				}
+			}
+			Minecraft_leftClickCounter.set(Minecraft.getMinecraft(), counter);
+		} catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
+	}
+	// Minecraft support ends here
 	
 	// Called when the client ticks.
 	@SubscribeEvent
@@ -58,6 +82,11 @@ public class TickHandler {
 		
 		if (FMLClientHandler.instance().getClient().thePlayer != null) {
 			EntityPlayer entityPlayer = FMLClientHandler.instance().getClient().thePlayer;
+			
+			if ( (entityPlayer.inventory.getCurrentItem() != null)
+			  && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun) ) {
+				noSwing(10000);
+			}
 			
 			if (GunCus.shootTime > 0) {
 				if (entityPlayer.inventory.getCurrentItem() == null) {
