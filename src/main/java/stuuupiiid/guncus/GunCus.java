@@ -457,7 +457,7 @@ public class GunCus {
 		createTemplatePack(fileGunCus);
 		
 		for (File filePack : fileGunCus.listFiles()) {
-			if (filePack.isDirectory() && (!filePack.getName().equalsIgnoreCase("template"))) {
+			if (filePack.isDirectory() && (!filePack.getName().equalsIgnoreCase("template")) && (!filePack.getName().equalsIgnoreCase("default"))) {
 				logger.info("Loading pack " + filePack.getName());
 				loadBullets(filePack.getAbsolutePath(), filePack.getName());
 				loadGuns(filePack.getAbsolutePath(), filePack.getName());
@@ -580,7 +580,7 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid stackSize. Expecting a strictly positive integer, found " + stackOnCreate + ".");
 		}
 		
-		String name = configBullet.get("general", "Name", "default", "Name of the bullet").getString();;
+		String name = configBullet.get("general", "Name", "default", "Name of the bullet").getString();
 		if (name == null || name.isEmpty()) {
 			hasError = true;
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid/missing name.");

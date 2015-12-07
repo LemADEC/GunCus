@@ -43,7 +43,7 @@ public class GunCusResourceLoader implements IResourcePack {
 		HashSet<String> folders = new HashSet();
 		for (String stringSubFolder : fileBaseFolder.list()) {
 			File fileSubFolder = new File(fileBaseFolder, stringSubFolder);
-			if (fileSubFolder.exists() && fileSubFolder.isDirectory() && !fileSubFolder.getName().equalsIgnoreCase("template")) {
+			if (fileSubFolder.exists() && fileSubFolder.isDirectory() && !fileSubFolder.getName().equalsIgnoreCase("template") && !fileSubFolder.getName().equalsIgnoreCase("default")) {
 				folders.add(fileSubFolder.getName().toLowerCase());
 			}
 		}
