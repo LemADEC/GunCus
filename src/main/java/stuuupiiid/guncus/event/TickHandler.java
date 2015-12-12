@@ -228,7 +228,7 @@ public class TickHandler {
 	@SubscribeEvent
 	public void onEntityJoinWorld(EntityJoinWorldEvent event){
 		if (event.entity instanceof EntityPlayer) {
-			GunCus.logger.info("onEntityJoinWorld " + event.entity);
+			// GunCus.logger.info("onEntityJoinWorld " + event.entity);
 			if (!event.world.isRemote) {
 				for (ItemGun itemGun : GunCus.instance.guns.values()) {
 					MessageClientValidation clientConnectionMessage = new MessageClientValidation(itemGun);
