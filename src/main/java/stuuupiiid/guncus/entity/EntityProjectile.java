@@ -54,6 +54,8 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	protected int SAFETY_FUSE_TICKS;
 	// Blocks that get broken when hit
 	protected Set<Blocks> WEAK_BLOCKS = null;	// shall be set by descendant
+	// Since projectile starts inside shooting player, we're protecting him at initial tick
+	protected int SHOOTER_SAFETY_TICKS = 2;
 	
 	public final static int STATE_FLYING = 0;
 	public final static int STATE_BOUNCING = 1;
@@ -311,7 +313,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 				}
 				
 				// Prevent immediate self-shooting
-				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < SAFETY_FUSE_TICKS))) {
+				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < SHOOTER_SAFETY_TICKS))) {
 					continue;
 				}
 				

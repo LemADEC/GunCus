@@ -51,7 +51,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round(100 * slowMotionFactor);	// 5 s on an entity
 		MAX_BLOCKHIT_DURATION_TICKS  = (int) Math.round(400 * slowMotionFactor);	// 20 s on the ground
 		MAX_LIFE_DURATION_TICKS      = (int) Math.round(6000 * slowMotionFactor);	// 5 mn max total time
-		SAFETY_FUSE_TICKS = 2;	// 2 ticks since bullet starts inside shooting player...
+		SAFETY_FUSE_TICKS = 0;	// none, it's a bullet...
 		
 		WEAK_BLOCKS = weakBlocks;
 	}
