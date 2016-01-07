@@ -46,9 +46,9 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	
 	{
 		// slowMotionFactor = 1.0F;
-		MAX_FLIGHT_DURATION_TICKS    = (int) Math.round(60 * slowMotionFactor);	// 3 s to reach a target
+		MAX_FLIGHT_DURATION_TICKS    = (int) Math.round( 60 * slowMotionFactor);	// 3 s to reach a target
 		MAX_BOUNCING_DURATION_TICKS  = (int) Math.round(600 * slowMotionFactor);	// 30 s bouncing around
-		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round(100 * slowMotionFactor);	// 5 s on an entity
+		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round( 20 * slowMotionFactor);	// 1 s on an entity
 		MAX_BLOCKHIT_DURATION_TICKS  = (int) Math.round(400 * slowMotionFactor);	// 20 s on the ground
 		MAX_LIFE_DURATION_TICKS      = (int) Math.round(6000 * slowMotionFactor);	// 5 mn max total time
 		SAFETY_FUSE_TICKS = 0;	// none, it's a bullet...
