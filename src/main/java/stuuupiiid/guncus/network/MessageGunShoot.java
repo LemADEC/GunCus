@@ -43,7 +43,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 			ItemGun gun = (ItemGun) playerEntity.inventory.getCurrentItem().getItem();
 			int metadata = playerEntity.inventory.getCurrentItem().getItemDamage();
 			ItemStack mag = null;
-
+			
 			if (gun.mag != null) {
 				for (int v1 = 0; v1 < playerEntity.inventory.getSizeInventory(); v1++) {
 					if ((playerEntity.inventory.getStackInSlot(v1) != null)
@@ -55,7 +55,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 						break;
 					}
 				}
-
+				
 				if (mag == null) {
 					for (int v1 = 0; v1 < playerEntity.inventory.getSizeInventory(); v1++) {
 						if ((playerEntity.inventory.getStackInSlot(v1) != null)
@@ -80,7 +80,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				} else if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag == null)) {
 					playerEntity.inventory.consumeInventoryItem(ItemBullet.bullets.get(gun.pack).get(bulletId));
 				}
-
+				
 				if (gun.hasSilencer(metadata)) {
 					playerEntity.worldObj.playSoundAtEntity(playerEntity, gun.soundSilenced, 1.0F, 1.0F / (playerEntity.worldObj.rand.nextFloat() * 0.4F + 0.8F));
 				} else {
