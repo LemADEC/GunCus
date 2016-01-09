@@ -236,43 +236,45 @@ public class ItemGun extends Item {
 				GunCus.logger.info("Gun pre accuracy is " + GunCus.accuracy);
 			}
 			
-			double newAccuracy = damage1;
+			double accuracyOffset = damage1;
+			//Applying under barrel bonus (Bottom Slot)
 			if (Mouse.isButtonDown(1)) {
-				newAccuracy *= 0.75D;
+				accuracyOffset *= 0.75D;
 			} else if (hasLaserPointer(itemStack.getItemDamage())) {
-				newAccuracy *= 0.75D;
-			}
-			
-			if (hasSilencer(itemStack.getItemDamage())) {
-				newAccuracy *= 1.05D;
-			}
-			
-			if (hasRifledBarrel(itemStack.getItemDamage())) {
-				newAccuracy *= 0.8D;
-			}
-			
-			if (hasPolygonalBarrel(itemStack.getItemDamage())) {
-				newAccuracy *= 0.75D;
-			}
-			
-			if (hasHeavyBarrel(itemStack.getItemDamage())) {
-				newAccuracy *= 0.7D;
+				accuracyOffset *= 0.75D;
 			}
 			
 			if ((hasBipod(itemStack.getItemDamage())) && (canUseBipod(entityPlayer))) {
-				newAccuracy *= 0.65D;
+				accuracyOffset *= 0.65D;
 			}
 			
 			if (hasGrip(itemStack.getItemDamage())) {
-				newAccuracy *= 0.8D;
+				accuracyOffset *= 0.8D;
 			}
 			
 			if (hasImprovedGrip(itemStack.getItemDamage())) {
-				newAccuracy *= 0.8D;
+				accuracyOffset *= 0.8D;
 			}
 			
-			if (GunCus.accuracy > newAccuracy) {
-				GunCus.accuracy -= newAccuracy;
+			//Applying Barrel Bonus (Left Slot)			
+			if (hasSilencer(itemStack.getItemDamage())) {
+				accuracyOffset *= 1.05D;
+			}
+			
+			if (hasRifledBarrel(itemStack.getItemDamage())) {
+				accuracyOffset *= 0.8D;
+			}
+			
+			if (hasPolygonalBarrel(itemStack.getItemDamage())) {
+				accuracyOffset *= 0.75D;
+			}
+			
+			if (hasHeavyBarrel(itemStack.getItemDamage())) {
+				accuracyOffset *= 0.7D;
+			}
+			
+			if (GunCus.accuracy > accuracyOffset) {
+				GunCus.accuracy -= accuracyOffset;
 			}
 			
 			recoil(entityPlayer, itemStack.getItemDamage(), Mouse.isButtonDown(1), damage1);
