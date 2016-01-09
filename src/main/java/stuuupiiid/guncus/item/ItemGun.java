@@ -230,21 +230,45 @@ public class ItemGun extends Item {
 				bulletItem = ItemBullet.bullets.get(pack).get(bullets[actualBullet]);
 			}
 			
-			float damage1 = this.damage * bulletItem.damageModifier;
+			float damage1 = (this.damage - 5) * bulletItem.damageModifier;
+			if (GunCus.logging_enableNetwork) {
+				GunCus.logger.info("Gun damage is " + this.damage);
+				GunCus.logger.info("Gun pre accuracy is " + GunCus.accuracy);
+			}
 			
 			double newAccuracy = damage1;
 			if (Mouse.isButtonDown(1)) {
-				newAccuracy *= 0.9D;
+				newAccuracy *= 0.75D;
 			} else if (hasLaserPointer(itemStack.getItemDamage())) {
-				newAccuracy *= 0.9D;
+				newAccuracy *= 0.75D;
+			}
+			
+			if (hasSilencer(itemStack.getItemDamage())) {
+				newAccuracy *= 1.05D;
 			}
 			
 			if (hasRifledBarrel(itemStack.getItemDamage())) {
 				newAccuracy *= 0.8D;
 			}
 			
+			if (hasPolygonalBarrel(itemStack.getItemDamage())) {
+				newAccuracy *= 0.75D;
+			}
+			
+			if (hasHeavyBarrel(itemStack.getItemDamage())) {
+				newAccuracy *= 0.7D;
+			}
+			
 			if ((hasBipod(itemStack.getItemDamage())) && (canUseBipod(entityPlayer))) {
 				newAccuracy *= 0.65D;
+			}
+			
+			if (hasGrip(itemStack.getItemDamage())) {
+				newAccuracy *= 0.8D;
+			}
+			
+			if (hasImprovedGrip(itemStack.getItemDamage())) {
+				newAccuracy *= 0.8D;
 			}
 			
 			if (GunCus.accuracy > newAccuracy) {
