@@ -119,27 +119,30 @@ public class TickHandler {
 				GunCus.reloading = false;
 			}
 			
-			if ((entityPlayer.motionY + 0.07840000152587891D != 0.0D) && (GunCus.accuracy > 35.0D)) {
-				GunCus.accuracy = 35.0D;
-			} else if (entityPlayer.isSprinting() && (GunCus.accuracy > 40.0D)) {
-				GunCus.accuracy = 40.0D;
+			double accuracyCap = 100.0D;
+			if (entityPlayer.motionY + 0.07840000152587891D != 0.0D) {
+				accuracyCap = 35.0D;
+			} else if (entityPlayer.isSprinting()) {
+				accuracyCap = 40.0D;
 			} else if (((entityPlayer.motionX != 0.0D) || (entityPlayer.motionZ != 0.0D)) && (GunCus.accuracy > 70.0D)) {
-				if (Mouse.isButtonDown(1) && (GunCus.accuracy > 70.0D)) {
-					GunCus.accuracy = 75.0D;
+				if (Mouse.isButtonDown(1)) {
+					accuracyCap = 75.0D;
 				} else {
-					GunCus.accuracy = 70.0D;
+					accuracyCap = 70.0D;
 				}
-			} else if ((!Mouse.isButtonDown(1)) && (GunCus.accuracy > 85.0D)) {
+			} else if (!Mouse.isButtonDown(1)) {
 				if ( (entityPlayer.inventory.getCurrentItem() == null)
 				  || (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun))
 				  || (!((ItemGun) entityPlayer.inventory.getCurrentItem().getItem())
 								.hasLaserPointer(entityPlayer.inventory.getCurrentItem().getItemDamage()))) {
-					GunCus.accuracy = 85.0D;
-				} else if (GunCus.accuracy > 92.5D) {
-					GunCus.accuracy = 92.5D;
+					accuracyCap = 85.0D;
+				} else {
+					accuracyCap = 92.5D;
 				}
 			}
-			
+			if (GunCus.accuracy > accuracyCap) {
+				GunCus.accuracy = accuracyCap;
+			}
 			if (entityPlayer.capabilities.isCreativeMode) {
 				GunCus.accuracy = 100.0D;
 			}
