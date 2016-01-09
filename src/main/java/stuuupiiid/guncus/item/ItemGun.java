@@ -230,7 +230,10 @@ public class ItemGun extends Item {
 				bulletItem = ItemBullet.bullets.get(pack).get(bullets[actualBullet]);
 			}
 			
-			float damage1 = (this.damage - 5) * bulletItem.damageModifier;
+			float damage1 = (this.damage - 5.0F) * bulletItem.damageModifier;
+			if (damage1 <= 2.0F) {
+				damage1 = 4.0F;
+			}
 			if (GunCus.logging_enableNetwork) {
 				GunCus.logger.info("Gun damage is " + this.damage);
 				GunCus.logger.info("Gun pre accuracy is " + GunCus.accuracy);
