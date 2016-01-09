@@ -12,27 +12,27 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoot, IMessage> {
-	private int accuracy;
+	private int playerAccuracy;
 	private int bulletId;
 	
 	public MessageGunShoot() {
 		// required on receiving side
 	}
 	
-	public MessageGunShoot(final int accuracy, final int bulletId) {
-		this.accuracy = accuracy;
+	public MessageGunShoot(final int playerAccuracy, final int bulletId) {
+		this.playerAccuracy = playerAccuracy;
 		this.bulletId = bulletId;
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
-		accuracy = buffer.readInt();
+		playerAccuracy = buffer.readInt();
 		bulletId = buffer.readInt();
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
-		buffer.writeInt(accuracy);
+		buffer.writeInt(playerAccuracy);
 		buffer.writeInt(bulletId);
 	}
 	
@@ -93,8 +93,11 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}
 				
-				if (accuracy > itemBullet.spray) {
-					accuracy = itemBullet.spray;
+				if (playerAccuracy > itemBullet.spray) {
+					playerAccuracy = itemBullet.spray;
+					double appliedAccuracy = playerAccuracy;
+					appliedAccuracy = appliedAccuracy * itemBullet.playerAccuracyModifier;
+					
 				}
 				
 				float damage = gun.damage * itemBullet.damageModifier;
@@ -108,7 +111,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				}
 				
 				for (int splitIndex = 0; splitIndex < itemBullet.split; splitIndex++) {
-					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, speed, damage, accuracy, gun.hasPolygonalBarrel(metadata), itemBullet);
+					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, speed, damage, playerAccuracy, gun.hasPolygonalBarrel(metadata), itemBullet);
 					playerEntity.worldObj.spawnEntityInWorld(bulletEntity);
 				}
 				
@@ -125,7 +128,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 	@Override
 	public IMessage onMessage(MessageGunShoot gunShootMessage, MessageContext context) {
 		if (GunCus.logging_enableNetwork) {
-			GunCus.logger.info("Received gunShoot packet: accuracy " + gunShootMessage.accuracy + " bulletId " + gunShootMessage.bulletId);
+			GunCus.logger.info("Received gunShoot packet: accuracy " + gunShootMessage.playerAccuracy + " bulletId " + gunShootMessage.bulletId);
 		}
 		
 		gunShootMessage.handle(context.getServerHandler().playerEntity);
