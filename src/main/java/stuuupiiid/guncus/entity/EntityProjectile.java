@@ -79,7 +79,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		super(world);
 	}
 	
-	public EntityProjectile(World parWorld, EntityPlayer entityPlayer, double speed, int accuracy) {
+	public EntityProjectile(World parWorld, EntityPlayer entityPlayer, double speed, float accuracy) {
 		super(parWorld);
 		isImmuneToFire = true;
 		renderDistanceWeight = 10.0D;
@@ -96,9 +96,10 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		
 		yOffset = 0.0F;
 		if (accuracy < 100) {
-			int accX1 = rand.nextInt(101 - accuracy);
-			int accY1 = rand.nextInt(101 - accuracy);
-			int accZ1 = rand.nextInt(101 - accuracy);
+			int accuracyInt = Math.round(accuracy);
+			int accX1 = rand.nextInt(101 - accuracyInt);
+			int accY1 = rand.nextInt(101 - accuracyInt);
+			int accZ1 = rand.nextInt(101 - accuracyInt);
 			double accX2 = accX1 - rand.nextInt(accX1 + 1) * 2;
 			double accY2 = accY1 - rand.nextInt(accY1 + 1) * 2;
 			double accZ2 = accZ1 - rand.nextInt(accZ1 + 1) * 2;

@@ -62,7 +62,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		canBePickedUp = 0;
 	}
 	
-	public EntityBullet(World parWorld, EntityPlayer entityPlayer, double speed, float parDamage, int accuracy, boolean parLowerGravity, ItemBullet bullet) {
+	public EntityBullet(World parWorld, EntityPlayer entityPlayer, double speed, float parDamage, float accuracy, boolean parLowerGravity, ItemBullet bullet) {
 		super(parWorld, entityPlayer, speed, accuracy);
 		setSize(0.2F, 0.2F);
 		canBePickedUp = 0;

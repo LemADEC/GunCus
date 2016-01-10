@@ -12,7 +12,8 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoot, IMessage> {
-	private int playerAccuracy;
+	private float playerAccuracy;
+	private float appliedAccuracy;
 	private int bulletId;
 	
 	public MessageGunShoot() {
@@ -26,13 +27,13 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
-		playerAccuracy = buffer.readInt();
+		playerAccuracy = buffer.readFloat();
 		bulletId = buffer.readInt();
 	}
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
-		buffer.writeInt(playerAccuracy);
+		buffer.writeFloat(playerAccuracy);
 		buffer.writeInt(bulletId);
 	}
 	
@@ -95,8 +96,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				
 				if (playerAccuracy > itemBullet.spray) {
 					playerAccuracy = itemBullet.spray;
-					double appliedAccuracy = playerAccuracy;
-					appliedAccuracy = appliedAccuracy * itemBullet.playerAccuracyModifier;
+					appliedAccuracy = playerAccuracy * itemBullet.playerAccuracyModifier;
 					
 				}
 				
@@ -111,7 +111,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				}
 				
 				for (int splitIndex = 0; splitIndex < itemBullet.split; splitIndex++) {
-					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, speed, damage, playerAccuracy, gun.hasPolygonalBarrel(metadata), itemBullet);
+					EntityBullet bulletEntity = new EntityBullet(playerEntity.worldObj, playerEntity, speed, damage, appliedAccuracy, gun.hasPolygonalBarrel(metadata), itemBullet);
 					playerEntity.worldObj.spawnEntityInWorld(bulletEntity);
 				}
 				
