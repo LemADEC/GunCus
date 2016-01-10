@@ -25,7 +25,7 @@ public class EntityRocket extends EntityGrenade implements IProjectile, IEntityA
 		canBePickedUp = 0;
 	}
 	
-	public EntityRocket(World parWorld, EntityPlayer entityPlayer, float speed, int accuracy) {
+	public EntityRocket(World parWorld, EntityPlayer entityPlayer, float speed, float accuracy) {
 		super(parWorld, entityPlayer, speed, accuracy);
 		
 		setSize(0.5F, 0.5F);

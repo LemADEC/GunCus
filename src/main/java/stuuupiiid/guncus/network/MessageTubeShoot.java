@@ -12,13 +12,13 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeShoot, IMessage> {
-	private int accuracy;
+	private float accuracy;
 	
 	public MessageTubeShoot() {
 		// required on receiving side
 	}
 	
-	public MessageTubeShoot(final int accuracy) {
+	public MessageTubeShoot(final float accuracy) {
 		this.accuracy = accuracy;
 	}
 	
@@ -29,7 +29,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 	
 	@Override
 	public void toBytes(ByteBuf buffer) {
-		buffer.writeInt(accuracy);
+		buffer.writeFloat(accuracy);
 	}
 	
 	private void handle(EntityPlayerMP entityPlayer) {

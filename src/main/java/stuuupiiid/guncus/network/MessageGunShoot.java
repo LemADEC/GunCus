@@ -13,7 +13,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoot, IMessage> {
 	private float playerAccuracy;
-	private float appliedAccuracy;
 	private int bulletId;
 	
 	public MessageGunShoot() {
@@ -94,9 +93,9 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}
 				
-				if (playerAccuracy > itemBullet.spray) {
+				float appliedAccuracy = playerAccuracy * itemBullet.playerAccuracyModifier;
+				if (appliedAccuracy > itemBullet.spray) {
 					playerAccuracy = itemBullet.spray;
-					appliedAccuracy = playerAccuracy * itemBullet.playerAccuracyModifier;
 					
 				}
 				
