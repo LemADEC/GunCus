@@ -24,7 +24,7 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 	
 	@Override
 	public void fromBytes(ByteBuf buffer) {
-		accuracy = buffer.readInt();
+		accuracy = buffer.readFloat();
 	}
 	
 	@Override
