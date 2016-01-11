@@ -39,7 +39,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 	private void handle(EntityPlayerMP playerEntity) {
 		
 		if ((playerEntity != null) && (playerEntity.inventory.getCurrentItem() != null)
-				&& ((playerEntity.inventory.getCurrentItem().getItem() instanceof ItemGun))) {
+		 && ((playerEntity.inventory.getCurrentItem().getItem() instanceof ItemGun))) {
 			ItemGun gun = (ItemGun) playerEntity.inventory.getCurrentItem().getItem();
 			int metadata = playerEntity.inventory.getCurrentItem().getItemDamage();
 			ItemStack mag = null;
@@ -47,10 +47,9 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 			if (gun.mag != null) {
 				for (int v1 = 0; v1 < playerEntity.inventory.getSizeInventory(); v1++) {
 					if ((playerEntity.inventory.getStackInSlot(v1) != null)
-							&& (playerEntity.inventory.getStackInSlot(v1).getItem() == gun.mag)
-							&& (playerEntity.inventory.getStackInSlot(v1).isItemDamaged())
-							&& (playerEntity.inventory.getStackInSlot(v1).getItemDamage() < playerEntity.inventory
-									.getStackInSlot(v1).getMaxDamage())) {
+					 && (playerEntity.inventory.getStackInSlot(v1).getItem() == gun.mag)
+					 && (playerEntity.inventory.getStackInSlot(v1).isItemDamaged())
+					 && (playerEntity.inventory.getStackInSlot(v1).getItemDamage() < playerEntity.inventory.getStackInSlot(v1).getMaxDamage())) {
 						mag = playerEntity.inventory.getStackInSlot(v1);
 						break;
 					}
@@ -59,8 +58,8 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				if (mag == null) {
 					for (int v1 = 0; v1 < playerEntity.inventory.getSizeInventory(); v1++) {
 						if ((playerEntity.inventory.getStackInSlot(v1) != null)
-								&& (playerEntity.inventory.getStackInSlot(v1).getItem() == gun.mag)
-								&& (!playerEntity.inventory.getStackInSlot(v1).isItemDamaged())) {
+						 && (playerEntity.inventory.getStackInSlot(v1).getItem() == gun.mag)
+						 && (!playerEntity.inventory.getStackInSlot(v1).isItemDamaged())) {
 							mag = playerEntity.inventory.getStackInSlot(v1);
 							break;
 						}
@@ -73,8 +72,8 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 			}
 			
 			if ( ((mag != null) && (gun.mag != null))
-					|| ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bullets.get(gun.pack).get(bulletId))))
-					|| (playerEntity.capabilities.isCreativeMode)) {
+			  || ((gun.mag == null) && (playerEntity.inventory.hasItem(ItemBullet.bullets.get(gun.pack).get(bulletId))))
+			  || (playerEntity.capabilities.isCreativeMode)) {
 				if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag != null) && (mag != null)) {
 					mag.damageItem(1, playerEntity);
 				} else if ((!playerEntity.capabilities.isCreativeMode) && (gun.mag == null)) {
