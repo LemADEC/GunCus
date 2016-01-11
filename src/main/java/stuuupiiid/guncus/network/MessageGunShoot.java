@@ -92,7 +92,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}
 				
-				float appliedAccuracy = playerAccuracy * itemBullet.playerAccuracyModifier;
+				float appliedAccuracy = 100 - (100 - playerAccuracy) * itemBullet.playerInaccuracyMultiplier;
 				if (appliedAccuracy > itemBullet.spray) {
 					playerAccuracy = itemBullet.spray;
 					

@@ -629,7 +629,7 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInAir. Expecting a strictly positive integer, up to 100, found " + frictionInAir + ".");
 		}
 		
-		float playerAccuracyModifier = (float) configBullet.get("general", "Player Accuracy Multiplyer", 1.0D, "Effects player accuracy. 1.0 will keep it normal, while 2.0 will double accuracy. You may get some weird effets.").getDouble();
+		float playerInaccuracyMultiplier = (float) configBullet.get("general", "Player Inaccuracy Multiplier", 1.0D, "Effects player accuracy. 0.0 means perfect accuracy and only the effects of spray will move the bullet, while 1.0 means normal. You may get some weird effets.").getDouble();
 		
 		double frictionInLiquid = configBullet.get("general", "FrictionInLiquids", 0.5D, "Friction factor while in a liquid. Factor is applied every tick. 0.00 means no friction, while 1.00 means instant stop.").getDouble();
 		if (frictionInLiquid <= 0.0D || frictionInLiquid > 1.0D) {
@@ -654,7 +654,7 @@ public class GunCus {
 				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
-					.setAccuracyModifiers(spray, playerAccuracyModifier)
+					.setAccuracyModifiers(spray, playerInaccuracyMultiplier)
 					.setSpeedStats(initialSpeed, frictionInAir, frictionInLiquid);
 				
 				for (String effect : effects) {

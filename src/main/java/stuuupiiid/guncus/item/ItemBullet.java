@@ -24,7 +24,7 @@ public class ItemBullet extends GunCusItem {
 	public double initialSpeed = 10.0D;
 	public double frictionInAir = 0.01D;
 	public double frictionInLiquid = 0.5D;
-	public float playerAccuracyModifier = 1.0F;
+	public float playerInaccuracyMultiplier = 1.0F;
 	
 	public static HashMap<String, List<ItemBullet>> bullets = new HashMap();
 	
@@ -66,9 +66,9 @@ public class ItemBullet extends GunCusItem {
 		return this;
 	}
 	
-	public ItemBullet setAccuracyModifiers(final int spray, final float playerAccuracyModifier) {
+	public ItemBullet setAccuracyModifiers(final int spray, final float playerInaccuracyMultiplier) {
 		this.spray = spray;
-		this.playerAccuracyModifier = playerAccuracyModifier;
+		this.playerInaccuracyMultiplier = playerInaccuracyMultiplier;
 		return this;
 	}
 
