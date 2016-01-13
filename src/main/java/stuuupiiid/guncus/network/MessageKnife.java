@@ -26,15 +26,14 @@ public class MessageKnife implements IMessage, IMessageHandler<MessageKnife, IMe
 	private void handle(EntityPlayerMP entityPlayer) {
 		entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "guncus:knife", 1.0F, 1.0F);
 		
-		float knifeDamage = GunCus.knifeDamage;
-		float knifeRange = GunCus.knifeRange;		
+		double knifeRangeSquared = GunCus.knifeRange * GunCus.knifeRange;
 		
 		double x = entityPlayer.posX;
 		double y = entityPlayer.posY;
 		double z = entityPlayer.posZ;
 		
 		EntityLivingBase targetEntity = null;
-		double closestEntity = knifeRange * knifeRange + 0.001;
+		double closestEntity = GunCus.knifeRange * GunCus.knifeRange + 0.001;
 		for (Object object : entityPlayer.worldObj.loadedEntityList) {
 			if (object instanceof EntityLivingBase) {
 				EntityLivingBase entity = (EntityLivingBase) object;
@@ -44,7 +43,7 @@ public class MessageKnife implements IMessage, IMessageHandler<MessageKnife, IMe
 				
 				double distanceSquared = (dx * dx + dy * dy + dz * dz);
 								
-				if ((distanceSquared <= knifeRange * knifeRange) && (distanceSquared < closestEntity) && (entity != entityPlayer)) {
+				if ((distanceSquared <= knifeRangeSquared) && (distanceSquared < closestEntity) && (entity != entityPlayer)) {
 					targetEntity = entity;
 					closestEntity = distanceSquared;
 				}
@@ -52,9 +51,9 @@ public class MessageKnife implements IMessage, IMessageHandler<MessageKnife, IMe
 		}
 		
 		if (targetEntity != null) {
-			targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), knifeDamage);
+			targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), GunCus.knifeDamage);
 			if (GunCus.logging_enableDamageData) {
-				GunCus.logger.info(knifeDamage + " damage done to " + targetEntity);
+				GunCus.logger.info(GunCus.knifeDamage + " damage done to " + targetEntity);
 				GunCus.logger.info(targetEntity + " is at a range of " + Math.sqrt(closestEntity));
 			}
 		}

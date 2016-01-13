@@ -26,15 +26,14 @@ public class ItemKnife extends GunCusItem {
 	
 	@SideOnly(Side.CLIENT)
 	public static void doKnife() {
-		if ( (GunCus.knifeTime <= 0)
+		if ( (GunCusKeyBindings.QuickKnife.isPressed())
+		  && (GunCus.knifeTime <= 0)
 		  && (FMLClientHandler.instance().getClient().thePlayer != null)
-		  && (FMLClientHandler.instance().getClient().theWorld != null)) {
-			if (GunCusKeyBindings.QuickKnife.isPressed()
-			  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
+		  && (FMLClientHandler.instance().getClient().theWorld != null)
+		  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
 				GunCus.knifeTime += GunCus.knifeCooldown;
 				GunCus.shootTime += 24;
 				PacketHandler.sendToServer_playerAction_knife();
-			}
-		}
+	    }		
 	}
 }

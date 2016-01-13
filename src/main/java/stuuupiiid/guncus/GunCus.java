@@ -173,14 +173,14 @@ public class GunCus {
 		creativeTabBullets = new GunCusCreativeTab("GunCus.bullets", null);
 		quickKnife = new ItemKnife();
 		
-		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true).getBoolean(true);
-		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
-		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true).getBoolean(true);
-		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false).getBoolean(false);
-		logging_enableDamageData = config.get("Gun Customization", "enableDamageData", false).getBoolean(false);
-		knifeDamage = (float) config.get("Gun Customization", "knifeDamage", 20.0).getDouble();
-		knifeRange = (float) config.get("Gun Customization", "knifeRange", 2.0).getDouble();
-		knifeCooldown = config.get("Gun Customization", "knifeCooldown", 30).getInt();
+		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true, "Disable this to prevent block damage from explosives and bullet damage to glass.").getBoolean(true);
+		enableExplosives = config.get("Gun Customization", "enableExplosives", true, "Disable this to remove the explosive parts of Gun Customization.").getBoolean(true);
+		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true, "Disable this to remove the official gun pack.").getBoolean(true);
+		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false, "Enable this to show client/server packet transfers.").getBoolean(false);
+		logging_enableDamageData = config.get("Gun Customization", "enableDamageData", false, "Enable this to show damage, range, accuracy, and what was hit.").getBoolean(false);
+		knifeDamage = (float) config.get("Gun Customization", "knifeDamage", 5.0, "This sets the damage the knife does in 1/2 hearts. Can be set with decimals.").getDouble();
+		knifeRange = (float) config.get("Gun Customization", "knifeRange", 2.0, "This sets the range the knife can hit in blocks. Can be set with decimals.").getDouble();
+		knifeCooldown = config.get("Gun Customization", "knifeCooldown", 30, "This sets the knife cooldown in ticks. 20 ticks = 1 second. Whole numbers only.").getInt();
 		
 		config.save();
 		

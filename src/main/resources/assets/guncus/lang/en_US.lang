@@ -53,7 +53,7 @@ container.magbox=Magazine Box
 container.manualmagfiller=Manual Magazine Filler
 container.weaponbox=Weapon Box
 
-key.GunCus.catagory=Gun Customization
+key.GunCus.category=Gun Customization
 key.M320Switch=Switch to/from M320
 key.SelectFire=Switch fire modes
 key.QuickKnife=Quick knife
