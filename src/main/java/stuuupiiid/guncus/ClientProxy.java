@@ -20,6 +20,7 @@ public class ClientProxy extends CommonProxy {
 		
 		RenderGameOverlay renderGameOverlay = new RenderGameOverlay();
 		FMLCommonHandler.instance().bus().register(renderGameOverlay);
+		FMLCommonHandler.instance().bus().register(new GunCusKeyBindings());
 		MinecraftForge.EVENT_BUS.register(renderGameOverlay);
 	}
 }

@@ -114,6 +114,9 @@ public class GunCus {
 	public static ItemMetadata attachment;
 	public static Item ammoM320;
 	public static int knifeTime = 0;
+	public static int knifeCooldown = 30;
+	public static float knifeDamage = 20.0F;
+	public static float knifeRange = 2.0F;
 	
 	// explosives extension
 	public static Item rpgm;
@@ -125,6 +128,7 @@ public class GunCus {
 	
 	// logging options
 	public static boolean logging_enableNetwork = false;
+	public static boolean logging_enableDamageData = false;
 	
 	public static Logger logger;
 	
@@ -173,6 +177,10 @@ public class GunCus {
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true).getBoolean(true);
 		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true).getBoolean(true);
 		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false).getBoolean(false);
+		logging_enableDamageData = config.get("Gun Customization", "enableDamageData", false).getBoolean(false);
+		knifeDamage = (float) config.get("Gun Customization", "knifeDamage", 20.0).getDouble();
+		knifeRange = (float) config.get("Gun Customization", "knifeRange", 2.0).getDouble();
+		knifeCooldown = config.get("Gun Customization", "knifeCooldown", 30).getInt();
 		
 		config.save();
 		

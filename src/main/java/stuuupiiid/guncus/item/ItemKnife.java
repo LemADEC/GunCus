@@ -1,8 +1,7 @@
 package stuuupiiid.guncus.item;
 
-import org.lwjgl.input.Keyboard;
-
 import stuuupiiid.guncus.GunCus;
+import stuuupiiid.guncus.GunCusKeyBindings;
 import stuuupiiid.guncus.network.PacketHandler;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -30,10 +29,9 @@ public class ItemKnife extends GunCusItem {
 		if ( (GunCus.knifeTime <= 0)
 		  && (FMLClientHandler.instance().getClient().thePlayer != null)
 		  && (FMLClientHandler.instance().getClient().theWorld != null)) {
-			if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
-			  && Keyboard.isKeyDown(Keyboard.KEY_F)
+			if (GunCusKeyBindings.QuickKnife.isPressed()
 			  && (FMLClientHandler.instance().getClient().currentScreen == null)) {
-				GunCus.knifeTime += 25;
+				GunCus.knifeTime += GunCus.knifeCooldown;
 				GunCus.shootTime += 24;
 				PacketHandler.sendToServer_playerAction_knife();
 			}

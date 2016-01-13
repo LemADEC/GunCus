@@ -1,12 +1,9 @@
 package stuuupiiid.guncus.network;
 
 import stuuupiiid.guncus.GunCus;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
 import io.netty.buffer.ByteBuf;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -29,30 +26,37 @@ public class MessageKnife implements IMessage, IMessageHandler<MessageKnife, IMe
 	private void handle(EntityPlayerMP entityPlayer) {
 		entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "guncus:knife", 1.0F, 1.0F);
 		
+		float knifeDamage = GunCus.knifeDamage;
+		float knifeRange = GunCus.knifeRange;		
+		
 		double x = entityPlayer.posX;
 		double y = entityPlayer.posY;
 		double z = entityPlayer.posZ;
 		
-		EntityLiving targetEntity = null;
-		double targetDistance = 300.0D;
+		EntityLivingBase targetEntity = null;
+		double closestEntity = knifeRange * knifeRange + 0.001;
 		for (Object object : entityPlayer.worldObj.loadedEntityList) {
 			if (object instanceof EntityLivingBase) {
 				EntityLivingBase entity = (EntityLivingBase) object;
-				double dx = ((EntityLiving) entity).posX - x;
-				double dy = ((EntityLiving) entity).posY - y;
-				double dz = ((EntityLiving) entity).posZ - z;
+				double dx = entity.posX - x;
+				double dy = entity.posY - y;
+				double dz = entity.posZ - z;
 				
-				double distance = MathHelper.sqrt_double(dx * dx + dy * dy + dz * dz);
-				
-				if ((distance <= 2.0001D) && (distance < targetDistance) && ((!(entity instanceof EntityPlayer)) || ((EntityPlayer) entity != entityPlayer))) {
-					targetEntity = (EntityLiving) entity;
-					targetDistance = distance;
+				double distanceSquared = (dx * dx + dy * dy + dz * dz);
+								
+				if ((distanceSquared <= knifeRange * knifeRange) && (distanceSquared < closestEntity) && (entity != entityPlayer)) {
+					targetEntity = entity;
+					closestEntity = distanceSquared;
 				}
 			}
 		}
 		
-		if ((targetEntity != null) && (targetDistance <= 2.0001D)) {
-			targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), 20.0F);
+		if (targetEntity != null) {
+			targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(entityPlayer), knifeDamage);
+			if (GunCus.logging_enableDamageData) {
+				GunCus.logger.info(knifeDamage + " damage done to " + targetEntity);
+				GunCus.logger.info(targetEntity + " is at a range of " + Math.sqrt(closestEntity));
+			}
 		}
 	}
 	

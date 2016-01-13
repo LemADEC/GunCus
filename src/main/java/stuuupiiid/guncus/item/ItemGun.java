@@ -22,10 +22,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
+import stuuupiiid.guncus.GunCusKeyBindings;
 import stuuupiiid.guncus.data.CustomizationPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.network.PacketHandler;
@@ -234,7 +234,7 @@ public class ItemGun extends Item {
 			if (damage1 <= 2.0F) {
 				damage1 = 4.0F;
 			}
-			if (GunCus.logging_enableNetwork) {
+			if (GunCus.logging_enableDamageData) {
 				GunCus.logger.info("Gun damage is " + this.damage);
 				GunCus.logger.info("Gun pre accuracy is " + GunCus.accuracy);
 			}
@@ -300,8 +300,7 @@ public class ItemGun extends Item {
 		}
 		
 		// Switching Fire mode
-		if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
-		  && Keyboard.isKeyDown(Keyboard.KEY_V)
+		if (GunCusKeyBindings.SelectFire.isPressed()
 		  && (GunCus.switchTime <= 0)
 		  && (!canHaveStraightPullBolt()) ) {
 			switch (shootType) {
@@ -351,8 +350,8 @@ public class ItemGun extends Item {
 			GunCus.switchTime = 20;
 			
 			// Switching with grenades
-		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
-			     && Keyboard.isKeyDown(Keyboard.KEY_C)
+		} else if 
+				(GunCusKeyBindings.M320Switch.isPressed()
 			     && (GunCus.switchTime <= 0)
 			     && hasM320(itemStack.getItemDamage()) ) {
 			GunCus.switchTime = 20;
@@ -365,8 +364,7 @@ public class ItemGun extends Item {
 			}
 			
 			// Switching bullets
-		} else if ( (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
-			     && Keyboard.isKeyDown(Keyboard.KEY_G)
+		} else if (GunCusKeyBindings.SpecialAmmo.isPressed()
 			     && (GunCus.switchTime <= 0)
 			     && (bullets != null)
 			     && (bullets.length > 1) ) {
