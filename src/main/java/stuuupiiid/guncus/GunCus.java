@@ -279,185 +279,187 @@ public class GunCus {
 		GameRegistry.registerBlock(blockWeapon, blockWeapon.getUnlocalizedName());
 		
 		GameRegistry.addShapedRecipe(new ItemStack(part),
-				new Object[] { "ABA", "BCB", "ABA",
+				"ABA", "BCB", "ABA",
 					'A', new ItemStack(Items.iron_ingot),
 					'B', new ItemStack(Items.redstone),
-					'C', new ItemStack(Items.gold_ingot) });
+					'C', new ItemStack(Items.gold_ingot) );
 		GameRegistry.addShapedRecipe(new ItemStack(magFill),
-				new Object[] { "ABA", "BAB", "ABA",
+				"ABA", "BAB", "ABA",
 					'B', new ItemStack(Items.iron_ingot),
-					'A', new ItemStack(Items.redstone) });
+					'A', new ItemStack(Items.redstone) );
 		GameRegistry.addShapedRecipe(new ItemStack(blockAmmo),
-				new Object[] { "BBB", "ABA", "BCB",
+				"BBB", "ABA", "BCB",
 					'A', new ItemStack(part),
 					'B', new ItemStack(Items.iron_ingot),
-					'C', new ItemStack(Blocks.iron_block) });
+					'C', new ItemStack(Blocks.iron_block) );
 		GameRegistry.addShapedRecipe(new ItemStack(blockBullet),
-				new Object[] { "BAB", "AAA", "BCB",
+				"BAB", "AAA", "BCB",
 					'A', new ItemStack(part),
 					'B', new ItemStack(Items.iron_ingot),
-					'C', new ItemStack(Blocks.iron_block) });
+					'C', new ItemStack(Blocks.iron_block) );
 		GameRegistry.addShapedRecipe(new ItemStack(blockMag),
-				new Object[] { "BAB", "ABA", "BCB",
+				"BAB", "ABA", "BCB",
 					'A', new ItemStack(part),
 					'B', new ItemStack(Items.iron_ingot),
-					'C', new ItemStack(Blocks.iron_block) });
+					'C', new ItemStack(Blocks.iron_block) );
 		GameRegistry.addShapedRecipe(new ItemStack(blockGun),
-				new Object[] { "BAB", "AAA", "BAB",
+				"BAB", "AAA", "BAB",
 					'A', new ItemStack(part),
-					'B', new ItemStack(Items.iron_ingot) });
+					'B', new ItemStack(Items.iron_ingot) );
 		GameRegistry.addShapedRecipe(new ItemStack(blockWeapon),
-				new Object[] { "ABA", "ABA", "BCB",
+				"ABA", "ABA", "BCB",
 					'A', new ItemStack(part),
 					'B', new ItemStack(Items.iron_ingot),
-					'C', new ItemStack(Blocks.iron_block) });
+					'C', new ItemStack(Blocks.iron_block) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 0),
-				new Object[] { " IG", "IRI",
+				" IG", "IRI",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 1),
-				new Object[] { "IG ", "IRI",
+				"IG ", "IRI",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 2),
-				new Object[] { " I ", "GRG", "I I",
+				" I ", "GRG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 3),
-				new Object[] { "I I", "GRG", " I ",
+				"I I", "GRG", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 4),
-				new Object[] { " I ", "GDG", "I I",
+				" I ", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 5),
-				new Object[] { "I I", "GDG", " I ",
+				"I I", "GDG", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 6),
-				new Object[] { "I I", "GDG", "I I",
+				"I I", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 7),
-				new Object[] { "I I", "GDG", " II",
+				"I I", "GDG", " II",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 8),
-				new Object[] { "III", "GDG", "I I",
+				"III", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 9),
-				new Object[] { "I I", "D8G", "I I",
+				"I I", "D8G", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1),
-					'8', new ItemStack(scope, 1, 7) });
+					'8', new ItemStack(scope, 1, 7) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(scope, 1, 10),
-				new Object[] { "D9G", " I ",
+				"D9G", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1), Character.valueOf('9'), new ItemStack(scope, 1, 8) });
+					'D', new ItemStack(Items.diamond, 1),
+					'9', new ItemStack(scope, 1, 8) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 11),
-				new Object[] { "GIG", "DDD", "III",
+				"GIG", "DDD", "III",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 12),
-				new Object[] { " I ", "DBG", "I I",
+				" I ", "DBG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1), Character.valueOf('B'), new ItemStack(scope, 1, 11) });
+					'D', new ItemStack(Items.diamond, 1),
+					'B', new ItemStack(scope, 1, 11) );
 		
 		GameRegistry.addShapedRecipe(
 				new ItemStack(ammoM320),
-				new Object[] { "GI ", "IGI", " IG",
+				"GI ", "IGI", " IG",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'G', new ItemStack(Items.gunpowder, 1) });
+					'G', new ItemStack(Items.gunpowder, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 0),
-				new Object[] { "I  ", " I ", "I I",
-					'I', new ItemStack(Items.iron_ingot, 1) });
+				"I  ", " I ", "I I",
+					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 1),
-				new Object[] { " I ", "I I", "I I",
-					'I', new ItemStack(Items.iron_ingot, 1) });
+				" I ", "I I", "I I",
+					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 2),
-				new Object[] { "II ", " I ", " II",
-					'I', new ItemStack(Items.iron_ingot, 1) });
+				"II ", " I ", " II",
+					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 3),
-				new Object[] { " II", "IRR", "I I",
+				" II", "IRR", "I I",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 4),
-				new Object[] { "I  ", "IGI", "  I",
+				"I  ", "IGI", "  I",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'G', new ItemStack(Items.gold_ingot, 1) });
+					'G', new ItemStack(Items.gold_ingot, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 5),
-				new Object[] { " L ", "LGL", " L ",
+				" L ", "LGL", " L ",
 					'L', new ItemStack(Items.leather, 1),
-					'G', new ItemStack(attachment, 1, 2) });
+					'G', new ItemStack(attachment, 1, 2) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(attachment, 1, 6),
-				new Object[] { "II ", "RRI", "II ",
+				"II ", "RRI", "II ",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'R', new ItemStack(Items.redstone, 1) });
+					'R', new ItemStack(Items.redstone, 1) );
 
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 0),
-				new Object[] { "SI ", "ISI", " IS",
+				"SI ", "ISI", " IS",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'S', new ItemStack(Items.slime_ball, 1) });
+					'S', new ItemStack(Items.slime_ball, 1) );
 		GameRegistry.addShapedRecipe(new ItemStack(barrel, 1, 1),
-				new Object[] { "II ", "II ", "  I",
-					'I', new ItemStack(Items.iron_ingot, 1) });
+				"II ", "II ", "  I",
+					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 2),
-				new Object[] { "GI ", "IGI", " IG",
+				"GI ", "IGI", " IG",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'G', new ItemStack(Items.gold_ingot, 1) });
+					'G', new ItemStack(Items.gold_ingot, 1) );
 		GameRegistry.addShapedRecipe(
 				new ItemStack(barrel, 1, 3),
-				new Object[] { "II ", "IDI", " II",
+				"II ", "IDI", " II",
 					'I', new ItemStack(Items.iron_ingot, 1),
-					'D', new ItemStack(Items.diamond, 1) });
+					'D', new ItemStack(Items.diamond, 1) );
 		
 		if (enableExplosives) {
 			GameRegistry.addRecipe(
 					new ItemStack(rpg, 1),
-					new Object[] { "IIR", "IWR", "RRW",
+					"IIR", "IWR", "RRW",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 						Character.valueOf('W'), new ItemStack(Blocks.planks),
-						Character.valueOf('R'), new ItemStack(Items.redstone) });
+						Character.valueOf('R'), new ItemStack(Items.redstone) );
 			GameRegistry.addRecipe(
 					new ItemStack(smaw, 1),
-					new Object[] { "RI ", "IRI", " IR",
+					"RI ", "IRI", " IR",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-						Character.valueOf('R'), new ItemStack(Items.redstone) });
+						Character.valueOf('R'), new ItemStack(Items.redstone) );
 			
 			GameRegistry.addRecipe(
 					new ItemStack(rpgm, 2),
-					new Object[] { "II ", "IG ", "  G",
+					"II ", "IG ", "  G",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-						Character.valueOf('G'), new ItemStack(Items.gunpowder) });
+						Character.valueOf('G'), new ItemStack(Items.gunpowder) );
 			GameRegistry.addRecipe(
 					new ItemStack(smawm, 2),
-					new Object[] { "G  ", " GI", " II",
+					"G  ", " GI", " II",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-						Character.valueOf('G'), new ItemStack(Items.gunpowder) });
+						Character.valueOf('G'), new ItemStack(Items.gunpowder) );
 		}
 	}
 	

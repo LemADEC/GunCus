@@ -2,12 +2,10 @@ package stuuupiiid.guncus.item;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.PacketHandler;
-
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.Entity;
