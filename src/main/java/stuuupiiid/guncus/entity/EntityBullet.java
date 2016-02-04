@@ -14,12 +14,18 @@ import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.monster.EntityGiantZombie;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -156,6 +162,9 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
 			
+			// get entity hit
+			Entity entityHit = worldObj.getEntityByID(entityHitID);
+			
 			// Directly spawn crack particles as per RenderGlobal.doSpawnParticle
 			double particleMotionX = -0.05 * MathHelper.sin(rotationYaw   * fDegToRadFactor) * MathHelper.cos(rotationPitch * fDegToRadFactor);
 			double particleMotionZ = -0.05 * MathHelper.sin(rotationPitch * fDegToRadFactor);
@@ -164,6 +173,27 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			// particle effect at collision point
 			float particleSpeed = 0.0F;
 			int particleQuantity = 5;
+			Block block = Blocks.redstone_block;
+			int blockMetadata = 0;
+			if (entityHit instanceof EntityZombie || entityHit instanceof EntityGiantZombie) {
+				block = Blocks.stained_hardened_clay;
+				blockMetadata = 13;
+			} else if (entityHit instanceof EntitySkeleton) {
+				block = Blocks.quartz_block;
+				blockMetadata = 0;
+			} else if (entityHit instanceof EntityWither) {
+				block = Blocks.redstone_block;
+				blockMetadata = 0;
+			} else if (entityHit instanceof EntityLivingBase && ((EntityLivingBase)entityHit).isEntityUndead()) {
+				block = Blocks.stained_hardened_clay;
+				blockMetadata = 13;
+			} else if (entityHit instanceof EntityLiving) {
+				block = Blocks.redstone_block;
+				blockMetadata = 0;
+			} else {
+				block = Blocks.iron_block;
+				blockMetadata = 0;
+			}
 			for (int index = 0; index < particleQuantity; index++) {
 				mc.effectRenderer.addEffect(new EntityDiggingFX(
 						worldObj,
@@ -173,7 +203,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
-						Blocks.redstone_block, 0).applyRenderColor(blockCollidedMetadata));
+						block, blockMetadata).applyRenderColor(blockMetadata));
 			}
 		}
 	}

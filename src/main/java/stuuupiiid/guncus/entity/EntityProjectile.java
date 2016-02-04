@@ -73,6 +73,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	protected Block blockCollided = null;	// field field_145790_g
 	protected int blockCollidedMetadata = -1;	// field inData
 	protected int brokenCount = 0;
+	protected int entityHitID = -1;
 	
 	protected double previousX = Double.NaN;
 	protected double previousY = Double.NaN;
@@ -359,6 +360,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			// Resolve collision
 			if (mopCollision != null) {
 				if (mopCollision.entityHit != null) {
+					entityHitID = mopCollision.entityHit.getEntityId();
 					onServerEntityCollision(mopCollision.entityHit, mopCollision.hitVec);
 				} else if (mopCollision.entityHit == null) {
 					// (block collision) Resolve block breaking first
@@ -531,6 +533,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			syncDataCompound_cachedWrite.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
 			syncDataCompound_cachedWrite.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
 		}
+		if (state == STATE_ENTITYHIT) {
+			syncDataCompound_cachedWrite.setInteger("entityHitID", entityHitID);
+		}
 		return syncDataCompound_cachedWrite;
 	}
 	
@@ -559,6 +564,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		}
 		
 		if (previousState != state && state == STATE_ENTITYHIT) {
+			if (syncDataCompound.hasKey("entityHitID")) {
+				entityHitID = syncDataCompound.getInteger("entityHitID");
+			}
 			onClientEntityHit();
 		}
 	}
