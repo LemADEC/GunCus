@@ -47,7 +47,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	{
 		// slowMotionFactor = 1.0F;
 		MAX_FLIGHT_DURATION_TICKS    = (int) Math.round( 60 * slowMotionFactor);	// 3 s to reach a target
-		MAX_BOUNCING_DURATION_TICKS  = (int) Math.round(600 * slowMotionFactor);	// 30 s bouncing around
+		MAX_BOUNCING_DURATION_TICKS  = (int) Math.round(200 * slowMotionFactor);	// 10 s bouncing around
 		MAX_ENTITYHIT_DURATION_TICKS = (int) Math.round( 20 * slowMotionFactor);	// 1 s on an entity
 		MAX_BLOCKHIT_DURATION_TICKS  = (int) Math.round(400 * slowMotionFactor);	// 20 s on the ground
 		MAX_LIFE_DURATION_TICKS      = (int) Math.round(6000 * slowMotionFactor);	// 5 mn max total time
@@ -207,48 +207,47 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		// (no critical hits)
 		
 		boolean isAttaching = false;
-		if (entityHit instanceof EntityLivingBase) {
-			DamageSource damagesource = null;
-			if (shootingEntity instanceof EntityPlayer) {
-				damagesource = DamageSource.causePlayerDamage((EntityPlayer)shootingEntity);
-			} else if (shootingEntity != null) {
-				damagesource = DamageSource.causeArrowDamage(this, shootingEntity);
-			} else {
-				damagesource = DamageSource.causeArrowDamage(this, this);
-			}
+		
+		DamageSource damagesource = null;
+		if (shootingEntity instanceof EntityPlayer) {
+			damagesource = DamageSource.causePlayerDamage((EntityPlayer)shootingEntity);
+		} else if (shootingEntity != null) {
+			damagesource = DamageSource.causeArrowDamage(this, shootingEntity);
+		} else {
+			damagesource = DamageSource.causeArrowDamage(this, this);
+		}
+		if ((damage > 0.0F) && entityHit.attackEntityFrom(damagesource, damage)) {
 			
-			if ((damage > 0.0F) && entityHit.attackEntityFrom(damagesource, damage)) {
-				
-				applyEffectOnEntityCollision(entityHit, hitVec);
-				
-				if (entityHit instanceof EntityLivingBase) {
-					if (!entityHit.isDead) {
-						EntityLivingBase entityLivingBase = (EntityLivingBase) entityHit;
-						entityLivingBase.hurtResistantTime = 0;
-					}
-					
-					// (Vanilla arrow) Play random.successful_hit when player hits another player
-					if ( entityHit != shootingEntity
-					  && entityHit instanceof EntityPlayer
-					  && shootingEntity instanceof EntityPlayerMP) {
-						((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
-					}
-					
-					if ( entityHit != shootingEntity
-					  && !entityHit.isDead
-					  && shootingEntity instanceof EntityPlayer) {
-						PacketHandler.sendToClient_showHitMarker(worldObj, hitVec, (EntityPlayer)shootingEntity);
-					}
+			applyEffectOnEntityCollision(entityHit, hitVec);
+			
+			if (entityHit instanceof EntityLivingBase) {
+				if (!entityHit.isDead) {
+					EntityLivingBase entityLivingBase = (EntityLivingBase) entityHit;
+					entityLivingBase.hurtResistantTime = 0;
 				}
 				
-				isAttaching = true;
+				// (Vanilla arrow) Play random.successful_hit when player hits another player
+				if ( entityHit != shootingEntity
+				  && entityHit instanceof EntityPlayer
+				  && shootingEntity instanceof EntityPlayerMP) {
+					((EntityPlayerMP) shootingEntity).playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(6, 0.0F));
+				}
 				
-			} else if (((EntityLivingBase) entityHit).getHealth() <= 0.0F) {
-				isAttaching = true;
+				if ( entityHit != shootingEntity
+				  && !entityHit.isDead
+				  && shootingEntity instanceof EntityPlayer) {
+					PacketHandler.sendToClient_showHitMarker(worldObj, hitVec, (EntityPlayer)shootingEntity);
+				}
 			}
+			
+			isAttaching = true;
+			
+		} else if (entityHit instanceof EntityLivingBase && ((EntityLivingBase) entityHit).getHealth() <= 0.0F) {
+			isAttaching = true;
 		}
 		
 		if (isAttaching) {
+			// GunCus.logger.info("Attaching to entity " + entityHit + " state " + state + " motion " + motionX + " " + motionY + " " + motionZ);
 			// Fix the bullet 25% in the entity
 			motionX = ((float) (hitVec.xCoord - posX));
 			motionY = ((float) (hitVec.yCoord - posY));
@@ -263,6 +262,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			
 		} else {
 			// (not a valid entity target) Bouncing
+			// GunCus.logger.info("Bouncing from entity " + entityHit + " state " + state + " motion " + motionX + " " + motionY + " " + motionZ);
 			motionX *= -0.1D;
 			motionY *= -0.1D;
 			motionZ *= -0.1D;
@@ -286,7 +286,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			// Fix the bullet 5% in the block if flying, right on edge if bouncing
 			double depth = 0.25D * width;
 			if (state == STATE_BOUNCING) {
-				depth = -0.70D * width;
+				depth = 0;
 				prevRotationPitch = 0.0F;
 			}
 			motionX = 0.0F;

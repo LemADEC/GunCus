@@ -1,6 +1,8 @@
 package stuuupiiid.guncus.entity;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
@@ -13,6 +15,7 @@ import java.util.Set;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
+import mcheli.aircraft.MCH_EntityAircraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.client.Minecraft;
@@ -74,6 +77,8 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	protected double previousX = Double.NaN;
 	protected double previousY = Double.NaN;
 	protected double previousZ = Double.NaN;
+	
+	protected Object shooterRide = null;
 	
 	public EntityProjectile(World world) {
 		super(world);
@@ -313,9 +318,27 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 					}
 				}
 				
-				// Prevent immediate self-shooting
-				if (!entityInRange.canBeCollidedWith() || ((entityInRange == shootingEntity) && (stateTicks < SHOOTER_SAFETY_TICKS))) {
+				// Prevent immediate self-shooting or related rides or co-riders
+				if (!entityInRange.canBeCollidedWith()) {
 					continue;
+				}
+				if (stateTicks < SHOOTER_SAFETY_TICKS) {
+					if (entityInRange == shootingEntity) {
+						continue;
+					}
+					if (entityInRange.riddenByEntity != null) {
+						if (entityInRange.riddenByEntity == shootingEntity) {
+							continue;
+						}
+						if (Loader.isModLoaded("mcheli")) {
+							if (shooterRide == null) {
+								shooterRide = MCHeli_getRootEntity(shootingEntity);
+							}
+							if (shooterRide != null && MCHeli_getRootEntity(entityInRange) == shooterRide) {
+								continue;
+							}
+						}
+					}
 				}
 				
 				float tolerance = 0.1F;
@@ -423,6 +446,11 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			setPosition(posX, posY, posZ);
 			func_145775_I();	// doBlockCollisions();
 		}
+	}
+
+	@Optional.Method(modid = "mcheli")
+	protected static Object MCHeli_getRootEntity(Entity entity) {
+		return MCH_EntityAircraft.getAircraft_RiddenOrControl(entity);		// as of 0.10.7
 	}
 
 	@Override
