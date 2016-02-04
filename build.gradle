@@ -28,8 +28,11 @@ configFile.withReader {
 }
 
 group = "stuuupiiid.guncus"
-version = config.mod_version
+version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?: '-'}"
 archivesBaseName = "GunCustomization" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
@@ -43,11 +46,6 @@ minecraft {
     if (project.hasProperty("guncus_signature"))
         replace "@FINGERPRINT@", project.guncus_signature
 }
-
-version = "${config.minecraft_version}-${config.mod_version}.${System.getenv("BUILD_NUMBER") ?: 22}"
-
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
 
 processResources {
     // this will ensure that this task is redone when the versions change.
