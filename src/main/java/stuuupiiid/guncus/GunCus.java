@@ -624,7 +624,7 @@ public class GunCus {
 				+ "\n7:X = Blindness for X seconds"
 				+ "\n8:X = Instant damage (harm) of X damages"
 				+ "\n9:X:Y = weaken +Y * 20% damage increase for X seconds"
-				+ "\n10:X:Y = knockback +X horizontally +Y vertically.").getString().split(";");
+				+ "\n10:X:Y = knockback +X horizontally +Y * 0.1 vertically. Vanilla knockback is cancelled when this effect is defined.").getString().split(";");
 		
 		double gravityModifier = configBullet.get("general", "GravityModifier", 0.45D, "Gravity is vertical down acceleration applied every tick.").getDouble();
 		

@@ -22,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityGiantZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
@@ -246,8 +247,21 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		} else {
 			damagesource = DamageSource.causeArrowDamage(this, this);
 		}
+		
+        boolean previousIsAirBorne = entityHit.isAirBorne;
+		double previousMotionX = entityHit.motionX;
+		double previousMotionY = entityHit.motionY;
+		double previousMotionZ = entityHit.motionZ;
+		
 		if ((damage > 0.0F) && entityHit.attackEntityFrom(damagesource, damage)) {
-			
+			// cancel vanilla knockback effect when ours is defined
+			if (getBullet().effectModifiers.containsKey(10)) {
+		        entityHit.isAirBorne = previousIsAirBorne;
+				entityHit.motionX = previousMotionX;
+				entityHit.motionY = previousMotionY;
+				entityHit.motionZ = previousMotionZ;
+			}
+			// apply our effects
 			applyEffectOnEntityCollision(entityHit, hitVec);
 			
 			if (entityHit instanceof EntityLivingBase) {
@@ -428,11 +442,21 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		
 		if (itemBullet.effectModifiers.containsKey(10)) {// knockback
 			double speed = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-			if (speed > 0.0F) {
-				entityLivingBase.addVelocity(
-						motionX * itemBullet.effectModifiers.get(9) / speed,
-						Math.max(0.1D, motionY * itemBullet.effectAmplifiers.get(9) / speed),
-						motionZ * itemBullet.effectModifiers.get(9) / speed);
+			if (speed > 0.1F && rand.nextDouble() >= entityLivingBase.getEntityAttribute(SharedMonsterAttributes.knockbackResistance).getAttributeValue()) {
+				double dX = motionX / speed * itemBullet.effectModifiers.get(10);
+				double dY = motionY / speed * itemBullet.effectAmplifiers.get(10) / 10;
+				double dZ = motionZ / speed * itemBullet.effectModifiers.get(10);
+				entityLivingBase.isAirBorne = true;
+				entityLivingBase.motionX /= 2.0D;
+				entityLivingBase.motionY /= 2.0D;
+				entityLivingBase.motionZ /= 2.0D;
+				entityLivingBase.motionX += dX;
+				entityLivingBase.motionY += dY;
+				entityLivingBase.motionZ += dZ;
+				
+				if (entityLivingBase.motionY > 0.4000000059604645D) {
+					entityLivingBase.motionY = 0.4000000059604645D;
+				}
 			}
 		}
 	}
