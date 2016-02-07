@@ -1,7 +1,6 @@
 package stuuupiiid.guncus.block;
 
 import stuuupiiid.guncus.GunCus;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -85,7 +84,7 @@ public class BlockMine extends GunCusBlock {
 	}
 	
 	public void explode(World world, int x, int y, int z) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+		if (!world.isRemote) {
 			world.setBlockToAir(x, y, z);
 			world.createExplosion(null, x + 0.5D, y + 1, z + 0.5D, 1.3F, GunCus.enableBlockDamage);
 			world.createExplosion(null, x + 0.5D, y + 1, z + 0.5D, 3.0F, false);

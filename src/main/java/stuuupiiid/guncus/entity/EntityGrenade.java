@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -164,7 +163,7 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 	}
 	
 	public void explode() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+		if (!worldObj.isRemote) {
 			worldObj.createExplosion(shootingEntity, posX, posY, posZ, 3.5F, GunCus.enableBlockDamage);
 		}
 	}

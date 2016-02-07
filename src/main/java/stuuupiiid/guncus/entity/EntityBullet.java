@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -393,7 +392,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	}
 	
 	public void applyEffectOnEntityCollision(Entity entity, Vec3 vecHit) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (worldObj.isRemote) {
 			return;
 		}
 		
@@ -462,7 +461,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 	}
 	
 	public void applyEffectOnBlockCollision(final boolean isWeakBlock, Vec3 vecHit) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (worldObj.isRemote) {
 			return;
 		}
 		

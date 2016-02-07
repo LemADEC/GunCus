@@ -1,7 +1,6 @@
 package stuuupiiid.guncus.item;
 
 import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
@@ -26,7 +25,7 @@ public class ItemAttachment extends ItemMetadata {
 	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient() && (itemStack.getItemDamage() == 4) && entity instanceof EntityPlayer) {
+		if (world.isRemote && (itemStack.getItemDamage() == 4) && entity instanceof EntityPlayer) {
 			doUpdate(itemStack, world, entity, par1, flag);
 		}
 	}

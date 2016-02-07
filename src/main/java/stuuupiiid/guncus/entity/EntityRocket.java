@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -81,7 +80,7 @@ public class EntityRocket extends EntityGrenade implements IProjectile, IEntityA
 	
 	@Override
 	public void explode() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+		if (!worldObj.isRemote) {
 			worldObj.createExplosion(shootingEntity, posX, posY, posZ, 7.0F, GunCus.enableBlockDamage);
 		}
 	}

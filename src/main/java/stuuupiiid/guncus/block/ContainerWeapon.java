@@ -1,8 +1,8 @@
 package stuuupiiid.guncus.block;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
@@ -52,13 +52,19 @@ public class ContainerWeapon extends Container {
 	@Override
 	public void onContainerClosed(EntityPlayer entityPlayer) {
 		super.onContainerClosed(entityPlayer);
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (entityPlayer != null && entityPlayer.worldObj.isRemote) {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
 			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
-			if ((itemStackSlot != null) && (entityPlayer != null)) {
-				entityPlayer.entityDropItem(itemStackSlot, 0.5F);
+			if (itemStackSlot != null) {
+				if (entityPlayer != null) {
+					entityPlayer.entityDropItem(itemStackSlot, 0.5F);
+				} else {
+					EntityItem entityItem = new EntityItem(worldObj, posX, posY + 0.5F, posZ, itemStackSlot);
+					entityItem.delayBeforeCanPickup = 10;
+					worldObj.spawnEntityInWorld(entityItem);
+				}
 			}
 		}
 	}

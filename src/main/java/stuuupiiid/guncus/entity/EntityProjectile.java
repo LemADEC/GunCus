@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
@@ -247,7 +246,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			prevRotationPitch = (rotationPitch = (float) (Math.atan2(motionY, f)) * fRadToDegFactor);
 		}
 		
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (worldObj.isRemote) {
 			onClientUpdate();
 			
 			// Do collision resolution on server side only
@@ -371,7 +370,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 					blockCollidedMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
 					// break weak blocks and pass through them 
 					if (GunCus.enableBlockDamage && WEAK_BLOCKS.contains(blockCollided)) {
-						if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+						if (!worldObj.isRemote) {
 							boolean isCanceled = true;
 							if (shootingEntity instanceof EntityPlayerMP) {
 								BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(worldObj, GameType.SURVIVAL, (EntityPlayerMP)shootingEntity, blockX, blockY, blockZ);

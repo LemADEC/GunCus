@@ -1,6 +1,5 @@
 package stuuupiiid.guncus.block;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemMag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,12 +30,12 @@ public class ContainerAmmoMan extends Container {
 	@Override
 	public void onContainerClosed(EntityPlayer entityPlayer) {
 		super.onContainerClosed(entityPlayer);
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (entityPlayer == null || entityPlayer.worldObj.isRemote) {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
 			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
-			if ((itemStackSlot != null) && (entityPlayer != null)) {
+			if (itemStackSlot != null) {
 				entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 			}
 		}

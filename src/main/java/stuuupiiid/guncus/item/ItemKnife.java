@@ -4,7 +4,6 @@ import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.GunCusKeyBindings;
 import stuuupiiid.guncus.network.PacketHandler;
 import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
@@ -19,7 +18,7 @@ public class ItemKnife extends GunCusItem {
 	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (world.isRemote) {
 			doKnife();
 		}
 	}

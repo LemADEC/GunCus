@@ -153,7 +153,7 @@ public class ItemGun extends Item {
 	
 	@Override
 	public void onUpdate(ItemStack itemStack, World world, Entity entity, int par1, boolean flag) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (world.isRemote) {
 			doUpdate(itemStack, world, entity, par1, flag);
 		}
 	}
