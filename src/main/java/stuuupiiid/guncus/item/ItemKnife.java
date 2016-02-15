@@ -33,6 +33,6 @@ public class ItemKnife extends GunCusItem {
 				GunCus.knifeTime += GunCus.knifeCooldown;
 				GunCus.shootTime += 24;
 				PacketHandler.sendToServer_playerAction_knife();
-	    }		
+		}
 	}
 }
