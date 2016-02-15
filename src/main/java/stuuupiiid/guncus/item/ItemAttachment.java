@@ -40,7 +40,8 @@ public class ItemAttachment extends ItemMetadata {
 		  && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)
 		  && (GunCus.shootTime <= 0)
 		  && (Mouse.isButtonDown(0))
-		  && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+		  && (client.currentScreen == null)
+		  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
 		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) ) {
 			GunCus.shootTime += 95;
 			GunCus.reloading = true;

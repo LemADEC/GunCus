@@ -79,10 +79,9 @@ public class GunCus {
 	public static float maxY;
 	public static boolean scopingX;
 	public static boolean scopingY;
-	public static int counter = 0;
-	public static boolean startedBreathing;
-	public static boolean breathing = false;
-	public static int breathCounter = 0;
+	public static int holdFireAfterClosingGUIcounter = 0;
+	public static int breathingCounter = 0;
+	public static int holdingBreathCounter = 0;
 	public static boolean reloading = false;
 	public static int hitmarker = 0;
 	

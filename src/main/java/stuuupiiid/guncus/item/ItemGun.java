@@ -190,10 +190,11 @@ public class ItemGun extends Item {
 		}
 		
 		if ( (GunCus.shootTime <= 0)
-				&& Mouse.isButtonDown(0)
-				&& ((client.currentScreen == null) || Mouse.isButtonDown(1))
-				&& (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode)
-				&& isInTubingMode) {
+		  && Mouse.isButtonDown(0)
+		  && (client.currentScreen == null)
+		  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
+		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode)
+		  && isInTubingMode) {
 			GunCus.shootTime += 120;
 			GunCus.reloading = true;
 			PacketHandler.sendToServer_playerAction_tube();
@@ -201,13 +202,14 @@ public class ItemGun extends Item {
 			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube")));
 		}
 		if ( (GunCus.shootTime <= 0)
-				&& (Mouse.isButtonDown(0))
-				&& (!shot)
-				&& ((client.currentScreen == null) || Mouse.isButtonDown(1))
-				&& ((playerMag != null) || (entityPlayer.capabilities.isCreativeMode)
-						|| ((bullets != null)
-								&& entityPlayer.inventory.hasItem((ItemBullet.bullets.get(pack)).get(bullets[actualBullet]))))
-				&& (!isInTubingMode)) {
+		  && (Mouse.isButtonDown(0))
+		  && (!shot)
+		  && (client.currentScreen == null)
+		  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
+		  && ( (playerMag != null)
+		    || (entityPlayer.capabilities.isCreativeMode)
+		    || ((bullets != null) && entityPlayer.inventory.hasItem((ItemBullet.bullets.get(pack)).get(bullets[actualBullet]))))
+		  && (!isInTubingMode)) {
 			GunCus.shootTime += this.delay;
 			this.reloadBurst = 0;
 			

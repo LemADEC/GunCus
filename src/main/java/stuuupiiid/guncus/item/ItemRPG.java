@@ -39,7 +39,8 @@ public class ItemRPG extends GunCusItem {
 		if ((entityPlayer != null) && (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() == this)) {
 			
 			if ( (GunCus.shootTime <= 0) && (Mouse.isButtonDown(0))
-			  && ((client.currentScreen == null) || (Mouse.isButtonDown(1)))
+			  && (client.currentScreen == null)
+			  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
 			  && (entityPlayer.inventory.hasItem(ammo) || entityPlayer.capabilities.isCreativeMode)) {
 				GunCus.shootTime += 140;
 				GunCus.reloading = true;

@@ -7,5 +7,6 @@
    "reload"        : { "category": "master", "sounds": [ { "name": "reload"        , "stream": false } ] },
    "click"         : { "category": "master", "sounds": [ { "name": "click"         , "stream": false } ] },
    "reload_tube"   : { "category": "master", "sounds": [ { "name": "reload_tube"   , "stream": false } ] },
-   "reload_rpg"    : { "category": "master", "sounds": [ { "name": "reload_rpg"    , "stream": false } ] }
+   "reload_rpg"    : { "category": "master", "sounds": [ { "name": "reload_rpg"    , "stream": false } ] },
+   "breath"        : { "category": "player", "sounds": [ { "name": "breath"        , "stream": false } ] }
 }
