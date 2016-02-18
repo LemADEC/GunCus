@@ -8,5 +8,6 @@
    "click"         : { "category": "master", "sounds": [ { "name": "click"         , "stream": false } ] },
    "reload_tube"   : { "category": "master", "sounds": [ { "name": "reload_tube"   , "stream": false } ] },
    "reload_rpg"    : { "category": "master", "sounds": [ { "name": "reload_rpg"    , "stream": false } ] },
-   "breath"        : { "category": "player", "sounds": [ { "name": "breath"        , "stream": false } ] }
+   "breath"        : { "category": "player", "sounds": [ { "name": "breath"        , "stream": false } ] },
+   "liquid"        : { "category": "master", "sounds": [ { "name": "liquid"        , "stream": false } ] }
 }

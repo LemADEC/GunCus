@@ -15,6 +15,7 @@ public class ItemBullet extends GunCusItem {
 	public int ironIngots;
 	public int stackOnCreate;
 	public String pack;
+	public String groundHit = "guncus:inground";
 	public float damageModifier;
 	public int spray = 100;
 	public int split = 1;
@@ -50,6 +51,7 @@ public class ItemBullet extends GunCusItem {
 			}
 		}
 		bullets.get(pack).set(bulletId, this);
+		GunCus.logger.info("Added bullet #" + bulletId + ": "+ name);
 	}
 	
 	public ItemBullet setGravityModifier(final double gravityModifier) {
@@ -59,6 +61,11 @@ public class ItemBullet extends GunCusItem {
 	
 	public boolean hasEffects() {
 		return this.effectModifiers.size() > 0;
+	}
+	
+	public ItemBullet setGroundHit(String groundHit) {
+		this.groundHit = groundHit;
+		return this;
 	}
 	
 	public ItemBullet setSplit(final int split) {

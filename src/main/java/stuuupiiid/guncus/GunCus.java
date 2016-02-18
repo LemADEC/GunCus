@@ -613,6 +613,10 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Spray. Expecting a strictly positive integer, up to 100, found " + spray + ".");
 		}
 		
+		String groundHit = configBullet.get("general", "Ground Hit", "inground", "Sound played when a bullet hits a block."
+				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
+				+ "\nLeave blanc for default").getString();
+		
 		int texture = configBullet.get("general", "Texture", 0, "Texture variation of the bullet (0 to 5)."
 				+ "\n0 is normal, 1 is poison/rust, 2 is purple, 3 is red, 4 is fat metal, 5 is needle green.").getInt(0);;
 		
@@ -664,13 +668,20 @@ public class GunCus {
 			} else {
 				iconName = pack + ":bullets/" + iconName;
 			}
-			
+
 			if (!pack.equalsIgnoreCase("template")) {
 				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
 					.setAccuracyModifiers(spray, playerInaccuracyMultiplier)
 					.setSpeedStats(initialSpeed, frictionInAir, frictionInLiquid);
+				
+				// Add sounds
+				if (!groundHit.equals("") || groundHit.equals(" ")) {
+					bullet.setGroundHit("guncus:" + groundHit);
+				} else {
+					groundHit = "guncus:inground";
+				}
 				
 				for (String effect : effects) {
 					try {
@@ -688,8 +699,6 @@ public class GunCus {
 						exception.printStackTrace();
 					}
 				}
-				
-				logger.info("Added bullet #" + bulletId + ": "+ name);
 			}
 		} else {
 			logger.error("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");

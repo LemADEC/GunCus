@@ -465,8 +465,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			return;
 		}
 		
-		// play hit sound
-		playSound("guncus:inground", 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
+
 		
 		// bullet effect upon first collision
 		if (!isFirstHit) {
@@ -475,6 +474,10 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		isFirstHit = false;
 		
 		ItemBullet itemBullet = getBullet();
+		
+		// play hit sound		
+		playSound(itemBullet.groundHit, 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
+
 		if (itemBullet.effectModifiers.containsKey(4)) {
 			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(4), GunCus.enableBlockDamage);
 		}
