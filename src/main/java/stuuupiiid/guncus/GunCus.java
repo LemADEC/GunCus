@@ -557,7 +557,11 @@ public class GunCus {
 		configBullet.load();
 		
 		boolean hasError = false; 
+		boolean enabled = configBullet.get("general", "Enabled", true, "Set this to false to disable this ammo."
+				+ "\nNote: Disabling ammo will also disable any guns that use this ammo.").getBoolean();
+		
 		int bulletId = configBullet.get("general", "Bullet ID", 1, "Bullet ID of the bullet (guns refer to bullet by this ID)").getInt();
+		
 		if (bulletId <= 0) {
 			hasError = true;
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid bullet ID. Expecting a strictly positive integer, found " + bulletId + ".");
@@ -646,13 +650,15 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInLiquids. Expecting a strictly positive integer, up to 100, found " + frictionInLiquid + ".");
 		}
 		
-		
+		if (!enabled){
+			logger.info("The ammo " + name + " in pack " + pack + " with ID " + bulletId + " is disabled in the configuration file.");
+		}		
 		
 		if (!ItemBullet.bullets.containsKey(pack)) {
 			ItemBullet.bullets.put(pack, new ArrayList());
 		}
 		
-		if (!hasError) {
+		if ((!hasError) && (enabled)) {
 			if (iconName.equals("") || iconName.equals(" ")) {
 				iconName = "guncus:bullet";
 			} else {
@@ -711,8 +717,10 @@ public class GunCus {
 	
 	private void loadGun(final String pack, File file) {
 		Configuration gunConfig = new Configuration(file);
-		gunConfig.load();
-		
+		gunConfig.load();		
+		 
+		boolean enabled = gunConfig.get("general", "Enabled", true, "Set this to false to disable this gun.").getBoolean();
+
 		int shootType = gunConfig.get("general", "Shoot", 2, "Shooting type. Higher values are cumulative."
 				+ "\n0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting").getInt();
 		
@@ -773,6 +781,10 @@ public class GunCus {
 			soundModifier = 20.0D;
 		}
 		
+		if (!enabled){
+			logger.info("The gun " + name + " in pack " + pack + " is disabled in the configuration file.");
+		}
+		
 		boolean errored = false;
 		if (shootType < 0 || shootType > 2) {
 			logger.error("[" + pack + "] [" + name + "] Invalid shootType '" + shootType + "', expecting 0, 1 or 2");
@@ -831,7 +843,7 @@ public class GunCus {
 			}
 		}
 		
-		if ( (!errored) && (name != null) && (stringIcon != null) ) {
+		if ( (!errored) && (name != null) && (stringIcon != null) && (enabled)) {
 			boolean defaultTexture = false;
 			String iconName;
 			if (stringIcon.isEmpty() || stringIcon.equals(" ")) {
