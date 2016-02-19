@@ -20,7 +20,9 @@ import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.ScopePart;
+import stuuupiiid.guncus.item.ItemAttachment;
 import stuuupiiid.guncus.item.ItemGun;
+import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.network.MessageClientValidation;
 import stuuupiiid.guncus.network.PacketHandler;
 
@@ -119,7 +121,7 @@ public class TickHandler {
 					GunCus.shootTime -= 1;
 				}
 			} else if (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)) {
-				if (!GunCus.reloading) {
+				if ((!GunCus.reloading) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachment)) {
 					GunCus.shootTime -= 1;
 				}
 			} else {
