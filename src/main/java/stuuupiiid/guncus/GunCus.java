@@ -725,62 +725,62 @@ public class GunCus {
 	}
 	
 	private void loadGun(final String pack, File file) {
-		Configuration gunConfig = new Configuration(file);
-		gunConfig.load();		
+		Configuration configGun = new Configuration(file);
+		configGun.load();		
 		 
-		boolean enabled = gunConfig.get("general", "Enabled", true, "Set this to false to disable this gun.").getBoolean();
+		boolean enabled = configGun.get("general", "Enabled", true, "Set this to false to disable this gun.").getBoolean();
 
-		int shootType = gunConfig.get("general", "Shoot", 2, "Shooting type. Higher values are cumulative."
+		int shootType = configGun.get("general", "Shoot", 2, "Shooting type. Higher values are cumulative."
 				+ "\n0 = Single Shooting | 1 = Burst Shooting | 2 = Auto Shooting").getInt();
 		
-		int delay = gunConfig.get("general", "Delay", 3, "Delay between shots of the gun (in ticks)").getInt();
+		int delay = configGun.get("general", "Delay", 3, "Delay between shots of the gun (in ticks)").getInt();
 		
-		int magSize = gunConfig.get("general", "Magsize", 1, "Size of the magazines").getInt();
+		int magSize = configGun.get("general", "Magsize", 1, "Size of the magazines").getInt();
 		
-		int magIronIngots = gunConfig.get("general", "Mag Ingots", 1, "Number of iron ingots a mag needs to be crafted").getInt();
+		int magIronIngots = configGun.get("general", "Mag Ingots", 1, "Number of iron ingots a mag needs to be crafted").getInt();
 		
-		int gunIronIngots = gunConfig.get("general", "Iron Ingots", 1, "Number of iron ingots this gun needs to be crafted").getInt();
+		int gunIronIngots = configGun.get("general", "Iron Ingots", 1, "Number of iron ingots this gun needs to be crafted").getInt();
 		
-		int gunRedstone = gunConfig.get("general", "Redstone", 1, "Number of redstone this gun needs to be crafted").getInt();
+		int gunRedstone = configGun.get("general", "Redstone", 1, "Number of redstone this gun needs to be crafted").getInt();
 		
-		String name = gunConfig.get("general", "Name", "default", "Name of the gun").getString();
+		String name = configGun.get("general", "Name", "default", "Name of the gun").getString();
 		
-		String[] stringBullets = gunConfig.get("general", "Bullets", "1", "Semicolon separated list of bullet IDs for this gun."
+		String[] stringBullets = configGun.get("general", "Bullets", "1", "Semicolon separated list of bullet IDs for this gun."
 				+ "\nYou may type more than 1 bullet ID if this gun doesn't use magazines!").getString().split(";");
 		
-		boolean usingMag = gunConfig.get("general", "UsingMags", true, "Does this gun use magazines? False, if the gun is for example a shotgun.").getBoolean();
+		boolean usingMag = configGun.get("general", "UsingMags", true, "Does this gun use magazines? False, if the gun is for example a shotgun.").getBoolean();
 		
-		String stringIcon = gunConfig.get("general", "Texture", "", "Texture of the gun. Leave blanc for default").getString();
+		String stringIcon = configGun.get("general", "Texture", "", "Texture of the gun. Leave blanc for default").getString();
 		
-		double recoilModifier = gunConfig.get("general", "RecoilModifier", 1.0D, "Defines the gun base recoil."
+		double recoilModifier = configGun.get("general", "RecoilModifier", 1.0D, "Defines the gun base recoil."
 				+ "\nApplied recoil is gun.RecoilModifier x bullet.RecoilModifier.").getDouble();
 		
-		String sound_normal = gunConfig.get("general", "NormalSound", "Sound_DERP2", "Sound played when shooting."
+		String soundNormal = configGun.get("general", "NormalSound", "Sound_DERP2", "Sound played when shooting."
 				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
 				+ "\nLeave blanc for default").getString();
 		
-		String sound_silenced = gunConfig.get("general", "SilencedSound", "", "Sound event played when shooting while gun has a silencer."
+		String soundSilenced = configGun.get("general", "SilencedSound", "", "Sound event played when shooting while gun has a silencer."
 				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
 				+ "\nLeave blanc for default").getString();
 		
-		double soundModifier = gunConfig.get("general", "SoundModifier", 1.0D, "Modifies the sound volume (does not affect the volume of silenced shots)."
+		double soundModifier = configGun.get("general", "SoundModifier", 1.0D, "Modifies the sound volume (does not affect the volume of silenced shots)."
 				+ "\nDefault Sound Volume x SoundModifier = Used Sound Volume").getDouble();
 		
-		String[] stringAttachments = gunConfig.get("general", "Attachments", "1;3;2;6", "Semicolon separated list of attachments valid on this gun."
+		String[] stringAttachments = configGun.get("general", "Attachments", "1;3;2;6", "Semicolon separated list of attachments valid on this gun."
 				+ "\n1 = Straight Pull Bolt | 2 = Bipod | 3 = Foregrip | 4 = M320 | 5 = Strong Spiral Spring"
 				+ "\n6 = Improved Grip | 7 = Laser Pointer.").getString().split(";");
 		
-		String[] stringBarrels = gunConfig.get("general", "Barrels", "1;2;3", "Semicolon separated list of barrels valid on this gun."
+		String[] stringBarrels = configGun.get("general", "Barrels", "1;2;3", "Semicolon separated list of barrels valid on this gun."
 				+ "\n1 = Silencer | 2 = Heavy Barrel | 3 = Rifled Barrel | 4 = Polygonal Barrel.").getString().split(";");
 		
-		String[] stringScopes = gunConfig.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13", "Semicolon separated list of scopes valid on this gun."
+		String[] stringScopes = configGun.get("general", "Scopes", "1;2;3;4;5;6;7;8;9;10;11;12;13", "Semicolon separated list of scopes valid on this gun."
 				+ "\n1 = Reflex | 2 = Kobra | 3 = Holographic | 4 = PKA-S | 5 = M145"
 				+ "\n6 = PK-A | 7 = ACOG | 8 = PSO-1 | 9 = Rifle 6x | 10 = PKS-07"
 				+ "\n11 = Rifle 8x | 12 = Ballistic 12x | 13 = Ballistic 20x.").getString().split(";");
 		
-		float zoom = (float) gunConfig.get("general", "Zoom", 1.0F, "Zoom factor without any scope. Default 1.0").getDouble();
+		float zoom = (float) configGun.get("general", "Zoom", 1.0F, "Zoom factor without any scope. Default 1.0").getDouble();
 		
-		int damage = gunConfig.get("general", "Damage", 6, "Damage dealth (1 is half a heart)").getInt();
+		int damage = configGun.get("general", "Damage", 6, "Damage dealth (1 is half a heart)").getInt();
 		
 		if (soundModifier < 1.E-005D) {
 			soundModifier = 1.E-005D;
@@ -912,12 +912,12 @@ public class GunCus {
 					}
 					
 					// Add sounds
-					if (!sound_normal.trim().isEmpty()) {
-						gun.setNormalSound(pack  + ":" + sound_normal);
+					if (!soundNormal.trim().isEmpty()) {
+						gun.setNormalSound(pack  + ":" + soundNormal);
 					}
 					
-					if (!sound_silenced.trim().isEmpty()) {
-						gun.setSilencedSound(pack  + ":" + sound_silenced);
+					if (!soundSilenced.trim().isEmpty()) {
+						gun.setSilencedSound(pack  + ":" + soundSilenced);
 					}
 				}
 			} catch (Exception exception) {
@@ -927,7 +927,7 @@ public class GunCus {
 		} else {
 			logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 		}
-		gunConfig.save();
+		configGun.save();
 	}
 	
 	public static void addChatMessage(final ICommandSender sender, final String message) {
