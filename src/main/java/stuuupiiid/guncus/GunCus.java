@@ -727,7 +727,7 @@ public class GunCus {
 	private void loadGun(final String pack, File file) {
 		Configuration configGun = new Configuration(file);
 		configGun.load();		
-		 
+		
 		boolean enabled = configGun.get("general", "Enabled", true, "Set this to false to disable this gun.").getBoolean();
 
 		int shootType = configGun.get("general", "Shoot", 2, "Shooting type. Higher values are cumulative."
@@ -740,6 +740,8 @@ public class GunCus {
 		int magIronIngots = configGun.get("general", "Mag Ingots", 1, "Number of iron ingots a mag needs to be crafted").getInt();
 		
 		int gunIronIngots = configGun.get("general", "Iron Ingots", 1, "Number of iron ingots this gun needs to be crafted").getInt();
+		
+		boolean scopedReloading = configGun.get("general", "Scope Reloading", true, "Set this to false to disable reloading while aiming down the sights.").getBoolean();
 		
 		int gunRedstone = configGun.get("general", "Redstone", 1, "Number of redstone this gun needs to be crafted").getInt();
 		
@@ -904,7 +906,8 @@ public class GunCus {
 							.setRecoilModifier(recoilModifier)
 							.setSoundModifier(soundModifier)
 							.defaultTexture(defaultTexture)
-							.setZoom(zoom);
+							.setZoom(zoom)
+							.setReloading(scopedReloading);
 					GunCusCreativeTab tab = new GunCusCreativeTab((pack + "." + name).replace(" ", "_"), gun);
 					gun.setCreativeTab(tab);
 					if (gun.mag != null) {

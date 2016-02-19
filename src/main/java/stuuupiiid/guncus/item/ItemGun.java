@@ -52,6 +52,7 @@ public class ItemGun extends Item {
 	public double recoilModifier;
 	public double soundModifier;
 	public boolean usingDefault = false;
+	public boolean scopedReloading = true;
 	public float zoom = 1.0F;
 	public int[] bullets;
 	public int actualBullet;
@@ -123,6 +124,11 @@ public class ItemGun extends Item {
 	
 	public ItemGun setZoom(float zoom) {
 		this.zoom = Math.max(1.0F, zoom);
+		return this;
+	}
+	
+	public ItemGun setReloading(boolean scopedReloading) {
+		this.scopedReloading = scopedReloading;
 		return this;
 	}
 	

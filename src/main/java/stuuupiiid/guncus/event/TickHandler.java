@@ -131,7 +131,7 @@ public class TickHandler {
 				// guns without: always engage bullet
 				// all guns: only reload when not scoping
 				if (gun.canHaveStraightPullBolt()) {
-					if (Mouse.isButtonDown(1)) {
+					if ((Mouse.isButtonDown(1)) || (gun.scopedReloading)) {
 						if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage()) && !GunCus.reloading) {
 							GunCus.shootTime -= 1;
 							if (GunCus.shootTime <= 0) {
@@ -145,7 +145,7 @@ public class TickHandler {
 						}
 					}
 				} else {
-					if (!Mouse.isButtonDown(1) || !GunCus.reloading) {
+					if (!Mouse.isButtonDown(1) || !GunCus.reloading || gun.scopedReloading) {
 						GunCus.shootTime -= 1;
 					}
 				}
