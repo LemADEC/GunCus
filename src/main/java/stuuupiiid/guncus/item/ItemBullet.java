@@ -15,7 +15,8 @@ public class ItemBullet extends GunCusItem {
 	public int ironIngots;
 	public int stackOnCreate;
 	public String pack;
-	public String groundHit = "guncus:inground";
+	public String blockHit = "guncus:inground";
+	public String entityHit = "guncus:inground";
 	public float damageModifier;
 	public int spray = 100;
 	public int split = 1;
@@ -63,8 +64,13 @@ public class ItemBullet extends GunCusItem {
 		return this.effectModifiers.size() > 0;
 	}
 	
-	public ItemBullet setGroundHit(String groundHit) {
-		this.groundHit = groundHit;
+	public ItemBullet setBlockHit(String blockHit) {
+		this.blockHit = blockHit;
+		return this;
+	}
+	
+	public ItemBullet setEntityHit(String entityHit) {
+		this.entityHit = entityHit;
 		return this;
 	}
 	

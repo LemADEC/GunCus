@@ -396,9 +396,6 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			return;
 		}
 		
-		// play hit sound
-		playSound("guncus:inground", 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
-		
 		// bullet effect upon first collision
 		if (!isFirstHit) {
 			return;
@@ -411,6 +408,10 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		EntityLivingBase entityLivingBase = (EntityLivingBase) entity;
 		
 		ItemBullet itemBullet = getBullet();
+		
+		//play hit sound
+		playSound(itemBullet.entityHit, 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
+		
 		if (itemBullet.effectModifiers.containsKey(1)) {
 			entityLivingBase.addPotionEffect(new PotionEffect(Potion.poison.id, (int)Math.floor(itemBullet.effectModifiers.get(1) * 20F), 0));
 		}
@@ -476,7 +477,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		ItemBullet itemBullet = getBullet();
 		
 		// play hit sound		
-		playSound(itemBullet.groundHit, 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
+		playSound(itemBullet.blockHit, 1.0F, 1.5F / (rand.nextFloat() * 0.4F + 0.8F));
 
 		if (itemBullet.effectModifiers.containsKey(4)) {
 			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(4), GunCus.enableBlockDamage);

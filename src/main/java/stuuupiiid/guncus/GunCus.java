@@ -607,8 +607,14 @@ public class GunCus {
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid Spray. Expecting a strictly positive integer, up to 100, found " + spray + ".");
 		}
 		
-		String groundHit = configBullet.get("general", "Ground Hit", "inground", "Sound played when a bullet hits a block."
+		String blockHit = configBullet.get("general", "Block Hit", "", "Sound played when a bullet hits a block."
 				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
+				+ "\nIf using sounds from other packs, type the pack name and sound seperated by a colon."
+				+ "\nLeave blanc for default").getString();
+		
+		String entityHit = configBullet.get("general", "Entity Hit", "", "Sound played when a bullet hits an entity."
+				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
+				+ "\nIf using sounds from other packs, type the pack name and sound seperated by a colon."
 				+ "\nLeave blanc for default").getString();
 		
 		int texture = configBullet.get("general", "Texture", 0, "Texture variation of the bullet (0 to 5)."
@@ -657,7 +663,7 @@ public class GunCus {
 		}
 		
 		if ((!hasError) && (enabled)) {
-			if (iconName.equals("") || iconName.equals(" ")) {
+			if (iconName.isEmpty()) {
 				iconName = "guncus:bullet";
 			} else {
 				iconName = pack + ":bullets/" + iconName;
@@ -671,12 +677,27 @@ public class GunCus {
 					.setSpeedStats(initialSpeed, frictionInAir, frictionInLiquid);
 				
 				// Add sounds
-				if (!groundHit.equals("") || groundHit.equals(" ")) {
-					bullet.setGroundHit("guncus:" + groundHit);
+				if (!blockHit.isEmpty()) {
+					if (blockHit.contains(":")) {
+						bullet.setBlockHit(blockHit);
+					} else {
+					bullet.setBlockHit(pack + ":" + blockHit);
+					}
 				} else {
-					groundHit = "guncus:inground";
+					blockHit = "guncus:inground";
 				}
 				
+				if (!entityHit.isEmpty()) {
+					if (entityHit.contains(":")){
+						bullet.setEntityHit(entityHit);
+					} else {
+					bullet.setEntityHit(pack + ":" + entityHit);
+					} 
+				} else {
+					entityHit = "guncus:inground";
+				}
+				
+				// Add effects
 				for (String effect : effects) {
 					try {
 						if (effect.contains(":")) {
@@ -751,7 +772,7 @@ public class GunCus {
 		double recoilModifier = configGun.get("general", "RecoilModifier", 1.0D, "Defines the gun base recoil."
 				+ "\nApplied recoil is gun.RecoilModifier x bullet.RecoilModifier.").getDouble();
 		
-		String soundNormal = configGun.get("general", "NormalSound", "Sound_DERP2", "Sound played when shooting."
+		String soundNormal = configGun.get("general", "NormalSound", "", "Sound played when shooting."
 				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
 				+ "\nLeave blanc for default").getString();
 		
@@ -910,11 +931,25 @@ public class GunCus {
 					
 					// Add sounds
 					if (!soundNormal.trim().isEmpty()) {
-						gun.setNormalSound(pack  + ":" + soundNormal);
+						if (soundNormal.contains(":")) {
+								gun.setNormalSound(soundNormal);
+					    } else {
+					    	gun.setNormalSound(pack  + ":" + soundNormal);
+					    }
+					}
+					else {
+						gun.setNormalSound("guncus:shoot_sound");
 					}
 					
 					if (!soundSilenced.trim().isEmpty()) {
-						gun.setSilencedSound(pack  + ":" + soundSilenced);
+						if (soundSilenced.contains(":")) {
+							gun.setSilencedSound(soundSilenced);
+					    } else {
+					    	gun.setSilencedSound(pack  + ":" + soundSilenced);
+						}
+					}
+					else {
+						gun.setSilencedSound("guncus:shoot_silenced");
 					}
 				}
 			} catch (Exception exception) {
