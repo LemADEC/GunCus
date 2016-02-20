@@ -97,7 +97,6 @@ public class GunCus {
 	
 	public GuiHandler guiHandler = null;
 	private boolean enableExplosives;
-	private boolean enableOfficialGuns;
 	public static Item quickKnife;
 	public static CreativeTabs creativeTabModifications;
 	public static CreativeTabs creativeTabBullets;
@@ -174,7 +173,6 @@ public class GunCus {
 		
 		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true, "Disable this to prevent block damage from explosives and bullet damage to glass.").getBoolean(true);
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true, "Disable this to remove the explosive parts of Gun Customization.").getBoolean(true);
-		enableOfficialGuns = config.get("Gun Customization", "enableOfficialGuns", true, "Disable this to remove the official gun pack.").getBoolean(true);
 		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false, "Enable this to show client/server packet transfers.").getBoolean(false);
 		logging_enableDamageData = config.get("Gun Customization", "enableDamageData", false, "Enable this to show damage, range, accuracy, and what was hit.").getBoolean(false);
 		knifeDamage = (float) config.get("Gun Customization", "knifeDamage", 5.0, "This sets the damage the knife does in 1/2 hearts. Can be set with decimals.").getDouble();
@@ -237,11 +235,7 @@ public class GunCus {
 			rpg = new ItemRPG("guncus:explosive/rpg", "explosive.rpg", rpgm);
 			smaw = new ItemRPG("guncus:explosive/smaw", "explosive.smaw", smawm);
 			
-		}
-		
-		if (enableOfficialGuns) {
-			OfficialGuns.load();
-		}
+		}		
 		
 		TickHandler tickHandler = new TickHandler();
 		FMLCommonHandler.instance().bus().register(tickHandler);
@@ -562,7 +556,7 @@ public class GunCus {
 		
 		int bulletId = configBullet.get("general", "Bullet ID", 1, "Bullet ID of the bullet (guns refer to bullet by this ID)").getInt();
 		
-		if (bulletId <= 0) {
+		if (bulletId < 0) {
 			hasError = true;
 			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid bullet ID. Expecting a strictly positive integer, found " + bulletId + ".");
 		}
