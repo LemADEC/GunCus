@@ -130,9 +130,9 @@ public class TickHandler {
 				// guns with manual pull: engage bullet when idle or scoping with attachment, play click sound at the end
 				// guns without: always engage bullet
 				// all guns: only reload when not scoping
-				if (gun.canHaveStraightPullBolt()) {
-					if ((Mouse.isButtonDown(1)) || (gun.scopedReloading)) {
-						if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage()) && !GunCus.reloading) {
+				if (gun.canHaveStraightPullBolt() && !GunCus.reloading) {
+					if (Mouse.isButtonDown(1)) {
+						if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage())) {
 							GunCus.shootTime -= 1;
 							if (GunCus.shootTime <= 0) {
 								Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:click")));
