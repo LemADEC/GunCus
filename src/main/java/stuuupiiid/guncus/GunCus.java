@@ -9,8 +9,12 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,8 +131,59 @@ public class GunCus {
 	// logging options
 	public static boolean logging_enableNetwork = false;
 	public static boolean logging_enableDamageData = false;
+	public static boolean logging_enableErrors = false;
 	
 	public static Logger logger;
+	
+	// official gun pack creation
+	public static File officialDir;
+	public static File officialBulletsDir;
+	public static File officialGunsDir;
+	public static File officialLangDir;
+	public static File officialSoundsDir;
+	public static File officialTexturesBulletsDir;
+	public static File officialTexturesGun_G17Dir;
+	public static File officialTexturesGun_G18Dir;
+	public static File officialTexturesGun_L96Dir;
+	public static File officialTexturesGun_M16A3Dir;
+	public static File officialTexturesGun_SV98Dir;
+	public static File officialTexturesGun_AEK971Dir;
+	public static String[] attatchmentsList= {
+		"gun.png",
+		"hbl.png",
+		"img.png",
+		"magazine.png",
+		"rbl.png",
+		"scp.png",
+		"sight.png",
+		"sln.png",
+		"sss.png",
+		"bpd.png",
+		"grp.png",
+		"320.png",
+		"spb.png"
+	};
+	public static final String[]officialBullets= {
+			"bullet0_acp.cfg",
+		    "bullet1_nato.cfg",
+		    "bullet2_wp.cfg",
+		    "bullet3_parabellum.cfg",
+		    "bullet4_natoHeavy.cfg",
+		    "bullet5_wpHeavy.cfg",
+		    "bullet6_rHeavy.cfg" };
+	public static final String[]officialGuns ={	    
+		    "aek971.cfg",
+		    "g17.cfg",
+		    "g18.cfg",
+		    "m16a3.cfg",
+		    "l96.cfg",
+		    "sv98.cfg" };
+	public static final String[]officialLang ={	
+		    "en_US.lang",
+		    "ru_RU.lang", };
+	public static final String[] officialTexturesBullets ={
+			"bullet.png"
+	};			
 	
 	@Mod.EventHandler
 	public void onFMLPreInitialization(FMLPreInitializationEvent event) {
@@ -175,6 +230,7 @@ public class GunCus {
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true, "Disable this to remove the explosive parts of Gun Customization.").getBoolean(true);
 		logging_enableNetwork = config.get("Gun Customization", "enableNetworkLogs", false, "Enable this to show client/server packet transfers.").getBoolean(false);
 		logging_enableDamageData = config.get("Gun Customization", "enableDamageData", false, "Enable this to show damage, range, accuracy, and what was hit.").getBoolean(false);
+		logging_enableErrors = config.get("Gun Customization", "enableErrorLogs", false, "Enable this to show some more errors. Shouldn't really need this.").getBoolean(false);
 		knifeDamage = (float) config.get("Gun Customization", "knifeDamage", 5.0, "This sets the damage the knife does in 1/2 hearts. Can be set with decimals.").getDouble();
 		knifeRange = (float) config.get("Gun Customization", "knifeRange", 2.0, "This sets the range the knife can hit in blocks. Can be set with decimals.").getDouble();
 		knifeCooldown = config.get("Gun Customization", "knifeCooldown", 30, "This sets the knife cooldown in ticks. 20 ticks = 1 second. Whole numbers only.").getInt();
@@ -456,8 +512,39 @@ public class GunCus {
 		}
 	}
 	
+	/*
+	 * Copy a default configuration file from the mod's resources to the specified configuration folder
+	 */
+	public static void unpackResourceToFolder(final String filename, final String sourceResourcePath, File targetFolder) {
+		// targetFolder is already created by caller
+		
+		String resourceName = sourceResourcePath + "/" + filename;
+		
+		File destination = new File(targetFolder, filename);
+		
+		try {
+			InputStream inputStream = GunCus.class.getClassLoader().getResourceAsStream(resourceName);
+			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destination));
+			
+			byte[] byteBuffer = new byte[Math.max(8192, inputStream.available())];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(byteBuffer)) >= 0) {
+				outputStream.write(byteBuffer, 0, bytesRead);
+			}
+			
+			inputStream.close();
+			outputStream.close();
+		} catch (Exception exception) {
+			GunCus.logger.error("Failed to unpack resource \'" + resourceName + "\' into " + destination);
+				if (GunCus.logging_enableErrors) {
+					exception.printStackTrace();
+				}
+		}
+	}
+	
 	private void loadGunPacks(File fileGunCus) {
 		createTemplatePack(fileGunCus);
+		createOfficialPack(fileGunCus);
 		
 		for (File filePack : fileGunCus.listFiles()) {
 			if (filePack.isDirectory() && (!filePack.getName().equalsIgnoreCase("template")) && (!filePack.getName().equalsIgnoreCase("default"))) {
@@ -467,6 +554,106 @@ public class GunCus {
 			}
 		}
 		gunNames = guns.keySet();
+	}
+	
+	private void createOfficialPack(File fileGunCus) {
+		File fileOfficial = new File(fileGunCus, "/Official");
+		if (!fileOfficial.exists()) {
+			fileOfficial.mkdirs();
+			officialBulletsDir = new File(fileGunCus + "/Official/bullets");
+			officialBulletsDir.mkdirs();
+			officialGunsDir = new File(fileGunCus + "/Official/guns");
+			officialGunsDir.mkdirs();
+			officialLangDir = new File(fileGunCus + "/Official/lang");
+			officialLangDir.mkdirs();
+			officialSoundsDir = new File(fileGunCus + "/Official/sounds");
+			officialSoundsDir.mkdirs();
+			officialTexturesBulletsDir = new File(fileGunCus + "/Official/textures/items/bullets");
+			officialTexturesBulletsDir.mkdirs();
+			officialTexturesGun_G17Dir = new File(fileGunCus + "/Official/textures/items/gun_g17");
+			officialTexturesGun_G17Dir.mkdirs();
+			officialTexturesGun_G18Dir = new File(fileGunCus + "/Official/textures/items/gun_g18");
+			officialTexturesGun_G18Dir.mkdirs();
+			officialTexturesGun_L96Dir = new File(fileGunCus + "/Official/textures/items/gun_l96");
+			officialTexturesGun_L96Dir.mkdirs();
+			officialTexturesGun_M16A3Dir = new File(fileGunCus + "/Official/textures/items/gun_m16a3");
+			officialTexturesGun_M16A3Dir.mkdirs();
+			officialTexturesGun_SV98Dir = new File(fileGunCus + "/Official/textures/items/gun_sv98");
+			officialTexturesGun_SV98Dir.mkdirs();
+			officialTexturesGun_AEK971Dir = new File(fileGunCus + "/Official/textures/items/gun_aek-971");
+			officialTexturesGun_AEK971Dir.mkdirs();
+			
+			// read files
+			File[] files = fileOfficial.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File file_notUsed, String name) {
+					return name.contains(".");
+				}
+			});
+			if (files.length == 0) {
+				for (String defaultOfficialBullets : officialBullets) {
+					unpackResourceToFolder(defaultOfficialBullets, "assets/guncusofficial/bullets", officialBulletsDir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialGuns : officialGuns) {
+					unpackResourceToFolder(defaultOfficialGuns, "assets/guncusofficial/guns", officialGunsDir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialLang : officialLang) {
+					unpackResourceToFolder(defaultOfficialLang, "assets/guncusofficial/lang", officialLangDir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesBullets : officialTexturesBullets) {
+					unpackResourceToFolder(defaultOfficialTexturesBullets, "assets/guncusofficial/textures/items/bullets", officialTexturesBulletsDir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_G17 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_G17, "assets/guncusofficial/textures/items/gun_g17", officialTexturesGun_G17Dir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_G18 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_G18, "assets/guncusofficial/textures/items/gun_g18", officialTexturesGun_G18Dir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_L96 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_L96, "assets/guncusofficial/textures/items/gun_l96", officialTexturesGun_L96Dir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_M16A3 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_M16A3, "assets/guncusofficial/textures/items/gun_m16a3", officialTexturesGun_M16A3Dir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_SV98 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_SV98, "assets/guncusofficial/textures/items/gun_sv98", officialTexturesGun_SV98Dir);
+				}
+			}
+			if (files.length == 0) {
+				for (String defaultOfficialTexturesGun_AEK971 : attatchmentsList) {
+					unpackResourceToFolder(defaultOfficialTexturesGun_AEK971, "assets/guncusofficial/textures/items/gun_aek-971", officialTexturesGun_AEK971Dir);
+				}
+			}
+			File fileOfficialSoundJSON = new File(fileOfficial + "/sounds.json");
+			if (!fileOfficialSoundJSON.exists()) {
+				try {
+					FileUtils.writeStringToFile(fileOfficialSoundJSON, "{"
+							+ "\n   \"_EventNameWithoutNumbers_\": {\"category\": \"master\", \"sounds\": [{\"name\": \"_OGGsoundFileNameWithoutNumbers_\", \"stream\": false}]},"
+							+ "\n   \"akfortyseven\": {\"category\": \"master\", \"sounds\": [{\"name\": \"akfortyseven\", \"stream\": false}]},"
+							+ "\n   \"akfortysevensilencer\": {\"category\": \"master\", \"sounds\": [{\"name\": \"akfortysevensilencer\", \"stream\": false}]}"
+							+ "\n}"
+							+ "\n", "utf-8");
+				} catch (IOException exception) {
+					exception.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	private void createTemplatePack(File fileGunCus) {
