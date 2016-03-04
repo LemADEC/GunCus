@@ -510,7 +510,17 @@ public class GunCus {
 		
 		// official gun pack creation
 		File officialDir;
-		final String[] attachmentTextureArray = {
+		final String[] attachmentSniperTextureArray = {
+			"gun.png",
+			"hbl.png",
+			"magazine.png",
+			"rbl.png",
+			"scp.png",
+			"sight.png",
+			"sln.png",
+			"bpd.png",
+			"spb.png" };
+		final String[] attachmentPistolTextureArray = {
 			"gun.png",
 			"hbl.png",
 			"img.png",
@@ -519,11 +529,17 @@ public class GunCus {
 			"scp.png",
 			"sight.png",
 			"sln.png",
-			"sss.png",
-			"bpd.png",
+			"sss.png" };
+		final String[] attachmentARTextureArray = {
+			"gun.png",
+			"hbl.png",
+			"magazine.png",
+			"rbl.png",
+			"scp.png",
+			"sight.png",
+			"sln.png",
 			"grp.png",
-			"320.png",
-			"spb.png" };
+			"320.png" };
 		final String[] bulletCfgArray = {
 			"bullet0_acp.cfg",
 			"bullet1_nato.cfg",
@@ -544,22 +560,40 @@ public class GunCus {
 		    "ru_RU.lang", };
 		final String[] bulletTextureArray = {
 			"bullet.png" };			
-		final String[] gunNameArray = {
-			"gun_G17",
-			"gun_G18",
+		final String[] gunSniperNameArray = {
 			"gun_l96",
+			"gun_sv98" };			
+		final String[] gunPistolNameArray = {
+			"gun_g17",
+			"gun_g18" };			
+		final String[] gunARNameArray = {
 			"gun_m16a3",
-			"gun_sv98",
 			"gun_aek-971" };
 		
 		if (!fileOfficial.exists()) {
 			fileOfficial.mkdirs();
 						
-			for (String gunName : gunNameArray) {
+			for (String gunName : gunSniperNameArray) {
 				File dirGun = new File(fileGunCus + "/Official/textures/items/" + gunName);
 				dirGun.mkdirs();
-				for (String gunAttachment : attachmentTextureArray) {
-					unpackResourceToFolder(gunAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
+				for (String gunAttachment : attachmentSniperTextureArray) {
+						unpackResourceToFolder(gunAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
+				}
+			}
+			
+			for (String gunName : gunPistolNameArray) {
+				File dirGun = new File(fileGunCus + "/Official/textures/items/" + gunName);
+				dirGun.mkdirs();
+				for (String gunAttachment : attachmentPistolTextureArray) {
+						unpackResourceToFolder(gunAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
+				}
+			}
+			
+			for (String gunName : gunARNameArray) {
+				File dirGun = new File(fileGunCus + "/Official/textures/items/" + gunName);
+				dirGun.mkdirs();
+				for (String gunAttachment : attachmentARTextureArray) {
+						unpackResourceToFolder(gunAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
 				}
 			}
 			
