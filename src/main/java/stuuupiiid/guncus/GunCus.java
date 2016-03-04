@@ -509,13 +509,8 @@ public class GunCus {
 		File fileOfficial = new File(fileGunCus, "/Official");
 		
 		// official gun pack creation
-		File officialBulletsDir;
-		File officialGunsDir;
-		File officialLangDir;
-		File officialSoundsDir;
-		File officialTexturesBulletsDir;
-		File officialSoundJSONDir;
-		final String[] attatchmentsList= {
+		File officialDir;
+		final String[] attachmentTextureArray = {
 			"gun.png",
 			"hbl.png",
 			"img.png",
@@ -529,7 +524,7 @@ public class GunCus {
 			"grp.png",
 			"320.png",
 			"spb.png" };
-		final String[]officialBullets= {
+		final String[] bulletCfgArray = {
 			"bullet0_acp.cfg",
 			"bullet1_nato.cfg",
 			"bullet2_wp.cfg",
@@ -537,64 +532,66 @@ public class GunCus {
 		    "bullet4_natoHeavy.cfg",
 		    "bullet5_wpHeavy.cfg",
 		    "bullet6_rHeavy.cfg" };
-		final String[] officialGuns ={	    
+		final String[] gunCfgArray = {	    
 			"aek971.cfg",
 		    "g17.cfg",
 		    "g18.cfg",
 		    "m16a3.cfg",
 		    "l96.cfg",
 		    "sv98.cfg" };
-		final String[] officialLang ={	
+		final String[] langArray = {	
 			"en_US.lang",
 		    "ru_RU.lang", };
-		final String[] officialTexturesBullets ={
+		final String[] bulletTextureArray = {
 			"bullet.png" };			
-		final String[] officialGunNames ={
+		final String[] gunNameArray = {
 			"gun_G17",
 			"gun_G18",
 			"gun_l96",
 			"gun_m16a3",
 			"gun_sv98",
 			"gun_aek-971" };
-		final String[] officialSoundJSON ={
-			"sounds.json" };
 		
 		if (!fileOfficial.exists()) {
 			fileOfficial.mkdirs();
-			officialBulletsDir = new File(fileGunCus + "/Official/bullets");
-			officialBulletsDir.mkdirs();
-			officialGunsDir = new File(fileGunCus + "/Official/guns");
-			officialGunsDir.mkdirs();
-			officialLangDir = new File(fileGunCus + "/Official/lang");
-			officialLangDir.mkdirs();
-			officialSoundsDir = new File(fileGunCus + "/Official/sounds");
-			officialSoundsDir.mkdirs();
-			officialSoundJSONDir = new File(fileGunCus + "/Official");
-			officialSoundJSONDir.mkdirs();
-			officialTexturesBulletsDir = new File(fileGunCus + "/Official/textures/items/bullets");
-			officialTexturesBulletsDir.mkdirs();
-			
-			for (String gunName : officialGunNames) {
+						
+			for (String gunName : gunNameArray) {
 				File dirGun = new File(fileGunCus + "/Official/textures/items/" + gunName);
 				dirGun.mkdirs();
-				for (String officialAttachment : attatchmentsList) {
-					unpackResourceToFolder(officialAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
+				for (String gunAttachment : attachmentTextureArray) {
+					unpackResourceToFolder(gunAttachment, "assets/guncusofficial/textures/items/" + gunName, dirGun);
 				}
-			}			
-			for (String defaultOfficialBullets : officialBullets) {
-				unpackResourceToFolder(defaultOfficialBullets, "assets/guncusofficial/bullets", officialBulletsDir);
 			}
-			for (String defaultOfficialGuns : officialGuns) {
-				unpackResourceToFolder(defaultOfficialGuns, "assets/guncusofficial/guns", officialGunsDir);
+			
+			officialDir = new File(fileGunCus + "/Official/bullets");
+			officialDir.mkdirs();		
+			for (String bulletCfg : bulletCfgArray) {
+				unpackResourceToFolder(bulletCfg, "assets/guncusofficial/bullets", officialDir);
 			}
-			for (String defaultOfficialLang : officialLang) {
-				unpackResourceToFolder(defaultOfficialLang, "assets/guncusofficial/lang", officialLangDir);
+			
+			officialDir = new File(fileGunCus + "/Official/guns");
+			officialDir.mkdirs();
+			for (String gunCfg : gunCfgArray) {
+				unpackResourceToFolder(gunCfg, "assets/guncusofficial/guns", officialDir);
 			}
-			for (String defaultOfficialTexturesBullets : officialTexturesBullets) {
-				unpackResourceToFolder(defaultOfficialTexturesBullets, "assets/guncusofficial/textures/items/bullets", officialTexturesBulletsDir);
+			
+			officialDir = new File(fileGunCus + "/Official/lang");
+			officialDir.mkdirs();
+			for (String langFile : langArray) {
+				unpackResourceToFolder(langFile, "assets/guncusofficial/lang", officialDir);
 			}
-			for (String soundJSON : officialSoundJSON) {
-				unpackResourceToFolder(soundJSON, "assets/guncusofficial", officialSoundJSONDir);
+			
+			officialDir = new File(fileGunCus + "/Official/sounds");
+			officialDir.mkdirs();
+			
+			officialDir = new File(fileGunCus + "/Official");
+			officialDir.mkdirs();
+			unpackResourceToFolder("sounds.json", "assets/guncusofficial", officialDir);
+			
+			officialDir = new File(fileGunCus + "/Official/textures/items/bullets");
+			officialDir.mkdirs();
+			for (String bulletTexture : bulletTextureArray) {
+				unpackResourceToFolder(bulletTexture, "assets/guncusofficial/textures/items/bullets", officialDir);
 			}
 		}
 	}
