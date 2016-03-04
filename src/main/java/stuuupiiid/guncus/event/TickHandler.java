@@ -110,7 +110,9 @@ public class TickHandler {
 		
 		// hold swing animation when holding a gun
 		if ( (entityPlayer.inventory.getCurrentItem() != null)
-		  && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun) ) {
+		  && ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun )
+		  || ( entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG )
+		  || ( entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachment) ) ) {
 			noSwing(10000);
 		}
 		
