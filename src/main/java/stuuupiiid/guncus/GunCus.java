@@ -916,7 +916,7 @@ public class GunCus {
 		String stringIcon = configGun.get("general", "Texture", "", "Texture of the gun. Leave blanc for default").getString();
 		
 		double recoilModifier = configGun.get("general", "RecoilModifier", 1.0D, "Defines the gun base recoil."
-				+ "\nApplied recoil is gun.RecoilModifier x bullet.RecoilModifier.").getDouble();
+				+ "\nApplied recoil is Damage x RecoilModifier x AttachmentModifier.").getDouble();
 		
 		String soundNormal = configGun.get("general", "NormalSound", "", "Sound played when shooting."
 				+ "\nSelect the sound file in the sounds.json file. Only .ogg files are supported by Minecraft."
