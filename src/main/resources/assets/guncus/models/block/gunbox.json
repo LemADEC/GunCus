@@ -1,0 +1,11 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"down" : "guncus:blocks/bottom",
+		"up"   : "guncus:blocks/gun",
+		"north": "guncus:blocks/side",
+		"south": "guncus:blocks/side",
+		"west" : "guncus:blocks/side",
+		"east" : "guncus:blocks/side"
+	}
+}
