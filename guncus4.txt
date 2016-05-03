@@ -1,0 +1,127 @@
+Weapons:
+	phammer:
+		enabled: true
+		unlocalizedName: phammer	// lore goes in language file
+		acquired:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+		requiredHands: 1/2
+		maxDurability: 0
+		model: name
+		crafting:
+			ingredients:
+				itemName:metadata:quantity
+			output: 1
+		fireMain:
+			delayBetweenShots_ticks: 3
+			baseDamage_halfHearts: 7
+			recoilModifier: 1.0
+			enableSingleShoot: true
+			burstSize: 3
+			enableAutomaticShoot: 0/5
+			zoomWithoutScope: 1.0
+			shoot_empty:
+				effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			shoot_normal:
+				effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			shoot_silenced:
+				effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			projectiles:
+				9x19mm_parabellum
+			magazines:	// empty means direct loading (literraly, no magazine)
+				normal:
+					slotCapacity: 0-1500
+					slotCount: 1
+					crafting:
+						ingredients:
+							itemName:metadata:quantity
+						output: 1
+					maximumStackSize: 1
+					fullReload:
+						effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+						duration_ticks: 30
+						allowWhileScoped: true
+					slotReload:
+						effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+						duration_ticks: 20
+						allowWhileScoped: true
+					model:
+						name: xxx
+						positionMounted: x,y,z,a,b,c
+						positionDismounted: x,y,z,a,b,c
+			attachments:
+				straightPullBolt:
+					modifier:
+						xx:yyy (hardcoded)
+					model:
+						name: xx
+						positionMounted: x,y,z,a,b,c
+						positionDismounted: x,y,z,a,b,c
+			barrels:
+				M320:
+					modifier:
+						xx:yyy (hardcoded)
+					model:
+						name: xx
+						positionMounted: x,y,z,a,b,c
+						positionDismounted: x,y,z,a,b,c
+				laserPointer:
+					modifier:
+						xx:yyy (hardcoded)
+					model:
+						name: xx
+						positionMounted: x,y,z,a,b,c
+						positionDismounted: x,y,z,a,b,c
+			scopes:
+				ACOG:
+					modifier:
+						xx:yyy (hardcoded)
+						sight: xx
+					model:
+						name: xx
+						positionMounted: x,y,z,a,b,c
+						positionDismounted: x,y,z,a,b,c
+		fireSecondary:
+		Sneak:
+			Enable: true
+			No_Recoil: true
+			Bullet_Spread: 0.4
+Projectiles:
+	9x19mm_parabellum:	// unlocalizedName, lore goes in language file
+		enabled: true
+		projectilePerShot: 1
+		ammoPerShot: 1
+		type: arrow/ball/beam
+		initialSpeed_m/s: 40
+		damagePerProjectile: 4
+		criticalChance: 0.10
+		criticalBonusFactor: 1.5
+		maximumAccuracy(spread): 0.5
+		frictionInAir: 0.01
+		frictionInLiquid: 0.5
+		gravityFactor: 1.0
+		allowVanillaKnockback: false
+		resetHitCooldown: true
+		playerInnaccuracyMultiplier: 1.0
+		crafting:
+			ingredients:
+				itemName:metadata:quantity
+			output: 1
+		energyAmount_RF: 0
+		maximumStackSize: 50
+		overrideGunEffects: true
+		shoot_normal:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+		shoot_silenced:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+		flight:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			model: 
+				type: icon/json/java
+				location: 
+		entityHit:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			persistance_ticks: 5
+			deathMessage: <victim> was nailed by <shooter> with a Hammer!
+		blockHit:
+			effects: [particle, sound-pitch-volume, potionId-strength-duration, ...]
+			persistance_ticks: 5
