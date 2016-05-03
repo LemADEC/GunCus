@@ -4,3 +4,5 @@
 
 .classpath
 /.project
+/reference
+/src/main/resources/assets/guncus/textures/custom
