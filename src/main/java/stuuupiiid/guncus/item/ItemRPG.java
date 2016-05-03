@@ -2,9 +2,6 @@ package stuuupiiid.guncus.item;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.PacketHandler;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.Entity;
@@ -13,16 +10,19 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Mouse;
 
-public class ItemRPG extends GunCusItem {
-	public Item ammo;
+public class ItemRPG extends ItemBase {
+	public Item itemAmmo;
 	
-	public ItemRPG(String iconName, String name, Item ammo) {
-		super(iconName, name);
+	public ItemRPG(String unlocalizedName, Item itemAmmo) {
+		super(unlocalizedName);
 		setFull3D();
-		this.ammo = ammo;
+		this.itemAmmo = itemAmmo;
 	}
 	
 	@Override
@@ -41,20 +41,13 @@ public class ItemRPG extends GunCusItem {
 			if ( (GunCus.shootTime <= 0) && (Mouse.isButtonDown(0))
 			  && (client.currentScreen == null)
 			  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
-			  && (entityPlayer.inventory.hasItem(ammo) || entityPlayer.capabilities.isCreativeMode)) {
+			  && (entityPlayer.inventory.hasItem(itemAmmo) || entityPlayer.capabilities.isCreativeMode)) {
 				GunCus.shootTime += 140;
 				GunCus.reloading = true;
 				PacketHandler.sendToServer_playerAction_tube();
-				recoilTube(entityPlayer);
-				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_rpg")));
+				applyTubeRecoil(entityPlayer);
+				Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:reload_rpg")));
 			}
 		}
-	}
-	
-	private void recoilTube(EntityPlayer entityPlayer) {
-		float strength = 1.5F;
-		
-		entityPlayer.rotationPitch -= strength;
-		entityPlayer.rotationYaw -= (Item.itemRand.nextBoolean() ? strength / 2.0F : -strength / 2.0F);
 	}
 }

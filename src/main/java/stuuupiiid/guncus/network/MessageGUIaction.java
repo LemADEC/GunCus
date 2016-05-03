@@ -3,18 +3,18 @@ package stuuupiiid.guncus.network;
 import java.nio.charset.Charset;
 
 import stuuupiiid.guncus.GunCus;
-import stuuupiiid.guncus.block.ContainerAmmo;
-import stuuupiiid.guncus.block.ContainerAmmoMan;
-import stuuupiiid.guncus.block.ContainerBullet;
-import stuuupiiid.guncus.block.ContainerGun;
-import stuuupiiid.guncus.block.ContainerMag;
-import stuuupiiid.guncus.block.ContainerWeapon;
+import stuuupiiid.guncus.block.ContainerAmmoBox;
+import stuuupiiid.guncus.block.ContainerMagazineFiller;
+import stuuupiiid.guncus.block.ContainerBulletBox;
+import stuuupiiid.guncus.block.ContainerGunBox;
+import stuuupiiid.guncus.block.ContainerMagazineBox;
+import stuuupiiid.guncus.block.ContainerWeaponBox;
 import stuuupiiid.guncus.gui.GuiHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIaction, IMessage> {
 	private int guiId;
@@ -52,48 +52,48 @@ public class MessageGUIaction implements IMessage, IMessageHandler<MessageGUIact
 	}
 	
 	private void handle(EntityPlayerMP entityPlayer) {
-		if (guiId == GuiHandler.gunBlock) {// 3 GuiGun (client -> server)
-			ContainerGun container = (ContainerGun) entityPlayer.openContainer;
+		if (guiId == GuiHandler.gunBox) {// 3 GuiGun (client -> server)
+			ContainerGunBox container = (ContainerGunBox) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
 				container.split();
 			} else if (buttonId == 1) {
 				container.build(entityPlayer);
 			}
-		} else if (guiId == GuiHandler.ammoBlock) {// 4 GuiAmmo (client -> server)
-			ContainerAmmo container = (ContainerAmmo) entityPlayer.openContainer;
+		} else if (guiId == GuiHandler.ammoBox) {// 4 GuiAmmo (client -> server)
+			ContainerAmmoBox container = (ContainerAmmoBox) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
 				container.fill();
 			} else if (buttonId == 1) {
 				container.empty();
 			}
-		} else if (guiId == GuiHandler.magItem) {// 5 GuiAmmoMan (client -> server)
-			ContainerAmmoMan container = (ContainerAmmoMan) entityPlayer.openContainer;
+		} else if (guiId == GuiHandler.magazineFillerItem) {// 5 GuiAmmoMan (client -> server)
+			ContainerMagazineFiller container = (ContainerMagazineFiller) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
 				container.fill();
 			} else if (buttonId == 1) {
 				container.empty();
 			}
-		} else if (guiId == GuiHandler.magBlock) {// 6 GuiMag (client -> server)
-			ContainerMag container = (ContainerMag) entityPlayer.openContainer;
+		} else if (guiId == GuiHandler.magazineBox) {// 6 GuiMag (client -> server)
+			ContainerMagazineBox container = (ContainerMagazineBox) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
 				container.create();
 			} else if (buttonId == 1) {
 				GunCus.addChatMessage(entityPlayer, container.info());
 			}
-		} else if (guiId == GuiHandler.bulletBlock) {// 7 GuiBullet (client -> server)
-			ContainerBullet container = (ContainerBullet) entityPlayer.openContainer;
+		} else if (guiId == GuiHandler.bulletBox) {// 7 GuiBullet (client -> server)
+			ContainerBulletBox container = (ContainerBulletBox) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {
 				container.create();
 			} else if (buttonId == 1) {
 				GunCus.addChatMessage(entityPlayer, container.info());
 			}
-		} else if (guiId == GuiHandler.weaponBlock) {// 9 GuiWeapon
-			ContainerWeapon container = (ContainerWeapon) entityPlayer.openContainer;
+		} else if (guiId == GuiHandler.weaponBox) {// 9 GuiWeapon
+			ContainerWeaponBox container = (ContainerWeaponBox) entityPlayer.openContainer;
 			
 			if (buttonId == 0) {// previous
 				int index = 0;

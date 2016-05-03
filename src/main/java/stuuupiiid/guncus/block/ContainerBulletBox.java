@@ -2,7 +2,7 @@ package stuuupiiid.guncus.block;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemBullet;
-import stuuupiiid.guncus.item.ItemMag;
+import stuuupiiid.guncus.item.ItemMagazine;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -11,16 +11,17 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-public class ContainerBullet extends Container {
+public class ContainerBulletBox extends Container {
 	public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
 	private World worldObj;
 	public int posX;
 	public int posY;
 	public int posZ;
 
-	public ContainerBullet(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+	public ContainerBulletBox(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
 		this.worldObj = world;
 		this.posX = x;
 		this.posY = y;
@@ -49,13 +50,13 @@ public class ContainerBullet extends Container {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
-			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			ItemStack itemStackSlot = craftMatrix.removeStackFromSlot(slotIndex);
 			if (itemStackSlot != null) {
 				if (entityPlayer != null) {
 					entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 				} else {
 					EntityItem entityItem = new EntityItem(worldObj, posX, posY + 0.5F, posZ, itemStackSlot);
-					entityItem.delayBeforeCanPickup = 10;
+					entityItem.setDefaultPickupDelay();
 					worldObj.spawnEntityInWorld(entityItem);
 				}
 			}
@@ -63,17 +64,17 @@ public class ContainerBullet extends Container {
 	}
 	
 	public void create() {
-		ItemStack itemStackMagazineSlot = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack itemStackIronIngotsSlot = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack itemStackOutputSlot = ((Slot) inventorySlots.get(2)).getStack();
-		ItemStack itemStackGunpowerSlot = ((Slot) inventorySlots.get(3)).getStack();
+		ItemStack itemStackMagazineSlot = inventorySlots.get(0).getStack();
+		ItemStack itemStackIronIngotsSlot = inventorySlots.get(1).getStack();
+		ItemStack itemStackOutputSlot = inventorySlots.get(2).getStack();
+		ItemStack itemStackGunpowerSlot = inventorySlots.get(3).getStack();
 		
-		ItemMag mag = null;
+		ItemMagazine mag = null;
 		ItemBullet bullet = null;
 		
-		if ((itemStackMagazineSlot != null) && (itemStackMagazineSlot.getItem() != null) && (itemStackMagazineSlot.getItem() instanceof ItemMag)) {
-			mag = (ItemMag) itemStackMagazineSlot.getItem();
-			bullet = ItemBullet.bullets.get(mag.pack).get(mag.bulletId);
+		if ((itemStackMagazineSlot != null) && (itemStackMagazineSlot.getItem() != null) && (itemStackMagazineSlot.getItem() instanceof ItemMagazine)) {
+			mag = (ItemMagazine) itemStackMagazineSlot.getItem();
+			bullet = ItemBullet.bullets.get(mag.packName).get(mag.bulletIds[0]);	// FIXME: add supports for varied bullets in magazine
 			
 			if ( (bullet.gunpowder >= 0)
 			  && (bullet.ironIngots >= 0)
@@ -96,36 +97,36 @@ public class ContainerBullet extends Container {
 				int size = bullet.stackOnCreate
 						+ ((itemStackOutputSlot != null) && (itemStackOutputSlot.getItem() != null) && (itemStackOutputSlot.stackSize > 0) ? itemStackOutputSlot.stackSize : 0);
 				
-				((Slot) inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, sizeIr));
-				((Slot) inventorySlots.get(3)).putStack(new ItemStack(Items.gunpowder, sizeSu));
-				((Slot) inventorySlots.get(2)).putStack(new ItemStack(bullet, size));
+				inventorySlots.get(1).putStack(new ItemStack(Items.iron_ingot, sizeIr));
+				inventorySlots.get(3).putStack(new ItemStack(Items.gunpowder, sizeSu));
+				inventorySlots.get(2).putStack(new ItemStack(bullet, size));
 			}
 		}
 	}
 	
 	public String info() {
-		ItemStack itemStackMagSlot = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack itemStackMagSlot = inventorySlots.get(0).getStack();
 		
-		ItemMag itemMag = null;
+		ItemMagazine itemMag = null;
 		
 		if ((itemStackMagSlot == null) || (itemStackMagSlot.getItem() == null)) {
 			return "Empty magazine slot!\n"
 					+ "Place a GunCus magazine in the magazine slot and try again...";
-		} else if (itemStackMagSlot.getItem() instanceof ItemMag) {
-			itemMag = (ItemMag) itemStackMagSlot.getItem();
+		} else if (itemStackMagSlot.getItem() instanceof ItemMagazine) {
+			itemMag = (ItemMagazine) itemStackMagSlot.getItem();
 			
-			ItemBullet bullet = ItemBullet.bullets.get(itemMag.pack).get(itemMag.bulletId);
+			ItemBullet bullet = ItemBullet.bullets.get(itemMag.packName).get(itemMag.bulletIds[0]);	// FIXME: add supports for varied bullets in magazine);
 			if (bullet == null) {
 				return "Invalid bullet defined!\n"
-						+ "Please contact the '" + itemMag.pack + "' addon author to fix it";
+						+ "Please contact the '" + itemMag.packName + "' addon author to fix it";
 			} else {
 				if ((bullet.ironIngots >= 0) && (bullet.gunpowder >= 0) && ((bullet.ironIngots > 0) || (bullet.gunpowder > 0))) {
-					return "Those '" + bullet.getUnlocalizedName() + "' bullets from '" + itemMag.pack + "' requires\n"
+					return "Those '" + bullet.getUnlocalizedName() + "' bullets from '" + itemMag.packName + "' requires\n"
 							+ " " + (bullet.ironIngots > 0 ? bullet.ironIngots + " iron ingot" + (bullet.ironIngots > 1 ? "s, " : ", ") : "")
 							+ (bullet.gunpowder > 0 ? bullet.gunpowder + " gunpowder" : "");
 				} else {
 					return "Invalid bullet costs detected!\n"
-							+ "Please contact the '" + bullet.pack + "' addon author to fix it";
+							+ "Please contact the '" + bullet.packName + "' addon author to fix it";
 				}
 			}
 		} else {
@@ -135,8 +136,8 @@ public class ContainerBullet extends Container {
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockBullet;
+	public boolean canInteractWith(EntityPlayer entityPlayer) {
+		return worldObj.getBlockState(new BlockPos(posX, posY, posZ)).getBlock() == GunCus.blockBulletBox;
 	}
 	
 	@Override

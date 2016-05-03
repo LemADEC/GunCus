@@ -7,14 +7,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class ItemMagFiller extends GunCusItem {
-	public ItemMagFiller() {
-		super("guncus:magFiller", "magFiller");
+public class ItemMagazineFiller extends ItemBase {
+	public ItemMagazineFiller(String unlocalizedName) {
+		super(unlocalizedName);
 	}
 	
 	@Override
 	public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer) {
-		par3EntityPlayer.openGui(GunCus.instance, GuiHandler.magItem,
+		par3EntityPlayer.openGui(GunCus.instance, GuiHandler.magazineFillerItem,
 				par2World,
 				MathHelper.floor_double(par3EntityPlayer.posX),
 				MathHelper.floor_double(par3EntityPlayer.posY),

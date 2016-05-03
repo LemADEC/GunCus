@@ -4,23 +4,23 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class ItemMag extends GunCusItem {
-	public int bulletId;
+public class ItemMagazine extends ItemBase {
+	public int[] bulletIds;
 	public String gunName;
-	public String pack;
+	public String packName;
 	
-	public ItemMag(String pack, String gunName, String gunIcon, int magSize, int bulletId) {
-		super(gunIcon + "magazine", pack + "." + gunName + ".magazine");
+	public ItemMagazine(String packName, String gunName, int magSize, int[] bulletIds) {
+		super(packName + "." + gunName + ".magazine");
 		setMaxDamage(magSize);
 		setMaxStackSize(1);
-		this.bulletId = bulletId;
+		this.bulletIds = bulletIds;
 		this.gunName = gunName;
-		this.pack = pack;
+		this.packName = packName;
 	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		ItemStack itemStackBullet = new ItemStack(ItemBullet.bullets.get(pack).get(bulletId), 0);
+		ItemStack itemStackBullet = new ItemStack(ItemBullet.bullets.get(packName).get(bulletIds[0]), 0);	// FIXME: show all bullet types
 		int bulletCount = getMaxDamage() - itemStack.getItemDamage();
 		if (bulletCount == getMaxDamage()) {
 			list.add("Full magazine of " + itemStackBullet.getDisplayName());
@@ -33,6 +33,6 @@ public class ItemMag extends GunCusItem {
 			list.add(bulletCount + " / " + getMaxDamage() + " bullets");
 		}
 		list.add("");
-		list.add(pack + " pack");
+		list.add(packName + " pack");
 	}
 }

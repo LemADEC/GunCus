@@ -8,13 +8,13 @@ import stuuupiiid.guncus.GunCus;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class ItemBullet extends GunCusItem {
+public class ItemBullet extends ItemBase {
 	public int bulletId;
 	public int texture;
 	public int gunpowder;
 	public int ironIngots;
 	public int stackOnCreate;
-	public String pack;
+	public String packName;
 	public String blockHit = "guncus:inground";
 	public String entityHit = "guncus:inground";
 	public float damageModifier;
@@ -30,13 +30,13 @@ public class ItemBullet extends GunCusItem {
 	
 	public static HashMap<String, List<ItemBullet>> bullets = new HashMap();
 	
-	public ItemBullet(String pack, String name, int bulletId, String iconName, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
-		super(iconName, pack + ".bullet." + name);
+	public ItemBullet(String packName, String bulletName, int bulletId, int texture, int gunpowder, int ironIngot, int stackOnCreate, float damageModifier) {
+		super(packName + ".bullet." + bulletName);
 		setCreativeTab(GunCus.creativeTabBullets);
 		setMaxStackSize(64);
 		
-		if (!bullets.containsKey(pack)) {
-			bullets.put(pack, new ArrayList());
+		if (!bullets.containsKey(packName)) {
+			bullets.put(packName, new ArrayList());
 		}
 		
 		this.damageModifier = damageModifier;
@@ -45,14 +45,14 @@ public class ItemBullet extends GunCusItem {
 		this.gunpowder = gunpowder;
 		this.ironIngots = ironIngot;
 		this.stackOnCreate = stackOnCreate;
-		this.pack = pack;
-		if (bullets.get(pack).size() <= bulletId) {
-			for (int bulletIndex = bullets.get(pack).size(); bulletIndex <= bulletId; bulletIndex++) {
-				bullets.get(pack).add(null);
+		this.packName = packName;
+		if (bullets.get(packName).size() <= bulletId) {
+			for (int bulletIndex = bullets.get(packName).size(); bulletIndex <= bulletId; bulletIndex++) {
+				bullets.get(packName).add(null);
 			}
 		}
-		bullets.get(pack).set(bulletId, this);
-		GunCus.logger.info("Added bullet #" + bulletId + ": "+ name);
+		bullets.get(packName).set(bulletId, this);
+		GunCus.logger.info("Added bullet #" + bulletId + ": " + bulletName);
 	}
 	
 	public ItemBullet setGravityModifier(final double gravityModifier) {
@@ -102,6 +102,6 @@ public class ItemBullet extends GunCusItem {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		list.add("");
-		list.add(pack + " pack");
+		list.add(packName + " pack");
 	}
 }

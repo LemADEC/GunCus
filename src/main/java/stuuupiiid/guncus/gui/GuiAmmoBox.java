@@ -1,27 +1,23 @@
 package stuuupiiid.guncus.gui;
 
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import stuuupiiid.guncus.block.ContainerAmmo;
+import stuuupiiid.guncus.block.ContainerAmmoBox;
 import stuuupiiid.guncus.item.ItemBullet;
-import stuuupiiid.guncus.item.ItemMag;
+import stuuupiiid.guncus.item.ItemMagazine;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class GuiAmmoBlock extends GuiContainer {
-	public GuiAmmoBlock(InventoryPlayer inventory, World world, int x, int y, int z) {
+public class GuiAmmoBox extends AbstractGuiContainer {
+	public GuiAmmoBox(InventoryPlayer inventory, World world, int x, int y, int z) {
 		
-		super(new ContainerAmmo(inventory, world, x, y, z));
+		super(new ContainerAmmoBox(inventory, world, x, y, z));
 		
 		// default size
 		xSize = 176;
@@ -46,8 +42,8 @@ public class GuiAmmoBlock extends GuiContainer {
 		
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {
-			if (((GuiButton) guibutton).func_146115_a()) {
-				((GuiButton) guibutton).func_146111_b(mouseX - guiLeft, mouseY - guiTop);
+			if (((GuiButton) guibutton).isMouseOver()) {
+				((GuiButton) guibutton).drawButtonForegroundLayer(mouseX - guiLeft, mouseY - guiTop);
 				break;
 			}
 		}
@@ -75,36 +71,20 @@ public class GuiAmmoBlock extends GuiContainer {
 		ItemBullet itemBullet = getBullet();
 		if (itemBullet != null) {
 			itemStack = new ItemStack(itemBullet);
-			GuiContainer.itemRender.renderItemAndEffectIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 101, guiTop + 14 + 40);
-			GuiContainer.itemRender.renderItemOverlayIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 101, guiTop + 14 + 40);
+			drawItemStack(itemStack, guiLeft + 101, guiTop + 14 + 40, "");
 		}
 	}
 	
 	protected ItemBullet getBullet() {
-		if (inventorySlots.getSlot(0).getStack() != null && inventorySlots.getSlot(0).getStack().getItem() instanceof ItemMag) {
-			ItemMag itemMag = (ItemMag) inventorySlots.getSlot(0).getStack().getItem();
-			return ItemBullet.bullets.get(itemMag.pack).get(itemMag.bulletId);
+		if (inventorySlots.getSlot(0).getStack() != null && inventorySlots.getSlot(0).getStack().getItem() instanceof ItemMagazine) {
+			ItemMagazine itemMag = (ItemMagazine) inventorySlots.getSlot(0).getStack().getItem();
+			return ItemBullet.bullets.get(itemMag.packName).get(itemMag.bulletIds[0]);	// FIXME: add support for more than 1 bullet per magazine
 		}
 		return null;
 	}
 	
 	@Override
 	protected void actionPerformed(GuiButton button) {
-		PacketHandler.sendToServer_GUIaction(GuiHandler.ammoBlock, button.id);
-	}
-	
-	@SideOnly(Side.CLIENT)
-	class ButtonWithTooltip extends GuiButton {
-		private String helpString = "";
-		
-		public ButtonWithTooltip(int id, int xPosition, int yPosition, int width, int height, String displayString, String helpString) {
-			super(id, xPosition, yPosition, width, height, displayString);
-			this.helpString = helpString;
-		}
-		
-		@Override
-		public void func_146111_b(int mouseX, int mouseY) {
-			drawCreativeTabHoveringText(I18n.format(helpString, new Object[0]), mouseX, mouseY);
-		}
+		PacketHandler.sendToServer_GUIaction(GuiHandler.ammoBox, button.id);
 	}
 }

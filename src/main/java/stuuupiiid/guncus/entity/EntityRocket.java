@@ -1,16 +1,17 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityRocket extends EntityGrenade implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	
@@ -39,9 +40,9 @@ public class EntityRocket extends EntityGrenade implements IProjectile, IEntityA
 		// (always draw rocket fume trails)
 		// Check render distance
 		Minecraft mc = Minecraft.getMinecraft();
-		double dX = mc.renderViewEntity.posX - posX;
-		double dY = mc.renderViewEntity.posY - posY;
-		double dZ = mc.renderViewEntity.posZ - posZ;
+		double dX = mc.getRenderViewEntity().posX - posX;
+		double dY = mc.getRenderViewEntity().posY - posY;
+		double dZ = mc.getRenderViewEntity().posZ - posZ;
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
 			// build orientation vector
@@ -54,13 +55,14 @@ public class EntityRocket extends EntityGrenade implements IProjectile, IEntityA
 				double factor = 0.20 * smokeIndex;
 				// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
 				// adjust color to be more rocket style (white/yellowish)
-				EntitySmokeFX effect = new EntitySmokeFX(
+				EntityFX effect = new EntitySmokeFX.Factory().getEntityFX(
+						0,
 						worldObj,
 						tailX - motionX * factor,
 						tailY - motionY * factor,
 						tailZ - motionZ * factor,
-						-0.5 * motionX, -0.5 * motionY + 0.1, -0.5 * motionZ,
-						1.5F);
+						-0.5 * motionX, -0.5 * motionY + 0.1, -0.5 * motionZ);
+				effect.multipleParticleScaleBy(1.5F);
 				float color = 0.7F + rand.nextFloat() * 0.15F; 
 				effect.setRBGColorF(color, color + 0.05F, color + 0.05F);
 				mc.effectRenderer.addEffect(effect);

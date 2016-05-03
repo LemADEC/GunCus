@@ -1,12 +1,14 @@
 package stuuupiiid.guncus.render;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderArrow;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -17,7 +19,8 @@ import stuuupiiid.guncus.entity.EntityRocket;
 public class RenderRocket extends RenderArrow {
 	private static final ResourceLocation rocketTextures = new ResourceLocation("guncus:textures/entity/rocket.png");
 	
-	public RenderRocket() {
+	public RenderRocket(RenderManager renderManagerIn) {
+		super(renderManagerIn);
 		shadowSize = 0.0F;
 	}
 	
@@ -39,7 +42,8 @@ public class RenderRocket extends RenderArrow {
 		GL11.glTranslatef((float) x, (float) y, (float) z);
 		GL11.glRotatef(entityRocket.prevRotationYaw + (entityRocket.rotationYaw - entityRocket.prevRotationYaw) * par9 - 90.0F, 0.0F, 1.0F, 0.0F);
 		GL11.glRotatef(entityRocket.prevRotationPitch + (entityRocket.rotationPitch - entityRocket.prevRotationPitch) * par9, 0.0F, 0.0F, 1.0F);
-		Tessellator tessellator = Tessellator.instance;
+		Tessellator tessellator = Tessellator.getInstance();
+		WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		
 		if (entityRocket.state == entityRocket.STATE_FLYING) {
@@ -55,31 +59,31 @@ public class RenderRocket extends RenderArrow {
 		
 		// tail back face
 		GL11.glNormal3f(scale, 0.0F, 0.0F);
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV(-7.0D, -2.0D, -2.0D, uBackMin, vMin);
-		tessellator.addVertexWithUV(-7.0D, -2.0D,  2.0D, uBackMax, vMin);
-		tessellator.addVertexWithUV(-7.0D,  2.0D,  2.0D, uBackMax, vMax);
-		tessellator.addVertexWithUV(-7.0D,  2.0D, -2.0D, uBackMin, vMax);
+		worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		worldRenderer.pos(-7.0D, -2.0D, -2.0D).tex(uBackMin, vMin).endVertex();
+		worldRenderer.pos(-7.0D, -2.0D,  2.0D).tex(uBackMax, vMin).endVertex();
+		worldRenderer.pos(-7.0D,  2.0D,  2.0D).tex(uBackMax, vMax).endVertex();
+		worldRenderer.pos(-7.0D,  2.0D, -2.0D).tex(uBackMin, vMax).endVertex();
 		tessellator.draw();
 		
 		// tail front face
 		GL11.glNormal3f(-scale, 0.0F, 0.0F);
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV( 4.0D,  2.0D, -2.0D, uFrontMin, vMin);
-		tessellator.addVertexWithUV( 4.0D,  2.0D,  2.0D, uFrontMax, vMin);
-		tessellator.addVertexWithUV( 4.0D, -2.0D,  2.0D, uFrontMax, vMax);
-		tessellator.addVertexWithUV( 4.0D, -2.0D, -2.0D, uFrontMin, vMax);
+		worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		worldRenderer.pos( 4.0D,  2.0D, -2.0D).tex(uFrontMin, vMin).endVertex();
+		worldRenderer.pos( 4.0D,  2.0D,  2.0D).tex(uFrontMax, vMin).endVertex();
+		worldRenderer.pos( 4.0D, -2.0D,  2.0D).tex(uFrontMax, vMax).endVertex();
+		worldRenderer.pos( 4.0D, -2.0D, -2.0D).tex(uFrontMin, vMax).endVertex();
 		tessellator.draw();
 		
 		// 4 sides
 		for (int i = 0; i < 4; i++) {
 			GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
 			GL11.glNormal3f(0.0F, 0.0F, scale);
-			tessellator.startDrawingQuads();
-			tessellator.addVertexWithUV(-8.0D, -2.0D, 0.0D, uSideMin, vMin);
-			tessellator.addVertexWithUV( 8.0D, -2.0D, 0.0D, uSideMax, vMin);
-			tessellator.addVertexWithUV( 8.0D,  2.0D, 0.0D, uSideMax, vMax);
-			tessellator.addVertexWithUV(-8.0D,  2.0D, 0.0D, uSideMin, vMax);
+			worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+			worldRenderer.pos(-8.0D, -2.0D, 0.0D).tex(uSideMin, vMin).endVertex();
+			worldRenderer.pos( 8.0D, -2.0D, 0.0D).tex(uSideMax, vMin).endVertex();
+			worldRenderer.pos( 8.0D,  2.0D, 0.0D).tex(uSideMax, vMax).endVertex();
+			worldRenderer.pos(-8.0D,  2.0D, 0.0D).tex(uSideMin, vMax).endVertex();
 			tessellator.draw();
 		}
 		
@@ -88,17 +92,12 @@ public class RenderRocket extends RenderArrow {
 	}
 	
 	@Override
-	protected ResourceLocation getEntityTexture(Entity entity) {
-		return rocketTextures;
-	}
-	
-	@Override
 	protected ResourceLocation getEntityTexture(EntityArrow entityArrow) {
 		return rocketTextures;
 	}
 	
 	@Override
-	public void doRender(Entity par1Entity, double x, double y, double z, float par8, float par9) {
-		renderRocket((EntityRocket) par1Entity, x, y, z, par8, par9);
+	public void doRender(EntityArrow entityArrow, double x, double y, double z, float par8, float par9) {
+		renderRocket((EntityRocket) entityArrow, x, y, z, par8, par9);
 	}
 }

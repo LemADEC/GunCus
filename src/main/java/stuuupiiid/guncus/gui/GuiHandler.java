@@ -1,38 +1,38 @@
 package stuuupiiid.guncus.gui;
 
-import stuuupiiid.guncus.block.ContainerAmmo;
-import stuuupiiid.guncus.block.ContainerAmmoMan;
-import stuuupiiid.guncus.block.ContainerBullet;
-import stuuupiiid.guncus.block.ContainerGun;
-import stuuupiiid.guncus.block.ContainerMag;
-import stuuupiiid.guncus.block.ContainerWeapon;
-import cpw.mods.fml.common.network.IGuiHandler;
+import stuuupiiid.guncus.block.ContainerAmmoBox;
+import stuuupiiid.guncus.block.ContainerMagazineFiller;
+import stuuupiiid.guncus.block.ContainerBulletBox;
+import stuuupiiid.guncus.block.ContainerGunBox;
+import stuuupiiid.guncus.block.ContainerMagazineBox;
+import stuuupiiid.guncus.block.ContainerWeaponBox;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public class GuiHandler implements IGuiHandler {
-	static public final int gunBlock = 0;
-	static public final int ammoBlock = 1;
-	static public final int magItem = 2;
-	static public final int magBlock = 3;
-	static public final int bulletBlock = 4;
-	static public final int weaponBlock = 5;
+	static public final int gunBox = 0;
+	static public final int ammoBox = 1;
+	static public final int magazineFillerItem = 2;
+	static public final int magazineBox = 3;
+	static public final int bulletBox = 4;
+	static public final int weaponBox = 5;
 	
 	@Override
 	public Object getClientGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z) {
 		switch (guiId) {
-		case gunBlock:
-			return new GuiGunBlock(player.inventory, world, x, y, z);
-		case ammoBlock:
-			return new GuiAmmoBlock(player.inventory, world, x, y, z);
-		case magItem:
-			return new GuiMagItem(player.inventory);
-		case magBlock:
-			return new GuiMagBlock(player.inventory, world, x, y, z);
-		case bulletBlock:
-			return new GuiBulletBlock(player.inventory, world, x, y, z);
-		case weaponBlock:
-			return new GuiWeaponBlock(player.inventory, world, x, y, z);
+		case gunBox:
+			return new GuiGunBox(player.inventory, world, x, y, z);
+		case ammoBox:
+			return new GuiAmmoBox(player.inventory, world, x, y, z);
+		case magazineFillerItem:
+			return new GuiMagazineFillerItem(player.inventory);
+		case magazineBox:
+			return new GuiMagazineBox(player.inventory, world, x, y, z);
+		case bulletBox:
+			return new GuiBulletBox(player.inventory, world, x, y, z);
+		case weaponBox:
+			return new GuiWeaponBox(player.inventory, world, x, y, z);
 		default:
 			return null;
 		}
@@ -41,18 +41,18 @@ public class GuiHandler implements IGuiHandler {
 	@Override
 	public Object getServerGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z) {
 		switch (guiId) {
-		case 0:
-			return new ContainerGun(player.inventory, world, x, y, z);
-		case 1:
-			return new ContainerAmmo(player.inventory, world, x, y, z);
-		case 2:
-			return new ContainerAmmoMan(player.inventory);
-		case 3:
-			return new ContainerMag(player.inventory, world, x, y, z);
-		case 4:
-			return new ContainerBullet(player.inventory, world, x, y, z);
-		case 5:
-			return new ContainerWeapon(player.inventory, world, x, y, z);
+		case gunBox:
+			return new ContainerGunBox(player.inventory, world, x, y, z);
+		case ammoBox:
+			return new ContainerAmmoBox(player.inventory, world, x, y, z);
+		case magazineFillerItem:
+			return new ContainerMagazineFiller(player.inventory);
+		case magazineBox:
+			return new ContainerMagazineBox(player.inventory, world, x, y, z);
+		case bulletBox:
+			return new ContainerBulletBox(player.inventory, world, x, y, z);
+		case weaponBox:
+			return new ContainerWeaponBox(player.inventory, world, x, y, z);
 		default:
 			return null;
 		}

@@ -4,13 +4,12 @@ import java.nio.charset.Charset;
 
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class MessageWeaponBoxSelection implements IMessage, IMessageHandler<MessageWeaponBoxSelection, IMessage> {
@@ -39,7 +38,7 @@ public class MessageWeaponBoxSelection implements IMessage, IMessageHandler<Mess
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void handle(EntityClientPlayerMP player) {
+	private void handle() {
 		GunCus.clientGUI_actualGunName = gunName;
 	}
 	
@@ -56,8 +55,7 @@ public class MessageWeaponBoxSelection implements IMessage, IMessageHandler<Mess
 			GunCus.logger.info("Received bulletImpact packet");
 		}
 		
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-		bulletImpactMessage.handle(player);
+		bulletImpactMessage.handle();
 		
 		return null;	// no response
 	}

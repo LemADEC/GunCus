@@ -6,10 +6,10 @@ import stuuupiiid.guncus.entity.EntityRocket;
 import stuuupiiid.guncus.item.ItemGun;
 import stuuupiiid.guncus.item.ItemRPG;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeShoot, IMessage> {
 	private float accuracy;
@@ -39,15 +39,15 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				int metadata = entityPlayer.inventory.getCurrentItem().getItemDamage();
 				
 				if ( gun.hasM320(metadata)
-				  && (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) ) {
+				  && (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.itemAmmoM320)) ) {
 					// m320 - 75m/s  => 3.75 blocks per tick
 					EntityGrenade grenade = new EntityGrenade(entityPlayer.worldObj, entityPlayer, 3.75F, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(grenade);
 				}
-			} else if ((entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
+			} else if ((entityPlayer.inventory.getCurrentItem().getItem() == GunCus.itemAttachment)
 					&& (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)) {
-				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.ammoM320)) {
+				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(GunCus.itemAmmoM320)) {
 					// m320 - 75m/s  => 3.75 blocks per tick
 					EntityGrenade grenade = new EntityGrenade(entityPlayer.worldObj, entityPlayer, 3.75F, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
@@ -55,10 +55,10 @@ public class MessageTubeShoot implements IMessage, IMessageHandler<MessageTubeSh
 				}
 			} else if (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) {
 				ItemRPG rpg = (ItemRPG) entityPlayer.inventory.getCurrentItem().getItem();
-				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(rpg.ammo)) {
+				if (entityPlayer.capabilities.isCreativeMode || entityPlayer.inventory.consumeInventoryItem(rpg.itemAmmo)) {
 					// rpg  - 115m/s => 5.75 blocks per tick
 					// smaw - 220m/s => 11 blocks per tick
-					float speed = (rpg == GunCus.rpg) ? 5.75F : 11.0F;
+					float speed = (rpg == GunCus.itemRPG) ? 5.75F : 11.0F;
 					EntityGrenade rocket = new EntityRocket(entityPlayer.worldObj, entityPlayer, speed, accuracy);
 					entityPlayer.worldObj.playSoundAtEntity(entityPlayer, "random.explode", 4.0F, 1.0F);
 					entityPlayer.worldObj.spawnEntityInWorld(rocket);

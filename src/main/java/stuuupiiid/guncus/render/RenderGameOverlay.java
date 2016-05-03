@@ -1,18 +1,20 @@
 package stuuupiiid.guncus.render;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Mouse;
 
@@ -93,7 +95,7 @@ public class RenderGameOverlay {
 		hasGunInHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun);
 		hasRPGinHand = (entityPlayer.inventory.getCurrentItem() != null) && (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG);
 		hasM320inHand = (entityPlayer.inventory.getCurrentItem() != null)
-				&& (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment) && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4);
+				&& (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.itemAttachment) && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4);
 		drawSight = hasGunInHand && Mouse.isButtonDown(1) && (client.gameSettings.thirdPersonView == 0) && (client.currentScreen == null);
 	}
 	
@@ -105,7 +107,7 @@ public class RenderGameOverlay {
 		}
 		EntityPlayer entityPlayer = client.thePlayer;
 		
-		ScaledResolution scale = new ScaledResolution(client, client.displayWidth,	client.displayHeight);
+		ScaledResolution scale = new ScaledResolution(client);
 		int scaledWidth = scale.getScaledWidth();
 		int scaledHeight = scale.getScaledHeight();
 		int xCenter = scaledWidth / 2;
@@ -119,7 +121,7 @@ public class RenderGameOverlay {
 			if (scopePart != null) {
 				// scope, always use originals
 				newZoom = scopePart.zoom + 0.1F;
-				sightTextureName = "guncus:textures/sights/" + scopePart.sight + ".png";
+				sightTextureName = "guncus:textures/sights/" + scopePart.unlocalizedName + ".png";
 			} else if (gun.usingDefault) {
 				// no scope, using default
 				sightTextureName = "guncus:textures/sights/default.png";
@@ -143,12 +145,14 @@ public class RenderGameOverlay {
 			}
 			
 			client.getTextureManager().bindTexture(new ResourceLocation(sightTextureName));
-			Tessellator tessellator = Tessellator.instance;
-			tessellator.startDrawingQuads();
-			tessellator.addVertexWithUV(xCenter - offset, scaledHeight, -90.0D, 0.0D, 1.0D);
-			tessellator.addVertexWithUV(xCenter + offset, scaledHeight, -90.0D, 1.0D, 1.0D);
-			tessellator.addVertexWithUV(xCenter + offset,         0.0D, -90.0D, 1.0D, 0.0D);
-			tessellator.addVertexWithUV(xCenter - offset,         0.0D, -90.0D, 0.0D, 0.0D);
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+			
+			worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+			worldRenderer.pos(xCenter - offset, scaledHeight, -90.0D).tex(0.0D, 1.0D).endVertex();
+			worldRenderer.pos(xCenter + offset, scaledHeight, -90.0D).tex(1.0D, 1.0D).endVertex();
+			worldRenderer.pos(xCenter + offset,         0.0D, -90.0D).tex(1.0D, 0.0D).endVertex();
+			worldRenderer.pos(xCenter - offset,         0.0D, -90.0D).tex(0.0D, 0.0D).endVertex();
 			tessellator.draw();
 		} else {
 			float newZoom = 1.0F;
@@ -172,12 +176,14 @@ public class RenderGameOverlay {
 		if ((hasGunInHand || hasRPGinHand || hasM320inHand) && (GunCus.hitmarker > 0) && (client.currentScreen == null)) {
 			GunCus.hitmarker -= 1;
 			client.getTextureManager().bindTexture(new ResourceLocation("guncus:textures/sights/hitmarker.png"));
-			Tessellator tessellator = Tessellator.instance;
-			tessellator.startDrawingQuads();
-			tessellator.addVertexWithUV(xCenter - offset, scaledHeight, -100.0D, 0.0D, 1.0D);
-			tessellator.addVertexWithUV(xCenter + offset, scaledHeight, -100.0D, 1.0D, 1.0D);
-			tessellator.addVertexWithUV(xCenter + offset,         0.0D, -100.0D, 1.0D, 0.0D);
-			tessellator.addVertexWithUV(xCenter - offset,         0.0D, -100.0D, 0.0D, 0.0D);
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer worldRenderer = tessellator.getWorldRenderer();
+			
+			worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+			worldRenderer.pos(xCenter - offset, scaledHeight, -100.0D).tex(0.0D, 1.0D).endVertex();
+			worldRenderer.pos(xCenter + offset, scaledHeight, -100.0D).tex(1.0D, 1.0D).endVertex();
+			worldRenderer.pos(xCenter + offset,         0.0D, -100.0D).tex(1.0D, 0.0D).endVertex();
+			worldRenderer.pos(xCenter - offset,         0.0D, -100.0D).tex(0.0D, 0.0D).endVertex();
 			tessellator.draw();
 		}
 		
@@ -190,11 +196,11 @@ public class RenderGameOverlay {
 		Minecraft mc = Minecraft.getMinecraft();
 		if ((hasGunInHand || hasRPGinHand || hasM320inHand) && GunCus.reloading) {
 			String text = "Reloading";
-			int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
+			int textX = (scaledWidth - mc.fontRendererObj.getStringWidth(text)) / 2;
 			float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / 95F));
 			int color = (colorGradient(progress, 0xFF, 0x00) << 16) + (colorGradient(progress, 0x40, 0xFF) << 8) + colorGradient(progress, 0x00, 0x00);
 			
-			mc.fontRenderer.drawString(text, textX, scaledHeight / 2 + 8, color, true);
+			mc.fontRendererObj.drawString(text, textX, scaledHeight / 2 + 8, color, true);
 		}
 		
 		// draw delay for long downtime
@@ -208,11 +214,11 @@ public class RenderGameOverlay {
 				startedShootTime = 0;
 			} else if (startedShootTime > 20) {
 				String text = ".............";
-				int textX = (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2;
+				int textX = (scaledWidth - mc.fontRendererObj.getStringWidth(text)) / 2;
 				float progress = Math.min(1.0F, Math.max(0.0F, 1.0F - GunCus.shootTime / (float) startedShootTime));
 				
-				mc.fontRenderer.drawString(text, textX, scaledHeight / 2 + 8, 0xFF0000, true);
-				mc.fontRenderer.drawString(text.substring(0, Math.round(text.length() * progress)), textX, scaledHeight / 2 + 8, 0x40FF00, true);
+				mc.fontRendererObj.drawString(text, textX, scaledHeight / 2 + 8, 0xFF0000, true);
+				mc.fontRendererObj.drawString(text.substring(0, Math.round(text.length() * progress)), textX, scaledHeight / 2 + 8, 0x40FF00, true);
 				
 				previousShootTime = GunCus.shootTime;
 			}

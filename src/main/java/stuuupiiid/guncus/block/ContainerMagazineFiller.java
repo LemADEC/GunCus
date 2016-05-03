@@ -1,7 +1,7 @@
 package stuuupiiid.guncus.block;
 
 import stuuupiiid.guncus.item.ItemBullet;
-import stuuupiiid.guncus.item.ItemMag;
+import stuuupiiid.guncus.item.ItemMagazine;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -9,10 +9,10 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class ContainerAmmoMan extends Container {
+public class ContainerMagazineFiller extends Container {
 	public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
 	
-	public ContainerAmmoMan(InventoryPlayer inventoryPlayer) {
+	public ContainerMagazineFiller(InventoryPlayer inventoryPlayer) {
 		addSlotToContainer(new Slot(craftMatrix, 0, 59, 35));
 		addSlotToContainer(new Slot(craftMatrix, 1, 101, 35));
 		
@@ -34,7 +34,7 @@ public class ContainerAmmoMan extends Container {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
-			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			ItemStack itemStackSlot = craftMatrix.removeStackFromSlot(slotIndex);
 			if (itemStackSlot != null) {
 				entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 			}
@@ -42,42 +42,42 @@ public class ContainerAmmoMan extends Container {
 	}
 	
 	public void fill() {
-		ItemStack itemStackMag = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack itemStackAmmo = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack itemStackMag = inventorySlots.get(0).getStack();
+		ItemStack itemStackAmmo = inventorySlots.get(1).getStack();
 		
-		if ( (itemStackMag != null) && (itemStackMag.getItem() instanceof ItemMag)
+		if ( (itemStackMag != null) && (itemStackMag.getItem() instanceof ItemMagazine)
 		  && (itemStackAmmo != null) && (itemStackAmmo.getItem() instanceof ItemBullet)
 		  && (itemStackMag.getItemDamage() > 0)) {
-			ItemMag itemMag = (ItemMag) itemStackMag.getItem();
-			int magBulletId = itemMag.bulletId;
+			ItemMagazine itemMag = (ItemMagazine) itemStackMag.getItem();
+			int magBulletId = itemMag.bulletIds[0];	// FIXME: add supports for varied bullets in magazine
 			ItemBullet ammoItemBullet = (ItemBullet) itemStackAmmo.getItem();
 			
-			if (magBulletId == ammoItemBullet.bulletId && itemMag.pack.equals(ammoItemBullet.pack)) {
+			if (magBulletId == ammoItemBullet.bulletId && itemMag.packName.equals(ammoItemBullet.packName)) {
 				int damage = itemStackMag.getItemDamage();
 				int size = itemStackAmmo.stackSize;
 				size--;
 				damage--;
 				
-				((Slot) inventorySlots.get(0)).putStack(new ItemStack(itemMag, 1, damage));
+				inventorySlots.get(0).putStack(new ItemStack(itemMag, 1, damage));
 				
 				if (size > 0) {
-					((Slot) inventorySlots.get(1)).putStack(new ItemStack(ammoItemBullet, size));
+					inventorySlots.get(1).putStack(new ItemStack(ammoItemBullet, size));
 				} else {
-					((Slot) inventorySlots.get(1)).putStack(null);
+					inventorySlots.get(1).putStack(null);
 				}
 			}
 		}
 	}
 	
 	public void empty() {
-		ItemStack itemStackMag = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack itemStackAmmo = ((Slot) inventorySlots.get(1)).getStack();
+		ItemStack itemStackMag = inventorySlots.get(0).getStack();
+		ItemStack itemStackAmmo = inventorySlots.get(1).getStack();
 		
-		if ( (itemStackMag != null) && (itemStackMag.getItem() instanceof ItemMag)
+		if ( (itemStackMag != null) && (itemStackMag.getItem() instanceof ItemMagazine)
 		  && ((itemStackAmmo == null) || (itemStackAmmo.getItem() instanceof ItemBullet))
 		  && (itemStackMag.getItemDamage() < itemStackMag.getMaxDamage()) ) {
-			ItemMag itemMag = (ItemMag) itemStackMag.getItem();
-			int magBulletId = itemMag.bulletId;
+			ItemMagazine itemMag = (ItemMagazine) itemStackMag.getItem();
+			int magBulletId = itemMag.bulletIds[0];	// FIXME: add supports for varied bullets in magazine
 			int ammoBulletId = magBulletId;
 			ItemBullet ammoItemBullet = null;
 			
@@ -86,7 +86,7 @@ public class ContainerAmmoMan extends Container {
 				ammoBulletId = ammoItemBullet.bulletId;
 			}
 			
-			if (magBulletId == ammoBulletId && (ammoItemBullet == null || ammoItemBullet.pack.equals(itemMag.pack))) {
+			if (magBulletId == ammoBulletId && (ammoItemBullet == null || ammoItemBullet.packName.equals(itemMag.packName))) {
 				int damage = itemStackMag.getItemDamage();
 				int size = 0;
 				if (itemStackAmmo != null) {
@@ -97,20 +97,20 @@ public class ContainerAmmoMan extends Container {
 				damage++;
 				
 				if (ammoItemBullet == null) {
-					ammoItemBullet = ItemBullet.bullets.get(itemMag.pack).get(magBulletId);
+					ammoItemBullet = ItemBullet.bullets.get(itemMag.packName).get(magBulletId);
 				}
 				
-				((Slot) inventorySlots.get(0)).putStack(new ItemStack(itemMag, 1, damage));
+				inventorySlots.get(0).putStack(new ItemStack(itemMag, 1, damage));
 				
 				if (size > 0) {
-					((Slot) inventorySlots.get(1)).putStack(new ItemStack(ammoItemBullet, size));
+					inventorySlots.get(1).putStack(new ItemStack(ammoItemBullet, size));
 				}
 			}
 		}
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
+	public boolean canInteractWith(EntityPlayer entityPlayer) {
 		return true;
 	}
 	

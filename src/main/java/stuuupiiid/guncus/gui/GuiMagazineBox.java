@@ -1,7 +1,6 @@
 package stuuupiiid.guncus.gui;
 
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -9,19 +8,16 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import stuuupiiid.guncus.block.ContainerMag;
+import stuuupiiid.guncus.block.ContainerMagazineBox;
 import stuuupiiid.guncus.item.ItemGun;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class GuiMagBlock extends GuiContainer {
-	public GuiMagBlock(InventoryPlayer inventory, World world, int x, int y, int z) {
+public class GuiMagazineBox extends AbstractGuiContainer {
+	public GuiMagazineBox(InventoryPlayer inventory, World world, int x, int y, int z) {
 		
-		super(new ContainerMag(inventory, world, x, y, z));
+		super(new ContainerMagazineBox(inventory, world, x, y, z));
 		
 		// default size
 		xSize = 176;
@@ -41,8 +37,8 @@ public class GuiMagBlock extends GuiContainer {
 		this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 0x404040);
 		// draw buttons tooltip
 		for (Object guibutton : buttonList) {
-			if (((GuiButton) guibutton).func_146115_a()) {
-				((GuiButton) guibutton).func_146111_b(mouseX - guiLeft, mouseY - guiTop);
+			if (((GuiButton) guibutton).isMouseOver()) {
+				((GuiButton) guibutton).drawButtonForegroundLayer(mouseX - guiLeft, mouseY - guiTop);
 				break;
 			}
 		}
@@ -68,12 +64,10 @@ public class GuiMagBlock extends GuiContainer {
 		ItemGun itemGun = getGun();
 		if (itemGun != null) {
 			itemStack = new ItemStack(Items.iron_ingot, itemGun.magIronIngots);
-			GuiContainer.itemRender.renderItemAndEffectIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 59, guiTop + 14 + 40);
-			GuiContainer.itemRender.renderItemOverlayIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 59, guiTop + 14 + 40);
+			drawItemStack(itemStack, guiLeft + 59, guiTop + 14 + 40, "xxx");
 						
 			itemStack = new ItemStack(itemGun.mag);
-			GuiContainer.itemRender.renderItemAndEffectIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 101, guiTop + 14 + 40);
-			GuiContainer.itemRender.renderItemOverlayIntoGUI(fontRendererObj, mc.renderEngine, itemStack, guiLeft + 101, guiTop + 14 + 40);
+			drawItemStack(itemStack, guiLeft + 101, guiTop + 14 + 40, "xxx");
 		}
 	}
 	
@@ -86,24 +80,9 @@ public class GuiMagBlock extends GuiContainer {
 		}
 		return null;
 	}
-
+	
 	@Override
 	protected void actionPerformed(GuiButton button) {
-		PacketHandler.sendToServer_GUIaction(GuiHandler.magBlock, button.id);
-	}
-	
-	@SideOnly(Side.CLIENT)
-	class ButtonWithTooltip extends GuiButton {
-		private String helpString = "";
-	
-		public ButtonWithTooltip(int id, int xPosition, int yPosition, int width, int height, String displayString, String helpString) {
-			super(id, xPosition, yPosition, width, height, displayString);
-			this.helpString = helpString;
-		}
-	
-		@Override
-		public void func_146111_b(int mouseX, int mouseY) {
-			drawCreativeTabHoveringText(I18n.format(helpString, new Object[0]), mouseX, mouseY);
-		}
+		PacketHandler.sendToServer_GUIaction(GuiHandler.magazineBox, button.id);
 	}
 }

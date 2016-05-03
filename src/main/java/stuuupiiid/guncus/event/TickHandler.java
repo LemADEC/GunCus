@@ -3,24 +3,24 @@ package stuuupiiid.guncus.event;
 import java.lang.reflect.Field;
 import java.util.Random;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.ScopePart;
-import stuuupiiid.guncus.item.ItemAttachment;
+import stuuupiiid.guncus.item.ItemAttachmentPart;
 import stuuupiiid.guncus.item.ItemGun;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.network.MessageClientValidation;
@@ -112,7 +112,7 @@ public class TickHandler {
 		if ( (entityPlayer.inventory.getCurrentItem() != null)
 		  && ((entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun )
 		  || ( entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG )
-		  || ( entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachment) ) ) {
+		  || ( entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachmentPart) ) ) {
 			noSwing(10000);
 		}
 		
@@ -123,7 +123,7 @@ public class TickHandler {
 					GunCus.shootTime -= 1;
 				}
 			} else if (!(entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemGun)) {
-				if ((!GunCus.reloading) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachment)) {
+				if ((!GunCus.reloading) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemRPG) || (entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemAttachmentPart)) {
 					GunCus.shootTime -= 1;
 				}
 			} else {
@@ -137,13 +137,13 @@ public class TickHandler {
 						if (gun.hasStraightPullBolt(entityPlayer.inventory.getCurrentItem().getItemDamage())) {
 							GunCus.shootTime -= 1;
 							if (GunCus.shootTime <= 0) {
-								Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:click")));
+								Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:click")));
 							}
 						}
 					} else {
 						GunCus.shootTime -= 1;
 						if (GunCus.shootTime <= 0) {
-							Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:click")));
+							Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:click")));
 						}
 					}
 				} else {

@@ -1,11 +1,5 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
@@ -17,9 +11,12 @@ import stuuupiiid.guncus.network.PacketHandler;
 import mcheli.aircraft.MCH_EntityAircraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityBubbleFX;
 import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,13 +25,20 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class EntityProjectile extends EntityArrow implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	protected static float fDegToRadFactor = ((float)Math.PI) / 180.0F;
@@ -66,11 +70,8 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 	public int state = STATE_FLYING;
 	protected int stateTicks = 0;
 	protected boolean isFirstHit = true;
-	protected int blockX = -1;	// field_145791_d
-	protected int blockY = -1;	// field_145792_e
-	protected int blockZ = -1;	// field_145789_f
-	protected Block blockCollided = null;	// field field_145790_g
-	protected int blockCollidedMetadata = -1;	// field inData
+	protected BlockPos blockpos = null;	// xTile, yTile, zTile
+	protected IBlockState blockStateCollided = null;	// field field_145790_g
 	protected int brokenCount = 0;
 	protected int entityHitID = -1;
 	
@@ -99,7 +100,6 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		posZ = entityPlayer.posZ - motionZ * 0.16F;
 		setLocationAndAngles(posX, posY, posZ, rotationYaw, rotationPitch);
 		
-		yOffset = 0.0F;
 		if (accuracy < 100) {
 			int accuracyInt = Math.round(accuracy);
 			int accX1 = rand.nextInt(101 - accuracyInt);
@@ -119,6 +119,11 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		previousZ = posZ;
 	}
 	
+	@Override
+	public float getEyeHeight() {
+		return 0.0F;
+	}
+	
 	@SideOnly(Side.CLIENT)
 	public void onClientUpdate() {
 		double deltaX = posX - previousX;
@@ -129,9 +134,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			
 			// Check render distance
 			Minecraft mc = Minecraft.getMinecraft();
-			double dX = mc.renderViewEntity.posX - posX;
-			double dY = mc.renderViewEntity.posY - posY;
-			double dZ = mc.renderViewEntity.posZ - posZ;
+			double dX = mc.getRenderViewEntity().posX - posX;
+			double dY = mc.getRenderViewEntity().posY - posY;
+			double dZ = mc.getRenderViewEntity().posZ - posZ;
 			double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 			if (dX * dX + dY * dY + dZ * dZ < range * range) {
 				// build orientation vector
@@ -152,11 +157,12 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 					double z = tailZ - deltaZ * factor;
 					
 					// Directly spawn bubbles as per RenderGlobal.doSpawnParticle
-					if (worldObj.getBlock(
+					if (worldObj.getBlockState(new BlockPos(
 							(int)Math.floor(x),
 							(int)Math.floor(y),
-							(int)Math.floor(z)) instanceof BlockLiquid) {
-						mc.effectRenderer.addEffect(new EntityBubbleFX(
+							(int)Math.floor(z))) instanceof BlockLiquid) {
+						mc.effectRenderer.addEffect(new EntityBubbleFX.Factory().getEntityFX(
+								0,
 								worldObj, x, y, z,
 								0.2D * deltaX + (rand.nextDouble() * 2.0D - 1.0D) * width,
 								0.2D * deltaY - rand.nextDouble() * 0.2D,
@@ -180,9 +186,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		
 		// Check render distance
 		Minecraft mc = Minecraft.getMinecraft();
-		double dX = mc.renderViewEntity.posX - posX;
-		double dY = mc.renderViewEntity.posY - posY;
-		double dZ = mc.renderViewEntity.posZ - posZ;
+		double dX = mc.getRenderViewEntity().posX - posX;
+		double dY = mc.getRenderViewEntity().posY - posY;
+		double dZ = mc.getRenderViewEntity().posZ - posZ;
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
 			
@@ -194,7 +200,8 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			float particleSpeed = 0.0F;
 			int particleQuantity = isBroken ? 20 : 3;
 			for (int index = 0; index < particleQuantity; index++) {
-				mc.effectRenderer.addEffect(new EntityDiggingFX(
+				mc.effectRenderer.addEffect(new EntityDiggingFX.Factory().getEntityFX(
+						0,
 						worldObj,
 						hitX + rand.nextGaussian() * particleMotionX,
 						hitY + rand.nextGaussian() * particleMotionY,
@@ -202,7 +209,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
-						blockCollided, blockCollidedMetadata).applyRenderColor(blockCollidedMetadata));
+						new int[] {Block.getStateId(blockStateCollided)}));
 			}
 		}
 	}
@@ -255,10 +262,9 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		
 		if (state == STATE_BLOCKHIT) {
 			// get collided block
-			Block block = worldObj.getBlock(blockX, blockY, blockZ);
-			int blockMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
+			IBlockState blockState = worldObj.getBlockState(blockpos);
 			
-			if (block == blockCollided && blockMetadata == blockCollidedMetadata) {
+			if (blockState == blockStateCollided) {
 				stateTicks++;
 				
 				if (stateTicks >= MAX_BLOCKHIT_DURATION_TICKS) {
@@ -295,18 +301,18 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			}
 			
 			// Check for block collision
-			Vec3 vecCurrent = Vec3.createVectorHelper(posX, posY, posZ);
-			Vec3 vecNextTick = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
-			MovingObjectPosition mopCollision = worldObj.func_147447_a(vecCurrent, vecNextTick, false, true, false); // rayTraceBlocks_do_do
-			vecCurrent = Vec3.createVectorHelper(posX, posY, posZ);
-			vecNextTick = Vec3.createVectorHelper(posX + motionX, posY + motionY, posZ + motionZ);
+			Vec3 vecCurrent = new Vec3(posX, posY, posZ);
+			Vec3 vecNextTick = new Vec3(posX + motionX, posY + motionY, posZ + motionZ);
+			MovingObjectPosition mopCollision = worldObj.rayTraceBlocks(vecCurrent, vecNextTick, false, true, false);
+			vecCurrent = new Vec3(posX, posY, posZ);
+			vecNextTick = new Vec3(posX + motionX, posY + motionY, posZ + motionZ);
 			
 			if (mopCollision != null) {
-				vecNextTick = Vec3.createVectorHelper(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
+				vecNextTick = new Vec3(mopCollision.hitVec.xCoord, mopCollision.hitVec.yCoord, mopCollision.hitVec.zCoord);
 			}
 			
 			// Check for entity collision
-			List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(this, boundingBox.addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
+			List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().addCoord(motionX, motionY, motionZ).expand(1.0D, 1.0D, 1.0D));
 			double distance2Closest = 0.0D;
 			for (Entity entityInRange : list) {
 				// Check for no-PvP attributes
@@ -342,7 +348,7 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 				}
 				
 				float tolerance = 0.1F;
-				AxisAlignedBB axisalignedbb1 = entityInRange.boundingBox.expand(tolerance, tolerance, tolerance);
+				AxisAlignedBB axisalignedbb1 = entityInRange.getEntityBoundingBox().expand(tolerance, tolerance, tolerance);
 				MovingObjectPosition mopEntityInRange = axisalignedbb1.calculateIntercept(vecCurrent, vecNextTick);
 				
 				if (mopEntityInRange != null) {
@@ -363,18 +369,14 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 					onServerEntityCollision(mopCollision.entityHit, mopCollision.hitVec);
 				} else if (mopCollision.entityHit == null) {
 					// (block collision) Resolve block breaking first
-					blockX = mopCollision.blockX;
-					blockY = mopCollision.blockY;
-					blockZ = mopCollision.blockZ;
-					blockCollided = worldObj.getBlock(blockX, blockY, blockZ);
-					blockCollidedMetadata = worldObj.getBlockMetadata(blockX, blockY, blockZ);
+					blockpos = mopCollision.getBlockPos();
+					blockStateCollided = worldObj.getBlockState(blockpos);
 					// break weak blocks and pass through them 
-					if (GunCus.enableBlockDamage && WEAK_BLOCKS.contains(blockCollided)) {
+					if (GunCus.enableBlockDamage && WEAK_BLOCKS.contains(blockStateCollided)) {
 						if (!worldObj.isRemote) {
 							boolean isCanceled = true;
 							if (shootingEntity instanceof EntityPlayerMP) {
-								BlockEvent.BreakEvent event = ForgeHooks.onBlockBreakEvent(worldObj, GameType.SURVIVAL, (EntityPlayerMP)shootingEntity, blockX, blockY, blockZ);
-								isCanceled = event.isCanceled();
+								isCanceled = -1 == ForgeHooks.onBlockBreakEvent(worldObj, GameType.SURVIVAL, (EntityPlayerMP)shootingEntity, blockpos);
 							}
 							if (isCanceled) {
 								// (protected block) Bouncing
@@ -392,12 +394,12 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 								posX = mopCollision.hitVec.xCoord - motionX;
 								posY = mopCollision.hitVec.yCoord - motionY;
 								posZ = mopCollision.hitVec.zCoord - motionZ;
-								worldObj.setBlockToAir(blockX, blockY, blockZ);
+								worldObj.setBlockToAir(blockpos);
 								onServerBlockCollision(true, mopCollision.hitVec);
 								PacketHandler.sendToClient_syncEntity(this);
 							}
 						}
-					} else if (!blockCollided.isAir(worldObj, blockX, blockY, blockZ)) {
+					} else if (!blockStateCollided.getBlock().isAir(worldObj, blockpos)) {
 						onServerBlockCollision(false, mopCollision.hitVec);
 					}
 				}
@@ -445,31 +447,36 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			}
 			
 			setPosition(posX, posY, posZ);
-			func_145775_I();	// doBlockCollisions();
+			doBlockCollisions();
 		}
 	}
-
+	
 	@Optional.Method(modid = "mcheli")
 	protected static Object MCHeli_getRootEntity(Entity entity) {
 		return MCH_EntityAircraft.getAircraft_RiddenOrControl(entity);		// as of 0.10.7
 	}
-
+	
 	@Override
-	protected void func_145775_I() {	// doBlockCollisions() but ignore the weak blocks
-		int i = MathHelper.floor_double(boundingBox.minX + 0.001D);
-		int j = MathHelper.floor_double(boundingBox.minY + 0.001D);
-		int k = MathHelper.floor_double(boundingBox.minZ + 0.001D);
-		int l = MathHelper.floor_double(boundingBox.maxX - 0.001D);
-		int i1 = MathHelper.floor_double(boundingBox.maxY - 0.001D);
-		int j1 = MathHelper.floor_double(boundingBox.maxZ - 0.001D);
+	protected void doBlockCollisions() {	// doBlockCollisions() but ignore the weak blocks
+		BlockPos blockposMin = new BlockPos(getEntityBoundingBox().minX + 0.001D, getEntityBoundingBox().minY + 0.001D, getEntityBoundingBox().minZ + 0.001D);
+		BlockPos blockposMax = new BlockPos(getEntityBoundingBox().maxX - 0.001D, getEntityBoundingBox().maxY - 0.001D, getEntityBoundingBox().maxZ - 0.001D);
 		
-		if (worldObj.checkChunksExist(i, j, k, l, i1, j1)) {
-			for (int k1 = i; k1 <= l; k1++) {
-				for (int l1 = j; l1 <= i1; l1++) {
-					for (int i2 = k; i2 <= j1; i2++) {
-						Block block = worldObj.getBlock(k1, l1, i2);
-						if (!WEAK_BLOCKS.contains(block)) {
-							block.onEntityCollidedWithBlock(worldObj, k1, l1, i2, this);
+		if (this.worldObj.isAreaLoaded(blockposMin, blockposMax)) {
+			for (int i = blockposMin.getX(); i <= blockposMax.getX(); ++i) {
+				for (int j = blockposMin.getY(); j <= blockposMax.getY(); ++j) {
+					for (int k = blockposMin.getZ(); k <= blockposMax.getZ(); ++k) {
+						BlockPos blockposToCheck = new BlockPos(i, j, k);
+						IBlockState iblockstate = this.worldObj.getBlockState(blockposToCheck);
+						
+						if (!WEAK_BLOCKS.contains(iblockstate)) {
+							try {
+								iblockstate.getBlock().onEntityCollidedWithBlock(worldObj, blockposToCheck, iblockstate, this);
+							} catch (Throwable throwable) {
+								CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Colliding entity with block");
+								CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being collided with");
+								CrashReportCategory.addBlockInfo(crashreportcategory, blockposToCheck, iblockstate);
+								throw new ReportedException(crashreport);
+							}
 						}
 					}
 				}
@@ -493,11 +500,11 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		nbttagcompound.setByte("state", (byte)state);
 		nbttagcompound.setInteger("stateTicks", stateTicks);
 		nbttagcompound.setBoolean("isFirstHit", isFirstHit);
-		nbttagcompound.setInteger("blockX", blockX);
-		nbttagcompound.setInteger("blockY", blockY);
-		nbttagcompound.setInteger("blockZ", blockZ);
-		nbttagcompound.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
-		nbttagcompound.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
+		nbttagcompound.setInteger("blockX", blockpos == null ? -1 : blockpos.getX());
+		nbttagcompound.setInteger("blockY", blockpos == null ? -1 : blockpos.getY());
+		nbttagcompound.setInteger("blockZ", blockpos == null ? -1 : blockpos.getZ());
+		nbttagcompound.setInteger("blockCollided", blockStateCollided == null ? 0 : Block.getIdFromBlock(blockStateCollided.getBlock()));
+		nbttagcompound.setByte("blockCollidedMetadata", blockStateCollided == null ? 0 : (byte)blockStateCollided.getBlock().getMetaFromState(blockStateCollided));
 	}
 	
 	@Override
@@ -505,11 +512,15 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		state = nbttagcompound.getByte("state");
 		stateTicks = nbttagcompound.getInteger("stateTicks");
 		isFirstHit = nbttagcompound.getBoolean("isFirstHit");
-		blockX = nbttagcompound.getInteger("blockX");
-		blockY = nbttagcompound.getInteger("blockY");
-		blockZ = nbttagcompound.getInteger("blockZ");
-		blockCollided = Block.getBlockById(nbttagcompound.getInteger("blockCollided"));
-		blockCollidedMetadata = nbttagcompound.getByte("blockCollidedMetadata");
+		int blockPosX = nbttagcompound.getInteger("blockX");
+		int blockPosY = nbttagcompound.getInteger("blockY");
+		int blockPosZ = nbttagcompound.getInteger("blockZ");
+		if (blockPosX != -1 && blockPosY != -1 && blockPosZ != -1) {
+			blockpos = new BlockPos(blockPosX, blockPosY, blockPosZ);
+		} else {
+			blockpos = null;
+		}
+		blockStateCollided = Block.getBlockById(nbttagcompound.getInteger("blockCollided")).getStateFromMeta(nbttagcompound.getByte("blockCollidedMetadata"));
 	}
 	
 	// Keep memory allocated
@@ -526,11 +537,11 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		syncDataCompound_cachedWrite.setDouble("motionZ", motionZ);
 		if (state == STATE_BLOCKHIT || brokenCount > 0) {
 			syncDataCompound_cachedWrite.setInteger("brokenCount", brokenCount);
-			syncDataCompound_cachedWrite.setInteger("blockX", blockX);
-			syncDataCompound_cachedWrite.setInteger("blockY", blockY);
-			syncDataCompound_cachedWrite.setInteger("blockZ", blockZ);
-			syncDataCompound_cachedWrite.setInteger("blockCollided", Block.getIdFromBlock(blockCollided));
-			syncDataCompound_cachedWrite.setByte("blockCollidedMetadata", (byte)blockCollidedMetadata);
+			syncDataCompound_cachedWrite.setInteger("blockX", blockpos.getX());
+			syncDataCompound_cachedWrite.setInteger("blockY", blockpos.getY());
+			syncDataCompound_cachedWrite.setInteger("blockZ", blockpos.getZ());
+			syncDataCompound_cachedWrite.setInteger("blockCollided", Block.getIdFromBlock(blockStateCollided.getBlock()));
+			syncDataCompound_cachedWrite.setByte("blockCollidedMetadata", (byte)blockStateCollided.getBlock().getMetaFromState(blockStateCollided));
 		}
 		if (state == STATE_ENTITYHIT) {
 			syncDataCompound_cachedWrite.setInteger("entityHitID", entityHitID);
@@ -552,11 +563,8 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 		if (syncDataCompound.hasKey("brokenCount")) {
 			int previousBrokenCount = brokenCount;
 			brokenCount = syncDataCompound.getInteger("brokenCount");
-			blockX = syncDataCompound.getInteger("blockX");
-			blockY = syncDataCompound.getInteger("blockY");
-			blockZ = syncDataCompound.getInteger("blockZ");
-			blockCollided = Block.getBlockById(syncDataCompound.getInteger("blockCollided"));
-			blockCollidedMetadata = syncDataCompound.getByte("blockCollidedMetadata");
+			blockpos = new BlockPos(syncDataCompound.getInteger("blockX"), syncDataCompound.getInteger("blockY"), syncDataCompound.getInteger("blockZ"));
+			blockStateCollided = Block.getBlockById(syncDataCompound.getInteger("blockCollided")).getStateFromMeta(syncDataCompound.getByte("blockCollidedMetadata"));
 			if (previousState != state || previousBrokenCount != brokenCount) {
 				onClientBlockHit(previousBrokenCount != brokenCount);
 			}

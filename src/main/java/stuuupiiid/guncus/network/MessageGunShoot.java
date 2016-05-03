@@ -6,10 +6,10 @@ import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
 public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoot, IMessage> {
 	private float playerAccuracy;
@@ -87,7 +87,7 @@ public class MessageGunShoot implements IMessage, IMessageHandler<MessageGunShoo
 				}
 				ItemBullet itemBullet;
 				if (gun.mag != null) {
-					itemBullet = ItemBullet.bullets.get(gun.pack).get(gun.mag.bulletId);
+					itemBullet = ItemBullet.bullets.get(gun.pack).get(gun.mag.bulletIds[0]);	// FIXME: add support for more than 1 bullet type per magazine
 				} else {
 					itemBullet = ItemBullet.bullets.get(gun.pack).get(bulletId);
 				}

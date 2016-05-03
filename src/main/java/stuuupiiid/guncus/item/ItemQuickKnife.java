@@ -3,16 +3,16 @@ package stuuupiiid.guncus.item;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.GunCusKeyBindings;
 import stuuupiiid.guncus.network.PacketHandler;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemKnife extends GunCusItem {
-	public ItemKnife() {
-		super("guncus:quickKnife", "quickKnife");
+public class ItemQuickKnife extends ItemBase {
+	public ItemQuickKnife(String unlocalizedName) {
+		super(unlocalizedName);
 		setFull3D();
 	}
 	

@@ -1,12 +1,10 @@
 package stuuupiiid.guncus.data;
 
-public class ScopePart extends CustomizationPart {
-	public String sight;
+public class ScopePart extends ModifierPart {
 	public float zoom;
-
-	public ScopePart(String sight, float zoom, int id) {
-		super("scp", id);
-		this.sight = sight;
+	
+	public ScopePart(final int id, final String unlocalizedName, final float zoom) {
+		super(id, unlocalizedName);
 		this.zoom = zoom;
 	}
 }

@@ -1,11 +1,9 @@
 package stuuupiiid.guncus;
 
 import net.minecraft.client.settings.KeyBinding;
-
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.input.Keyboard;
-
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
 
 public class GunCusKeyBindings {
 	
@@ -19,6 +17,6 @@ public class GunCusKeyBindings {
 		ClientRegistry.registerKeyBinding(SelectFire);
 		ClientRegistry.registerKeyBinding(SpecialAmmo);
 		ClientRegistry.registerKeyBinding(QuickKnife);
-		FMLCommonHandler.instance().bus().register(this);
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 }

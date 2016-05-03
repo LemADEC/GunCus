@@ -14,7 +14,7 @@ public class GunCusCreativeTab extends CreativeTabs {
 	@Override
 	public Item getTabIconItem() {
 		if (item == null) {
-			return GunCus.quickKnife;
+			return GunCus.itemQuickKnife;
 		} else {
 			return item;
 		}

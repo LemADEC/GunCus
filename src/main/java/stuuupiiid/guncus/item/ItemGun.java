@@ -1,37 +1,31 @@
 package stuuupiiid.guncus.item;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.GunCusKeyBindings;
-import stuuupiiid.guncus.data.CustomizationPart;
+import stuuupiiid.guncus.data.ModifierPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.network.PacketHandler;
-import stuuupiiid.guncus.render.RenderGun;
 
-public class ItemGun extends Item {
+public class ItemGun extends ItemBase {
 	public int delay = 3;
 	
 	public int shootType = 2;
@@ -41,11 +35,7 @@ public class ItemGun extends Item {
 	protected int reloadBurst = 0;
 	protected boolean shot = false;
 	public String iconBasePath;
-	public IIcon icon;
-	public IIcon[] iconsAttachment;
-	public IIcon[] iconsBarrel;
-	public IIcon iconScope;
-	public ItemMag mag = null;
+	public ItemMagazine mag = null;
 	public int magIronIngots;
 	public int gunIronIngots;
 	public int gunRedstone;
@@ -66,28 +56,26 @@ public class ItemGun extends Item {
 	public String soundSilenced;
 	public int damage;
 	
-	public ItemGun(String parPack, boolean parIsOfficial, String parName, String parIconBasePath,
+	public ItemGun(String packName, boolean isOfficial, String gunName, String parIconBasePath,
 			int parDamage, int parShootType, int parDelay,
 			int magSize, int parMagIronIngots, int parGunIronIngots, int parGunRedstone,
 			int[] parAttach, int[] parBarrel, int[] parScopes,
-			boolean usingMag, int[] parBullets) {
-		super();
+			boolean usingMagazine, int[] parBullets) {
+		super(packName + "." + gunName);
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			MinecraftForgeClient.registerItemRenderer(this, new RenderGun());
+			// TODO MinecraftForgeClient.registerItemRenderer(this, new RenderGun());
 		}
 		damage = parDamage;
 		setHasSubtypes(true);
-		maxStackSize = 1;
 		setFull3D();
 		shootType = parShootType;
 		actualShootType = parShootType;
 		delay = parDelay;
 		setMaxDamage(0);
-		setUnlocalizedName((parPack + "." + parName).replace(" ", "_"));
 		iconBasePath = parIconBasePath;
 		gunIronIngots = parGunIronIngots;
 		gunRedstone = parGunRedstone;
-		pack = parPack;
+		pack = packName;
 		recoilModifier = 1.0D;
 		soundModifier = 1.0D;
 		attachments = parAttach;
@@ -107,19 +95,17 @@ public class ItemGun extends Item {
 		
 		actualBullet = 0;
 		
-		if (usingMag) {
-			mag = new ItemMag(parPack, parName, parIconBasePath, magSize, parBullets[0]);
+		if (usingMagazine) {
+			mag = new ItemMagazine(packName, gunName, magSize, parBullets);
 			magIronIngots = parMagIronIngots;
 		} else {
 			bullets = parBullets;
 			mag = null;
 		}
 		
-		GameRegistry.registerItem(this, getUnlocalizedName());
-		
 		// Add to gun list
 		GunCus.guns.put(this.getUnlocalizedName(), this);
-		GunCus.logger.info("Added gun " + parName);
+		GunCus.logger.info("Added gun " + gunName);
 	}
 	
 	public ItemGun setZoom(float zoom) {
@@ -199,13 +185,13 @@ public class ItemGun extends Item {
 		  && Mouse.isButtonDown(0)
 		  && (client.currentScreen == null)
 		  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
-		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode)
+		  && (entityPlayer.inventory.hasItem(GunCus.itemAmmoM320) || entityPlayer.capabilities.isCreativeMode)
 		  && isInTubingMode) {
 			GunCus.shootTime += 120;
 			GunCus.reloading = true;
 			PacketHandler.sendToServer_playerAction_tube();
-			recoilTube(entityPlayer);
-			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube")));
+			applyTubeRecoil(entityPlayer);
+			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:reload_tube")));
 		}
 		if ( (GunCus.shootTime <= 0)
 		  && (Mouse.isButtonDown(0))
@@ -233,7 +219,7 @@ public class ItemGun extends Item {
 			PacketHandler.sendToServer_playerAction_shoot(entityPlayer, mag, bullets, actualBullet);
 			ItemBullet bulletItem;
 			if (mag != null) {
-				bulletItem = ItemBullet.bullets.get(pack).get(mag.bulletId);
+				bulletItem = ItemBullet.bullets.get(pack).get(mag.bulletIds[0]);	// FIXME: add support for varied bullets in magazine
 			} else {
 				bulletItem = ItemBullet.bullets.get(pack).get(bullets[actualBullet]);
 			}
@@ -402,11 +388,6 @@ public class ItemGun extends Item {
 		entityPlayer.rotationYaw -= strength * (itemRand.nextBoolean() ? -1.0F : +1.0F) * (0.8F + 0.4F * entityPlayer.worldObj.rand.nextFloat());
 	}
 	
-	private void recoilTube(EntityPlayer entityPlayer) {
-		entityPlayer.rotationPitch -= 1.25F + itemRand.nextFloat() * 0.5F;
-		entityPlayer.rotationYaw += itemRand.nextFloat() * 4.0F - 2.0F;
-	}
-	
 	@Override
 	public void getSubItems(Item item, CreativeTabs creativeTabs, List list) {
 		for (int barrelIndex = 0; barrelIndex <= barrels.length; barrelIndex++) {
@@ -418,7 +399,7 @@ public class ItemGun extends Item {
 				for (int scopeIndex = 0; scopeIndex <= scopes.length; scopeIndex++) {
 					int scopeId = (scopeIndex == 0)? 0 : scopes[scopeIndex - 1];
 					
-					int metadata = scopeId + (GunCus.scope.maxId + 1) * (attachmentId + (GunCus.attachment.maxId + 1) * barrelId);
+					int metadata = scopeId + (GunCus.itemScope.idMax + 1) * (attachmentId + (GunCus.itemAttachment.idMax + 1) * barrelId);
 					list.add(new ItemStack(item, 1, metadata));
 				}
 			}
@@ -438,7 +419,7 @@ public class ItemGun extends Item {
 	
 	
 	private boolean hasBarrel(int barrelId, int metadata) {
-		CustomizationPart customizationPart = getBarrelPart(metadata);
+		ModifierPart customizationPart = getBarrelPart(metadata);
 		if (customizationPart != null) {
 			return customizationPart.id == barrelId; 
 		} else {
@@ -473,7 +454,7 @@ public class ItemGun extends Item {
 	
 	
 	private boolean hasAttachment(int attachmentId, int metadata) {
-		CustomizationPart customizationPart = getAttachmentPart(metadata);
+		ModifierPart customizationPart = getAttachmentPart(metadata);
 		if (customizationPart != null) {
 			return customizationPart.id == attachmentId; 
 		} else {
@@ -552,38 +533,38 @@ public class ItemGun extends Item {
 	
 	// get the scope part or null
 	public ScopePart getScopePart(final int metadata) {
-		int scopeId = metadata % (GunCus.scope.maxId + 1);
+		int scopeId = metadata % (GunCus.itemScope.idMax + 1);
 		
 		if (scopeId == 0) {
 			return null;
 		}
 		
 		// return the global index of that scope
-		return (ScopePart) GunCus.scope.getCustomizationPart(scopeId);
+		return (ScopePart) GunCus.itemScope.getModifierPart(scopeId);
 	}
 	
 	// get the attachment part or null
-	public CustomizationPart getAttachmentPart(final int metadata) {
-		int attachmentId = (metadata / (GunCus.scope.maxId + 1)) % (GunCus.attachment.maxId + 1);
+	public ModifierPart getAttachmentPart(final int metadata) {
+		int attachmentId = (metadata / (GunCus.itemScope.idMax + 1)) % (GunCus.itemAttachment.idMax + 1);
 		
 		if (attachmentId == 0) {
 			return null;
 		}
 		
 		// return the global index of that scope
-		return GunCus.attachment.getCustomizationPart(attachmentId);
+		return GunCus.itemAttachment.getModifierPart(attachmentId);
 	}
 	
 	// get the barrel part or null
-	public CustomizationPart getBarrelPart(final int metadata) {
-		int barrelId = (metadata / (GunCus.scope.maxId + 1) / (GunCus.attachment.maxId + 1)) % (GunCus.barrel.maxId + 1);
+	public ModifierPart getBarrelPart(final int metadata) {
+		int barrelId = (metadata / (GunCus.itemScope.idMax + 1) / (GunCus.itemAttachment.idMax + 1)) % (GunCus.itemBarrel.idMax + 1);
 		
 		if (barrelId == 0) {
 			return null;
 		}
 		
 		// return the global index of that scope
-		return GunCus.barrel.getCustomizationPart(barrelId);
+		return GunCus.itemBarrel.getModifierPart(barrelId);
 	}
 	
 	public boolean canUseBipod(EntityPlayer entityPlayer) {
@@ -597,70 +578,28 @@ public class ItemGun extends Item {
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister par1IconRegister) {
-		String iconToRegisterName = iconBasePath + "gun";
-		icon = par1IconRegister.registerIcon(iconToRegisterName);
-		if (icon == null) {
-			GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-		}
-		
-		if (scopes.length > 0) {
-			iconToRegisterName = iconBasePath + "scp";
-			iconScope = par1IconRegister.registerIcon(iconToRegisterName);
-			if (iconScope == null) {
-				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-			}
-		}
-		
-		iconsAttachment = new IIcon[GunCus.attachment.maxId + 1];
-		for (int attachmentId : attachments) {
-			iconToRegisterName = iconBasePath + GunCus.attachment.getCustomizationPart(attachmentId).iconName;
-			iconsAttachment[attachmentId] = par1IconRegister.registerIcon(iconToRegisterName);
-			if (iconsAttachment[attachmentId] == null) {
-				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-			}
-		}
-		
-		iconsBarrel = new IIcon[GunCus.barrel.maxId + 1];
-		for (int barrelId : barrels) {
-			iconToRegisterName = iconBasePath + GunCus.barrel.getCustomizationPart(barrelId).iconName;
-			iconsBarrel[barrelId] = par1IconRegister.registerIcon(iconToRegisterName);
-			if (iconsBarrel[barrelId] == null) {
-				GunCus.logger.error("Failed to register icon '" + iconToRegisterName + "'");
-			}
-		}
-	}
-		
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconFromDamage(int metadata) {
-		return icon;
-	}
-	
-	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		int metadata = itemStack.getItemDamage();
 		
-		CustomizationPart customizationPart;
+		ModifierPart customizationPart;
 		ItemStack itemStackPart;
 		customizationPart = getBarrelPart(metadata);
 		if (customizationPart != null) {
-			itemStackPart = new ItemStack(GunCus.barrel, 1, customizationPart.id);
+			itemStackPart = new ItemStack(GunCus.itemBarrel, 1, customizationPart.id);
 			list.add(itemStackPart.getDisplayName());
 		} else if (barrels.length > 0) {
 			list.add("-");
 		}
 		customizationPart = getAttachmentPart(metadata);
 		if (customizationPart != null) {
-			itemStackPart = new ItemStack(GunCus.attachment, 1, customizationPart.id);
+			itemStackPart = new ItemStack(GunCus.itemAttachment, 1, customizationPart.id);
 			list.add(itemStackPart.getDisplayName());
 		} else if (attachments.length > 0) {
 			list.add("-");
 		}
 		customizationPart = getScopePart(metadata);
 		if (customizationPart != null) {
-			itemStackPart = new ItemStack(GunCus.scope, 1, customizationPart.id);
+			itemStackPart = new ItemStack(GunCus.itemScope, 1, customizationPart.id);
 			list.add(itemStackPart.getDisplayName());
 		} else if (scopes.length > 0) {
 			list.add("-");

@@ -1,19 +1,18 @@
 package stuuupiiid.guncus.gui;
 
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
-import stuuupiiid.guncus.block.ContainerAmmoMan;
+import stuuupiiid.guncus.block.ContainerMagazineFiller;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class GuiMagItem extends GuiContainer {
-	public GuiMagItem(InventoryPlayer inventory) {
-		super(new ContainerAmmoMan(inventory));
+public class GuiMagazineFillerItem extends AbstractGuiContainer {
+	public GuiMagazineFillerItem(InventoryPlayer inventory) {
+		super(new ContainerMagazineFiller(inventory));
 	}
 	
 	@Override
@@ -38,6 +37,6 @@ public class GuiMagItem extends GuiContainer {
 	
 	@Override
 	protected void actionPerformed(GuiButton button) {
-		PacketHandler.sendToServer_GUIaction(GuiHandler.magItem, button.id);
+		PacketHandler.sendToServer_GUIaction(GuiHandler.magazineFillerItem, button.id);
 	}
 }

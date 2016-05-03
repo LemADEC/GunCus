@@ -10,9 +10,10 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-public class ContainerWeapon extends Container {
+public class ContainerWeaponBox extends Container {
 	public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
 	private World worldObj;
 	public int posX;
@@ -20,7 +21,7 @@ public class ContainerWeapon extends Container {
 	public int posZ;
 	public String actualGunName = null;
 	
-	public ContainerWeapon(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+	public ContainerWeaponBox(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
 		this.worldObj = world;
 		this.posX = x;
 		this.posY = y;
@@ -56,13 +57,13 @@ public class ContainerWeapon extends Container {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
-			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			ItemStack itemStackSlot = craftMatrix.removeStackFromSlot(slotIndex);
 			if (itemStackSlot != null) {
 				if (entityPlayer != null) {
 					entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 				} else {
 					EntityItem entityItem = new EntityItem(worldObj, posX, posY + 0.5F, posZ, itemStackSlot);
-					entityItem.delayBeforeCanPickup = 10;
+					entityItem.setDefaultPickupDelay();
 					worldObj.spawnEntityInWorld(entityItem);
 				}
 			}
@@ -71,8 +72,8 @@ public class ContainerWeapon extends Container {
 	
 	public void create() {
 		if (GunCus.instance.guns.size() > 0) {
-			ItemStack itemStackIronIngotsSlot = ((Slot) inventorySlots.get(0)).getStack();
-			ItemStack itemStackRedstoneSlot = ((Slot) inventorySlots.get(1)).getStack();
+			ItemStack itemStackIronIngotsSlot = inventorySlots.get(0).getStack();
+			ItemStack itemStackRedstoneSlot = inventorySlots.get(1).getStack();
 			
 			ItemGun itemGun = GunCus.instance.guns.get(actualGunName);
 			if (itemGun != null) {
@@ -80,12 +81,12 @@ public class ContainerWeapon extends Container {
 						|| ((itemGun.gunIronIngots <= 0)
 				  && (((itemStackRedstoneSlot != null) && (itemStackRedstoneSlot.stackSize >= itemGun.gunRedstone) && (itemStackRedstoneSlot.getItem() == Items.redstone))
 						|| (itemGun.gunRedstone <= 0)))) {
-					((Slot) inventorySlots.get(2)).putStack(new ItemStack(itemGun, 1, 0));
+					inventorySlots.get(2).putStack(new ItemStack(itemGun, 1, 0));
 					if (itemStackIronIngotsSlot != null) {
-						((Slot) inventorySlots.get(0)).decrStackSize(itemGun.gunIronIngots);
+						inventorySlots.get(0).decrStackSize(itemGun.gunIronIngots);
 					}
 					if (itemStackRedstoneSlot != null) {
-						((Slot) inventorySlots.get(1)).decrStackSize(itemGun.gunRedstone);
+						inventorySlots.get(1).decrStackSize(itemGun.gunRedstone);
 					}
 				}
 			}
@@ -93,8 +94,8 @@ public class ContainerWeapon extends Container {
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockWeapon;
+	public boolean canInteractWith(EntityPlayer entityPlayer) {
+		return worldObj.getBlockState(new BlockPos(posX, posY, posZ)).getBlock() == GunCus.blockWeaponBox;
 	}
 	
 	@Override

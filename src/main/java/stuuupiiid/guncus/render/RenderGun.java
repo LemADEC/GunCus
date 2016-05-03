@@ -1,16 +1,16 @@
 package stuuupiiid.guncus.render;
 
 import org.lwjgl.opengl.GL11;
-import stuuupiiid.guncus.data.CustomizationPart;
+import stuuupiiid.guncus.data.ModifierPart;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.client.IItemRenderer;
+// import net.minecraft.util.IIcon;
+// import net.minecraftforge.client.IItemRenderer;
 
-public class RenderGun implements IItemRenderer {
+public class RenderGun  {} /*implements IItemRenderer {
 	private static RenderItem renderItem = new RenderItem();
 	
 	@Override
@@ -40,7 +40,7 @@ public class RenderGun implements IItemRenderer {
 			
 			renderItem.renderIcon(0, 0, icon, 16, 16);
 			
-			CustomizationPart customizationPart = gun.getBarrelPart(itemStack.getItemDamage());
+			ModifierPart customizationPart = gun.getBarrelPart(itemStack.getItemDamage());
 			if (customizationPart != null && gun.iconsBarrel[customizationPart.id] != null) {
 				renderItem.renderIcon(0, 0, gun.iconsBarrel[customizationPart.id], 16, 16);
 			}
@@ -60,3 +60,4 @@ public class RenderGun implements IItemRenderer {
 		}
 	}
 }
+/**/

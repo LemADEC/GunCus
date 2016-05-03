@@ -1,14 +1,5 @@
 package stuuupiiid.guncus;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,39 +14,43 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import stuuupiiid.guncus.block.BlockAmmo;
-import stuuupiiid.guncus.block.BlockBullet;
-import stuuupiiid.guncus.block.BlockGun;
-import stuuupiiid.guncus.block.BlockMag;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import stuuupiiid.guncus.block.BlockAmmoBox;
+import stuuupiiid.guncus.block.BlockBulletBox;
+import stuuupiiid.guncus.block.BlockGunBox;
+import stuuupiiid.guncus.block.BlockMagazineBox;
 import stuuupiiid.guncus.block.BlockMine;
-import stuuupiiid.guncus.block.BlockWeapon;
-import stuuupiiid.guncus.data.CustomizationPart;
+import stuuupiiid.guncus.block.BlockWeaponBox;
+import stuuupiiid.guncus.data.ModifierPart;
 import stuuupiiid.guncus.data.ScopePart;
 import stuuupiiid.guncus.entity.EntityGrenade;
 import stuuupiiid.guncus.entity.EntityBullet;
 import stuuupiiid.guncus.entity.EntityRocket;
 import stuuupiiid.guncus.event.TickHandler;
 import stuuupiiid.guncus.gui.GuiHandler;
-import stuuupiiid.guncus.item.GunCusItem;
-import stuuupiiid.guncus.item.ItemAttachment;
+import stuuupiiid.guncus.item.ItemBase;
+import stuuupiiid.guncus.item.ItemAttachmentPart;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemGun;
-import stuuupiiid.guncus.item.ItemKnife;
-import stuuupiiid.guncus.item.ItemMagFiller;
-import stuuupiiid.guncus.item.ItemMetadata;
-import stuuupiiid.guncus.item.ItemMine;
+import stuuupiiid.guncus.item.ItemQuickKnife;
+import stuuupiiid.guncus.item.ItemMagazineFiller;
+import stuuupiiid.guncus.item.ItemModifierPart;
 import stuuupiiid.guncus.item.ItemRPG;
 import stuuupiiid.guncus.item.ItemScope;
 import stuuupiiid.guncus.network.PacketHandler;
@@ -66,6 +61,7 @@ import stuuupiiid.guncus.network.PacketHandler;
 @Mod(modid = GunCus.MODID, name = "Gun Customization", version = GunCus.VERSION, dependencies = "")
 public class GunCus {
 	public static final String MODID = "GunCus";
+	public static final String ASSETID = MODID.toLowerCase();
 	public static final String VERSION = "@version@";
 	
 	@SidedProxy(clientSide = "stuuupiiid.guncus.ClientProxy", serverSide = "stuuupiiid.guncus.CommonProxy")
@@ -100,32 +96,32 @@ public class GunCus {
 	
 	public GuiHandler guiHandler = null;
 	private boolean enableExplosives;
-	public static Item quickKnife;
+	public static ItemQuickKnife itemQuickKnife;
 	public static CreativeTabs creativeTabModifications;
 	public static CreativeTabs creativeTabBullets;
-	public static Block blockWeapon;
-	public static Block blockMag;
-	public static Block blockBullet;
-	public static Block blockAmmo;
-	public static Block blockGun;
-	public static Item magFill;
-	public static Item part;
-	public static ItemScope scope;
-	public static ItemMetadata barrel;
-	public static ItemMetadata attachment;
-	public static Item ammoM320;
+	public static BlockWeaponBox blockWeaponBox;
+	public static BlockMagazineBox blockMagazineBox;
+	public static BlockBulletBox blockBulletBox;
+	public static BlockAmmoBox blockAmmoBox;
+	public static BlockGunBox blockGunBox;
+	public static ItemMagazineFiller itemMagazineFiller;
+	public static ItemBase itemBoxpart;
+	public static ItemScope itemScope;
+	public static ItemModifierPart itemBarrel;
+	public static ItemAttachmentPart itemAttachment;
+	public static ItemBase itemAmmoM320;
+	
 	public static int knifeTime = 0;
 	public static int knifeCooldown = 30;
 	public static float knifeDamage = 20.0F;
 	public static float knifeRange = 2.0F;
 	
 	// explosives extension
-	public static Item rpgm;
-	public static Item rpg;
-	public static Item smawm;
-	public static Item smaw;
-	public static Block mineBlock;
-	public static Item mineItem;
+	public static ItemBase itemRPGmagazine;
+	public static ItemRPG itemRPG;
+	public static ItemBase itemSMAWmagazine;
+	public static ItemRPG itemSMAW;
+	public static BlockMine blockMine;
 	
 	// logging options
 	public static boolean logging_enableNetwork = false;
@@ -139,7 +135,7 @@ public class GunCus {
 		logger = event.getModLog();
 		instance = this;
 		
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (event.getSide().isClient()) {
 			GunCusResourceLoader myResourceLoader = new GunCusResourceLoader();
 			Field field = null;
 			try {
@@ -173,7 +169,7 @@ public class GunCus {
 		
 		creativeTabModifications = new GunCusCreativeTab("GunCus.modifications", null);
 		creativeTabBullets = new GunCusCreativeTab("GunCus.bullets", null);
-		quickKnife = new ItemKnife();
+		itemQuickKnife = new ItemQuickKnife("quickKnife");
 		
 		enableBlockDamage = config.get("Gun Customization", "enableBlockDamage", true, "Disable this to prevent block damage from explosives and bullet damage to glass.").getBoolean(true);
 		enableExplosives = config.get("Gun Customization", "enableExplosives", true, "Disable this to remove the explosive parts of Gun Customization.").getBoolean(true);
@@ -186,64 +182,59 @@ public class GunCus {
 		
 		config.save();
 		
-		blockWeapon = new BlockWeapon();
-		blockMag = new BlockMag();
-		blockBullet = new BlockBullet();
-		blockAmmo = new BlockAmmo();
-		blockGun = new BlockGun();
+		blockWeaponBox = new BlockWeaponBox();
+		blockMagazineBox = new BlockMagazineBox();
+		blockBulletBox = new BlockBulletBox();
+		blockAmmoBox = new BlockAmmoBox();
+		blockGunBox = new BlockGunBox();
 		
-		magFill = new ItemMagFiller();
-		part = new GunCusItem("guncus:boxpart", "boxpart").setMaxStackSize(16);
+		itemMagazineFiller = new ItemMagazineFiller("magazineFiller");
+		itemBoxpart = (ItemBase) new ItemBase("boxpart").setMaxStackSize(16);
 		
-		scope = new ItemScope("scope", "scope",
+		itemScope = new ItemScope("scope",
 				new ScopePart[] {
-					new ScopePart("reflex", 1.0F, 1),
-					new ScopePart("kobra", 1.0F, 2),
-					new ScopePart("holographic", 1.0F, 3),
-					new ScopePart("pka-s", 1.0F, 4),
-					new ScopePart("m145", 3.4F, 5),
-					new ScopePart("pk-a", 3.4F, 6),
-					new ScopePart("acog", 4.0F, 7),
-					new ScopePart("pso-1", 4.0F, 8),
-					new ScopePart("rifle", 6.0F, 9),
-					new ScopePart("pks-07", 7.0F, 10),
-					new ScopePart("rifle", 8.0F, 11),
-					new ScopePart("ballistic", 12.0F, 12),
-					new ScopePart("ballistic", 20.0F, 13) });
-		barrel = new ItemMetadata("barrel", "barrel",
-				new CustomizationPart[] {
-					new CustomizationPart("sln", 1),
-					new CustomizationPart("hbl", 2),
-					new CustomizationPart("rbl", 3),
-					new CustomizationPart("pbl", 4) });
-		attachment = new ItemAttachment("attachment", "attachment",
-				new CustomizationPart[] {
-					new CustomizationPart("spb", 1),
-					new CustomizationPart("bpd", 2),
-					new CustomizationPart("grp", 3),
-					new CustomizationPart("320", 4),
-					new CustomizationPart("sss", 5),
-					new CustomizationPart("img", 6),
-					new CustomizationPart("ptr", 7) });
+					new ScopePart( 1, "reflex", 1.0F),
+					new ScopePart( 2, "kobra", 1.0F),
+					new ScopePart( 3, "holographic", 1.0F),
+					new ScopePart( 4, "pka-s", 1.0F),
+					new ScopePart( 5, "m145", 3.4F),
+					new ScopePart( 6, "pk-a", 3.4F),
+					new ScopePart( 7, "acog", 4.0F),
+					new ScopePart( 8, "pso-1", 4.0F),
+					new ScopePart( 9, "rifle6", 6.0F),
+					new ScopePart(10, "pks-07", 7.0F),
+					new ScopePart(11, "rifle8", 8.0F),
+					new ScopePart(12, "ballistic12", 12.0F),
+					new ScopePart(13, "ballistic20", 20.0F) });
+		itemBarrel = new ItemModifierPart("barrel",
+				new ModifierPart[] {
+					new ModifierPart(1, "silencer"),
+					new ModifierPart(2, "heavy"),
+					new ModifierPart(3, "rifled"),
+					new ModifierPart(4, "polygonal") });
+		itemAttachment = new ItemAttachmentPart("attachment",
+				new ModifierPart[] {
+					new ModifierPart(1, "straightPullBolt"),
+					new ModifierPart(2, "bipod"),
+					new ModifierPart(3, "foregrip"),
+					new ModifierPart(4, "m320"),
+					new ModifierPart(5, "strongSpiralSpring"),
+					new ModifierPart(6, "improvedGrip"),
+					new ModifierPart(7, "laserPointer") });
 		
-		ammoM320 = new GunCusItem("guncus:ammo_M320", "ammo_M320").setMaxStackSize(8);
+		itemAmmoM320 = (ItemBase) new ItemBase("ammo_M320").setMaxStackSize(8);
 		
 		if (enableExplosives) {
-			mineBlock = new BlockMine();
-			GameRegistry.registerBlock(mineBlock, mineBlock.getUnlocalizedName());
+			blockMine = new BlockMine();
 			
-			mineItem = new ItemMine();
+			itemRPGmagazine = new ItemBase("explosive.ammo_rpg");
+			itemRPG = new ItemRPG("explosive.rpg", itemRPGmagazine);
 			
-			rpgm = new GunCusItem("guncus:explosive/ammo_rpg", "explosive.ammo_rpg");
-			smawm = new GunCusItem("guncus:explosive/ammo_smaw", "explosive.ammo_smaw");
-			
-			rpg = new ItemRPG("guncus:explosive/rpg", "explosive.rpg", rpgm);
-			smaw = new ItemRPG("guncus:explosive/smaw", "explosive.smaw", smawm);
-			
-		}		
+			itemSMAWmagazine = new ItemBase("explosive.ammo_smaw");
+			itemSMAW = new ItemRPG("explosive.smaw", itemSMAWmagazine);
+		}
 		
 		TickHandler tickHandler = new TickHandler();
-		FMLCommonHandler.instance().bus().register(tickHandler);
 		MinecraftForge.EVENT_BUS.register(tickHandler);
 		
 		File path = new File(event.getModConfigurationDirectory().getParentFile().getAbsolutePath() + "/GunCus");
@@ -255,13 +246,13 @@ public class GunCus {
 		}
 		
 		loadGunPacks(path);
+		
+		commonProxy.onForgePreInit();
 	}
 	
 	@Mod.EventHandler
 	public void onFMLInitialization(FMLInitializationEvent event) {
 		PacketHandler.init();
-		
-		commonProxy.initRenderingRegistry();
 		
 		EntityRegistry.registerModEntity(EntityBullet.class, "guncus.bullet", 200, this, 80, 1, true);
 		EntityRegistry.registerModEntity(EntityGrenade.class, "guncus.grenade", 201, this, 80, 1, true);
@@ -270,191 +261,185 @@ public class GunCus {
 		guiHandler = new GuiHandler();
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, guiHandler);
 		
-		GameRegistry.registerBlock(blockGun, blockGun.getUnlocalizedName());
-		GameRegistry.registerBlock(blockAmmo, blockAmmo.getUnlocalizedName());
-		GameRegistry.registerBlock(blockMag, blockMag.getUnlocalizedName());
-		GameRegistry.registerBlock(blockBullet, blockBullet.getUnlocalizedName());
-		GameRegistry.registerBlock(blockWeapon, blockWeapon.getUnlocalizedName());
-		
-		GameRegistry.addShapedRecipe(new ItemStack(part),
+		GameRegistry.addShapedRecipe(new ItemStack(itemBoxpart),
 				"ABA", "BCB", "ABA",
 					'A', new ItemStack(Items.iron_ingot),
 					'B', new ItemStack(Items.redstone),
 					'C', new ItemStack(Items.gold_ingot) );
-		GameRegistry.addShapedRecipe(new ItemStack(magFill),
+		GameRegistry.addShapedRecipe(new ItemStack(itemMagazineFiller),
 				"ABA", "BAB", "ABA",
 					'B', new ItemStack(Items.iron_ingot),
 					'A', new ItemStack(Items.redstone) );
-		GameRegistry.addShapedRecipe(new ItemStack(blockAmmo),
+		GameRegistry.addShapedRecipe(new ItemStack(blockAmmoBox),
 				"BBB", "ABA", "BCB",
-					'A', new ItemStack(part),
+					'A', new ItemStack(itemBoxpart),
 					'B', new ItemStack(Items.iron_ingot),
 					'C', new ItemStack(Blocks.iron_block) );
-		GameRegistry.addShapedRecipe(new ItemStack(blockBullet),
+		GameRegistry.addShapedRecipe(new ItemStack(blockBulletBox),
 				"BAB", "AAA", "BCB",
-					'A', new ItemStack(part),
+					'A', new ItemStack(itemBoxpart),
 					'B', new ItemStack(Items.iron_ingot),
 					'C', new ItemStack(Blocks.iron_block) );
-		GameRegistry.addShapedRecipe(new ItemStack(blockMag),
+		GameRegistry.addShapedRecipe(new ItemStack(blockMagazineBox),
 				"BAB", "ABA", "BCB",
-					'A', new ItemStack(part),
+					'A', new ItemStack(itemBoxpart),
 					'B', new ItemStack(Items.iron_ingot),
 					'C', new ItemStack(Blocks.iron_block) );
-		GameRegistry.addShapedRecipe(new ItemStack(blockGun),
+		GameRegistry.addShapedRecipe(new ItemStack(blockGunBox),
 				"BAB", "AAA", "BAB",
-					'A', new ItemStack(part),
+					'A', new ItemStack(itemBoxpart),
 					'B', new ItemStack(Items.iron_ingot) );
-		GameRegistry.addShapedRecipe(new ItemStack(blockWeapon),
+		GameRegistry.addShapedRecipe(new ItemStack(blockWeaponBox),
 				"ABA", "ABA", "BCB",
-					'A', new ItemStack(part),
+					'A', new ItemStack(itemBoxpart),
 					'B', new ItemStack(Items.iron_ingot),
 					'C', new ItemStack(Blocks.iron_block) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(scope, 1, 0),
+				new ItemStack(itemScope, 1, 0),
 				" IG", "IRI",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(scope, 1, 1),
+				new ItemStack(itemScope, 1, 1),
 				"IG ", "IRI",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 2),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 2),
 				" I ", "GRG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 3),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 3),
 				"I I", "GRG", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 4),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 4),
 				" I ", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 5),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 5),
 				"I I", "GDG", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 6),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 6),
 				"I I", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 7),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 7),
 				"I I", "GDG", " II",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 8),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 8),
 				"III", "GDG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 9),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 9),
 				"I I", "D8G", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1),
-					'8', new ItemStack(scope, 1, 7) );
+					'8', new ItemStack(itemScope, 1, 7) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(scope, 1, 10),
+				new ItemStack(itemScope, 1, 10),
 				"D9G", " I ",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1),
-					'9', new ItemStack(scope, 1, 8) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 11),
+					'9', new ItemStack(itemScope, 1, 8) );
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 11),
 				"GIG", "DDD", "III",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(scope, 1, 12),
+		GameRegistry.addShapedRecipe(new ItemStack(itemScope, 1, 12),
 				" I ", "DBG", "I I",
 					'G', new ItemStack(Blocks.glass_pane, 1),
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1),
-					'B', new ItemStack(scope, 1, 11) );
+					'B', new ItemStack(itemScope, 1, 11) );
 		
 		GameRegistry.addShapedRecipe(
-				new ItemStack(ammoM320),
+				new ItemStack(itemAmmoM320),
 				"GI ", "IGI", " IG",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'G', new ItemStack(Items.gunpowder, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 0),
+		GameRegistry.addShapedRecipe(new ItemStack(itemAttachment, 1, 0),
 				"I  ", " I ", "I I",
 					'I', new ItemStack(Items.iron_ingot, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 1),
+		GameRegistry.addShapedRecipe(new ItemStack(itemAttachment, 1, 1),
 				" I ", "I I", "I I",
 					'I', new ItemStack(Items.iron_ingot, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(attachment, 1, 2),
+		GameRegistry.addShapedRecipe(new ItemStack(itemAttachment, 1, 2),
 				"II ", " I ", " II",
 					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(attachment, 1, 3),
+				new ItemStack(itemAttachment, 1, 3),
 				" II", "IRR", "I I",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(attachment, 1, 4),
+				new ItemStack(itemAttachment, 1, 4),
 				"I  ", "IGI", "  I",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'G', new ItemStack(Items.gold_ingot, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(attachment, 1, 5),
+				new ItemStack(itemAttachment, 1, 5),
 				" L ", "LGL", " L ",
 					'L', new ItemStack(Items.leather, 1),
-					'G', new ItemStack(attachment, 1, 2) );
+					'G', new ItemStack(itemAttachment, 1, 2) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(attachment, 1, 6),
+				new ItemStack(itemAttachment, 1, 6),
 				"II ", "RRI", "II ",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'R', new ItemStack(Items.redstone, 1) );
 
 		GameRegistry.addShapedRecipe(
-				new ItemStack(barrel, 1, 0),
+				new ItemStack(itemBarrel, 1, 0),
 				"SI ", "ISI", " IS",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'S', new ItemStack(Items.slime_ball, 1) );
-		GameRegistry.addShapedRecipe(new ItemStack(barrel, 1, 1),
+		GameRegistry.addShapedRecipe(new ItemStack(itemBarrel, 1, 1),
 				"II ", "II ", "  I",
 					'I', new ItemStack(Items.iron_ingot, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(barrel, 1, 2),
+				new ItemStack(itemBarrel, 1, 2),
 				"GI ", "IGI", " IG",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'G', new ItemStack(Items.gold_ingot, 1) );
 		GameRegistry.addShapedRecipe(
-				new ItemStack(barrel, 1, 3),
+				new ItemStack(itemBarrel, 1, 3),
 				"II ", "IDI", " II",
 					'I', new ItemStack(Items.iron_ingot, 1),
 					'D', new ItemStack(Items.diamond, 1) );
 		
 		if (enableExplosives) {
 			GameRegistry.addRecipe(
-					new ItemStack(rpg, 1),
+					new ItemStack(itemRPG, 1),
 					"IIR", "IWR", "RRW",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 						Character.valueOf('W'), new ItemStack(Blocks.planks),
 						Character.valueOf('R'), new ItemStack(Items.redstone) );
 			GameRegistry.addRecipe(
-					new ItemStack(smaw, 1),
+					new ItemStack(itemSMAW, 1),
 					"RI ", "IRI", " IR",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 						Character.valueOf('R'), new ItemStack(Items.redstone) );
 			
 			GameRegistry.addRecipe(
-					new ItemStack(rpgm, 2),
+					new ItemStack(itemRPGmagazine, 2),
 					"II ", "IG ", "  G",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 						Character.valueOf('G'), new ItemStack(Items.gunpowder) );
 			GameRegistry.addRecipe(
-					new ItemStack(smawm, 2),
+					new ItemStack(itemSMAWmagazine, 2),
 					"G  ", " GI", " II",
 						Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 						Character.valueOf('G'), new ItemStack(Items.gunpowder) );
@@ -829,9 +814,9 @@ public class GunCus {
 			} else {
 				iconName = pack + ":bullets/" + iconName;
 			}
-
+			
 			if (!pack.equalsIgnoreCase("template")) {
-				ItemBullet bullet = new ItemBullet(pack, name, bulletId, iconName, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
+				ItemBullet bullet = new ItemBullet(pack, name, bulletId, texture, gunpowder, ironIngot, stackOnCreate, damageModifier)
 					.setSplit(split)
 					.setGravityModifier(gravityModifier)
 					.setAccuracyModifiers(spray, playerInaccuracyMultiplier)
@@ -1105,8 +1090,8 @@ public class GunCus {
 					if (!soundSilenced.trim().isEmpty()) {
 						if (soundSilenced.contains(":")) {
 							gun.setSilencedSound(soundSilenced);
-					    } else {
-					    	gun.setSilencedSound(pack  + ":" + soundSilenced);
+						} else {
+							gun.setSilencedSound(pack  + ":" + soundSilenced);
 						}
 					}
 					else {
@@ -1127,6 +1112,29 @@ public class GunCus {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
 			sender.addChatMessage(new ChatComponentText(line));
+		}
+	}
+	
+	// add tooltip information with text formating and line splitting
+	// will ensure it fits on minimum screen width
+	public static void addTooltip(List list, String tooltip) {
+		tooltip = tooltip.replace("§", "" + (char)167).replace("\\n", "\n").replace("|", "\n");
+		
+		String[] split = tooltip.split("\n");
+		for (String line : split) {
+			String lineRemaining = line;
+			while (lineRemaining.length() > 38) {
+				int index = lineRemaining.substring(0, 38).lastIndexOf(' ');
+				if (index == -1) {
+					list.add(lineRemaining);
+					lineRemaining = "";
+				} else {
+					list.add(lineRemaining.substring(0, index));
+					lineRemaining = lineRemaining.substring(index + 1);
+				}
+			}
+			
+			list.add(lineRemaining);
 		}
 	}
 }

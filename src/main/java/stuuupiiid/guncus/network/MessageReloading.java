@@ -3,14 +3,13 @@ package stuuupiiid.guncus.network;
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class MessageReloading implements IMessage, IMessageHandler<MessageReloading, IMessage> {
@@ -28,10 +27,10 @@ public class MessageReloading implements IMessage, IMessageHandler<MessageReload
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void handle(EntityClientPlayerMP player) {
+	private void handle() {
 		GunCus.reloading = true;
 		GunCus.shootTime += 90;
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload")));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:reload")));
 	}
 	
 	@Override
@@ -47,8 +46,7 @@ public class MessageReloading implements IMessage, IMessageHandler<MessageReload
 			GunCus.logger.info("Received reloading packet");
 		}
 		
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-		reloadingMessage.handle(player);
+		reloadingMessage.handle();
 		
 		return null;	// no response
 	}

@@ -1,26 +1,25 @@
 package stuuupiiid.guncus.item;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import org.lwjgl.input.Mouse;
 
 import stuuupiiid.guncus.GunCus;
-import stuuupiiid.guncus.data.CustomizationPart;
+import stuuupiiid.guncus.data.ModifierPart;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class ItemAttachment extends ItemMetadata {
-	public ItemAttachment(String unlocalized, String iconName, CustomizationPart[] metadatas) {
-		super(unlocalized, iconName, metadatas);
+public class ItemAttachmentPart extends ItemModifierPart {
+	public ItemAttachmentPart(String unlocalizedName, ModifierPart[] modifierParts) {
+		super(unlocalizedName, modifierParts);
 	}
 	
 	@Override
@@ -36,25 +35,18 @@ public class ItemAttachment extends ItemMetadata {
 		EntityPlayer entityPlayer = client.thePlayer;
 		if ( (entityPlayer != null)
 		  && (entityPlayer.inventory.getCurrentItem() != null)
-		  && (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.attachment)
+		  && (entityPlayer.inventory.getCurrentItem().getItem() == GunCus.itemAttachment)
 		  && (entityPlayer.inventory.getCurrentItem().getItemDamage() == 4)
 		  && (GunCus.shootTime <= 0)
 		  && (Mouse.isButtonDown(0))
 		  && (client.currentScreen == null)
 		  && (GunCus.holdFireAfterClosingGUIcounter <= 0)
-		  && (entityPlayer.inventory.hasItem(GunCus.ammoM320) || entityPlayer.capabilities.isCreativeMode) ) {
+		  && (entityPlayer.inventory.hasItem(GunCus.itemAmmoM320) || entityPlayer.capabilities.isCreativeMode) ) {
 			GunCus.shootTime += 95;
 			GunCus.reloading = true;
 			PacketHandler.sendToServer_playerAction_tube();
-			recoilTube(entityPlayer);
-			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147673_a(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource
+			applyTubeRecoil(entityPlayer);
+			Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.create(new ResourceLocation("guncus:reload_tube"))); // FIXME: pre-load the sound resource
 		}
-	}
-	
-	private void recoilTube(EntityPlayer entityPlayer) {
-		float strength = 1.5F;
-		
-		entityPlayer.rotationPitch -= strength;
-		entityPlayer.rotationYaw -= (Item.itemRand.nextBoolean() ? strength / 2.0F : -strength / 2.0F);
 	}
 }

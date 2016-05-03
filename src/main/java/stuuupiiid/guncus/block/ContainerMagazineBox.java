@@ -10,16 +10,17 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-public class ContainerMag extends Container {
+public class ContainerMagazineBox extends Container {
 	public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
 	private World worldObj;
 	public int posX;
 	public int posY;
 	public int posZ;
 	
-	public ContainerMag(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
+	public ContainerMagazineBox(InventoryPlayer inventoryPlayer, World world, int x, int y, int z) {
 		this.worldObj = world;
 		this.posX = x;
 		this.posY = y;
@@ -47,13 +48,13 @@ public class ContainerMag extends Container {
 			return;
 		}
 		for (int slotIndex = 0; slotIndex < 9; slotIndex++) {
-			ItemStack itemStackSlot = craftMatrix.getStackInSlotOnClosing(slotIndex);
+			ItemStack itemStackSlot = craftMatrix.removeStackFromSlot(slotIndex);
 			if (itemStackSlot != null) {
 				if (entityPlayer != null) {
 					entityPlayer.entityDropItem(itemStackSlot, 0.5F);
 				} else {
 					EntityItem entityItem = new EntityItem(worldObj, posX, posY + 0.5F, posZ, itemStackSlot);
-					entityItem.delayBeforeCanPickup = 10;
+					entityItem.setDefaultPickupDelay();
 					worldObj.spawnEntityInWorld(entityItem);
 				}
 			}
@@ -61,9 +62,9 @@ public class ContainerMag extends Container {
 	}
 	
 	public void create() {
-		ItemStack down = ((Slot) inventorySlots.get(0)).getStack();
-		ItemStack left = ((Slot) inventorySlots.get(1)).getStack();
-		ItemStack right = ((Slot) inventorySlots.get(2)).getStack();
+		ItemStack down = inventorySlots.get(0).getStack();
+		ItemStack left = inventorySlots.get(1).getStack();
+		ItemStack right = inventorySlots.get(2).getStack();
 		
 		ItemGun gun = null;
 		int ingotsRequired = 0;
@@ -80,13 +81,13 @@ public class ContainerMag extends Container {
 			
 			stackSize -= ingotsRequired;
 			
-			((Slot) inventorySlots.get(1)).putStack(new ItemStack(Items.iron_ingot, stackSize));
-			((Slot) inventorySlots.get(2)).putStack(new ItemStack(gun.mag, 1, gun.mag.getMaxDamage()));
+			inventorySlots.get(1).putStack(new ItemStack(Items.iron_ingot, stackSize));
+			inventorySlots.get(2).putStack(new ItemStack(gun.mag, 1, gun.mag.getMaxDamage()));
 		}
 	}
 	
 	public String info() {
-		ItemStack itemStackGunSlot = ((Slot) inventorySlots.get(0)).getStack();
+		ItemStack itemStackGunSlot = inventorySlots.get(0).getStack();
 		
 		ItemGun gun = null;
 		
@@ -104,8 +105,8 @@ public class ContainerMag extends Container {
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
-		return worldObj.getBlock(posX, posY, posZ) == GunCus.blockMag;
+	public boolean canInteractWith(EntityPlayer entityPlayer) {
+		return worldObj.getBlockState(new BlockPos(posX, posY, posZ)).getBlock() == GunCus.blockMagazineBox;
 	}
 	
 	@Override

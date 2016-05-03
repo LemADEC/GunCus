@@ -4,28 +4,30 @@ import stuuupiiid.guncus.GunCus;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
-public class ItemMine extends GunCusItem {
-	public ItemMine() {
-		super("guncus:mine", "mine");
+public class ItemMine extends ItemBase {
+	public ItemMine(String unlocalizedName) {
+		super(unlocalizedName);
 	}
 	
 	@Override
-	public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, int x, int y, int z, int par7, float par8, float par9, float par10) {
-		if (par7 != 1) {
+	public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, BlockPos blockPos, EnumFacing side, float hitX, float hitY, float hitZ) {
+		if (side != EnumFacing.UP) {
 			return false;
 		}
 		
-		y++;
-		Block block = GunCus.mineBlock;
+		BlockPos posMine = blockPos.add(0, 1, 0);
+		Block block = GunCus.blockMine;
 		
-		if (entityPlayer.canPlayerEdit(x, y, z, par7, itemStack) && entityPlayer.canPlayerEdit(x, y + 1, z, par7, itemStack)) {
-			if (!block.canPlaceBlockAt(world, x, y, z)) {
+		if (entityPlayer.canPlayerEdit(posMine, side, itemStack) && entityPlayer.canPlayerEdit(posMine.add(0, 1, 0), side, itemStack)) {
+			if (!block.canPlaceBlockAt(world, posMine)) {
 				return false;
 			}
 			
-			world.setBlock(x, y, z, GunCus.mineBlock);
+			world.setBlockState(posMine, GunCus.blockMine.getDefaultState());
 			itemStack.stackSize -= 1;
 			return true;
 		}

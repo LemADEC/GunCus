@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
@@ -17,6 +14,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityGrenade extends EntityProjectile implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	private static final Set<Blocks> weakBlocks = new HashSet(Arrays.asList(
@@ -134,7 +134,7 @@ public class EntityGrenade extends EntityProjectile implements IProjectile, IEnt
 		state = STATE_BLOCKHIT;
 		stateTicks = 0;
 		PacketHandler.sendToClient_syncEntity(this);
-		blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
+		blockStateCollided.getBlock().onEntityCollidedWithBlock(worldObj, blockpos, this);
 		
 		// explode instantly if it's passed fuse duration
 		if (!isSafetyOn()) {

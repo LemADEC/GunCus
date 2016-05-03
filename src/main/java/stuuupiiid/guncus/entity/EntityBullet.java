@@ -1,8 +1,5 @@
 package stuuupiiid.guncus.entity;
 
-import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,8 +11,10 @@ import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.network.ISynchronisingEntity;
 import stuuupiiid.guncus.network.PacketHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.client.particle.EntityBlockDustFX;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.particle.EntitySmokeFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -37,6 +36,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class EntityBullet extends EntityProjectile implements IProjectile, IEntityAdditionalSpawnData, ISynchronisingEntity {
 	private static final Set<Blocks> weakBlocks = new HashSet(Arrays.asList(
@@ -75,7 +77,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		
 		damage = parDamage;
 		lowerGravity = parLowerGravity;
-		pack = bullet.pack;
+		pack = bullet.packName;
 		bulletId = bullet.bulletId;
 		isBurning = getBullet().effectModifiers.containsKey(3);
 	}
@@ -104,9 +106,9 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			if (ticksExisted > 3) {
 				// Check render distance
 				Minecraft mc = Minecraft.getMinecraft();
-				double dX = mc.renderViewEntity.posX - posX;
-				double dY = mc.renderViewEntity.posY - posY;
-				double dZ = mc.renderViewEntity.posZ - posZ;
+				double dX = mc.getRenderViewEntity().posX - posX;
+				double dY = mc.getRenderViewEntity().posY - posY;
+				double dZ = mc.getRenderViewEntity().posZ - posZ;
 				double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 				if (dX * dX + dY * dY + dZ * dZ < range * range) {
 					// build orientation vector
@@ -119,15 +121,16 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 						double factor = 0.20 * smokeIndex;
 						// Directly spawn largesmoke as per RenderGlobal.doSpawnParticle
 						// adjust color to be more rocket style (white/yellowish)
-						EntitySmokeFX effect = new EntitySmokeFX(
+						EntityFX effect = new EntitySmokeFX.Factory().getEntityFX(
+								0,
 								worldObj,
 								tailX - motionX * factor,
 								tailY - motionY * factor,
 								tailZ - motionZ * factor,
 								0.15 * motionX + rand.nextFloat() * 0.2F - 0.1F,
 								0.15 * motionY + rand.nextFloat() * 0.1F,
-								0.15 * motionZ + rand.nextFloat() * 0.2F - 0.1F,
-								Math.min(Math.max(1.0F, 0.05F * ticksExisted), 4.0F));
+								0.15 * motionZ + rand.nextFloat() * 0.2F - 0.1F);
+						effect.multipleParticleScaleBy(Math.min(Math.max(1.0F, 0.05F * ticksExisted), 4.0F));
 						effect.setRBGColorF(
 								0.95F + rand.nextFloat() * 0.10F,
 								0.65F + rand.nextFloat() * 0.35F,
@@ -156,9 +159,9 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 		
 		// Check render distance
 		Minecraft mc = Minecraft.getMinecraft();
-		double dX = mc.renderViewEntity.posX - posX;
-		double dY = mc.renderViewEntity.posY - posY;
-		double dZ = mc.renderViewEntity.posZ - posZ;
+		double dX = mc.getRenderViewEntity().posX - posX;
+		double dY = mc.getRenderViewEntity().posY - posY;
+		double dZ = mc.getRenderViewEntity().posZ - posZ;
 		double range = 96 / (1 + 2 * mc.gameSettings.particleSetting);
 		if (dX * dX + dY * dY + dZ * dZ < range * range) {
 			
@@ -173,29 +176,23 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			// particle effect at collision point
 			float particleSpeed = 0.0F;
 			int particleQuantity = 5;
-			Block block = Blocks.redstone_block;
-			int blockMetadata = 0;
+			IBlockState blockState = Blocks.redstone_block.getDefaultState();
 			if (entityHit instanceof EntityZombie || entityHit instanceof EntityGiantZombie) {
-				block = Blocks.stained_hardened_clay;
-				blockMetadata = 13;
+				blockState = Blocks.stained_hardened_clay.getStateFromMeta(13);
 			} else if (entityHit instanceof EntitySkeleton) {
-				block = Blocks.quartz_block;
-				blockMetadata = 0;
+				blockState = Blocks.quartz_block.getDefaultState();
 			} else if (entityHit instanceof EntityWither) {
-				block = Blocks.redstone_block;
-				blockMetadata = 0;
+				blockState = Blocks.redstone_block.getDefaultState();
 			} else if (entityHit instanceof EntityLivingBase && ((EntityLivingBase)entityHit).isEntityUndead()) {
-				block = Blocks.stained_hardened_clay;
-				blockMetadata = 13;
+				blockState = Blocks.stained_hardened_clay.getStateFromMeta(13);
 			} else if (entityHit instanceof EntityLiving) {
-				block = Blocks.redstone_block;
-				blockMetadata = 0;
+				blockState = Blocks.redstone_block.getDefaultState();
 			} else {
-				block = Blocks.iron_block;
-				blockMetadata = 0;
+				blockState = Blocks.iron_block.getDefaultState();
 			}
 			for (int index = 0; index < particleQuantity; index++) {
-				mc.effectRenderer.addEffect(new EntityDiggingFX(
+				mc.effectRenderer.addEffect(new EntityBlockDustFX.Factory().getEntityFX(
+						0,
 						worldObj,
 						hitX + rand.nextGaussian() * particleMotionX,
 						hitY + rand.nextGaussian() * particleMotionY,
@@ -203,7 +200,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
 						rand.nextGaussian() * particleSpeed,
-						block, blockMetadata).applyRenderColor(blockMetadata));
+						Block.getStateId(blockState)));
 			}
 		}
 	}
@@ -341,7 +338,7 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			state = STATE_BLOCKHIT;
 			stateTicks = 0;
 			PacketHandler.sendToClient_syncEntity(this);
-			blockCollided.onEntityCollidedWithBlock(worldObj, blockX, blockY, blockZ, this);
+			blockStateCollided.getBlock().onEntityCollidedWithBlock(worldObj, blockpos, this);
 		}
 		
 		applyEffectOnBlockCollision(isWeakBlock, hitVec);
@@ -487,11 +484,12 @@ public class EntityBullet extends EntityProjectile implements IProjectile, IEnti
 			worldObj.createExplosion(shootingEntity, vecHit.xCoord, vecHit.yCoord, vecHit.zCoord, itemBullet.effectModifiers.get(5), false);
 		}
 		
-		if (itemBullet.effectModifiers.containsKey(3) && (blockY > 0)) {
-			if (worldObj.isAirBlock(blockX, blockY + 1, blockZ) && !worldObj.isAirBlock(blockX, blockY, blockZ)) {
-				worldObj.setBlock(blockX, blockY + 1, blockZ, Blocks.fire);
-			} else if (worldObj.isAirBlock(blockX, blockY, blockZ) && !worldObj.isAirBlock(blockX, blockY - 1, blockZ)) {
-				worldObj.setBlock(blockX, blockY, blockZ, Blocks.fire);
+		if (itemBullet.effectModifiers.containsKey(3) && (blockpos.getY() > 0)) {
+			
+			if (worldObj.isAirBlock(blockpos.up()) && !worldObj.isAirBlock(blockpos)) {
+				worldObj.setBlockState(blockpos.up(), Blocks.fire.getDefaultState());
+			} else if (worldObj.isAirBlock(blockpos) && !worldObj.isAirBlock(blockpos.down())) {
+				worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
 			}
 		}
 	}

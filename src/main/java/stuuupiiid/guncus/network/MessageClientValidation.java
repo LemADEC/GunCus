@@ -5,13 +5,13 @@ import java.nio.charset.Charset;
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class MessageClientValidation implements IMessage, IMessageHandler<MessageClientValidation, IMessage> {
@@ -30,7 +30,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		shootType = itemGun.shootType;
 		delay = itemGun.delay;
 		if (itemGun.mag != null) {
-			bullets = "" + itemGun.mag.bulletId;
+			bullets = "" + itemGun.mag.bulletIds;
 		} else {
 			bullets = "" + itemGun.bullets;
 		}
@@ -76,13 +76,13 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void handle(EntityClientPlayerMP player) {
+	private void handle(EntityPlayerSP player) {
 		ItemGun gun = GunCus.instance.guns.get(gunName);
 		
 		if (gun != null) {
 			String encoded_bullets;
 			if (gun.mag != null) {
-				encoded_bullets = "" + gun.mag.bulletId;
+				encoded_bullets = "" + gun.mag.bulletIds;
 			} else {
 				encoded_bullets = "" + gun.bullets;
 			}
@@ -119,7 +119,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 					+ "'" + clientValidationMessage.bullets + "' " + clientValidationMessage.recoilModifier);
 		}
 		
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
 		clientValidationMessage.handle(player);
 		
 		return null;	// no response

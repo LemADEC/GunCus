@@ -2,13 +2,12 @@ package stuuupiiid.guncus.network;
 
 import stuuupiiid.guncus.GunCus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class MessageShowHitMarker implements IMessage, IMessageHandler<MessageShowHitMarker, IMessage> {
@@ -26,7 +25,7 @@ public class MessageShowHitMarker implements IMessage, IMessageHandler<MessageSh
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private void handle(EntityClientPlayerMP player) {
+	private void handle() {
 		GunCus.hitmarker = 5;
 	}
 	
@@ -43,8 +42,7 @@ public class MessageShowHitMarker implements IMessage, IMessageHandler<MessageSh
 			GunCus.logger.info("Received showHitMarker packet");
 		}
 		
-		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-		showHitMarkerMessage.handle(player);
+		showHitMarkerMessage.handle();
 		
 		return null;	// no response
 	}
