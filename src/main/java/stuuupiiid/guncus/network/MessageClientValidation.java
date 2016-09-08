@@ -77,7 +77,7 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 	
 	@SideOnly(Side.CLIENT)
 	private void handle(EntityPlayerSP player) {
-		ItemGun gun = GunCus.instance.guns.get(gunName);
+		ItemGun gun = GunCus.guns.get(gunName);
 		
 		if (gun != null) {
 			String encoded_bullets;
