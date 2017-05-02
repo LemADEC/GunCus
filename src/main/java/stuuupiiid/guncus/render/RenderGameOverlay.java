@@ -15,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.data.ScopePart;
@@ -110,6 +111,10 @@ public class RenderGameOverlay {
 		int scaledHeight = scale.getScaledHeight();
 		int xCenter = scaledWidth / 2;
 		int offset = scaledHeight * 2;
+		
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		
 		// draw sight
 		if (drawSight) {
 			ItemGun gun = (ItemGun) entityPlayer.inventory.getCurrentItem().getItem();
