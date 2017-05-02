@@ -11,14 +11,12 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import stuuupiiid.guncus.block.ContainerAmmo;
 import stuuupiiid.guncus.item.ItemBullet;
 import stuuupiiid.guncus.item.ItemMag;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class GuiAmmoBlock extends GuiContainer {
+public class GuiAmmoBlock extends AbstractGuiContainer {
 	public GuiAmmoBlock(InventoryPlayer inventory, World world, int x, int y, int z) {
 		
 		super(new ContainerAmmo(inventory, world, x, y, z));
@@ -91,20 +89,5 @@ public class GuiAmmoBlock extends GuiContainer {
 	@Override
 	protected void actionPerformed(GuiButton button) {
 		PacketHandler.sendToServer_GUIaction(GuiHandler.ammoBlock, button.id);
-	}
-	
-	@SideOnly(Side.CLIENT)
-	class ButtonWithTooltip extends GuiButton {
-		private String helpString = "";
-		
-		public ButtonWithTooltip(int id, int xPosition, int yPosition, int width, int height, String displayString, String helpString) {
-			super(id, xPosition, yPosition, width, height, displayString);
-			this.helpString = helpString;
-		}
-		
-		@Override
-		public void func_146111_b(int mouseX, int mouseY) {
-			drawCreativeTabHoveringText(I18n.format(helpString, new Object[0]), mouseX, mouseY);
-		}
 	}
 }

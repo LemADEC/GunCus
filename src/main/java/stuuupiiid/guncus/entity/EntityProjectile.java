@@ -448,12 +448,12 @@ public abstract class EntityProjectile extends EntityArrow implements IProjectil
 			func_145775_I();	// doBlockCollisions();
 		}
 	}
-
+	
 	@Optional.Method(modid = "mcheli")
 	protected static Object MCHeli_getRootEntity(Entity entity) {
 		return MCH_EntityAircraft.getAircraft_RiddenOrControl(entity);		// as of 0.10.7
 	}
-
+	
 	@Override
 	protected void func_145775_I() {	// doBlockCollisions() but ignore the weak blocks
 		int i = MathHelper.floor_double(boundingBox.minX + 0.001D);

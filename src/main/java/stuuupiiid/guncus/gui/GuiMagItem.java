@@ -1,7 +1,6 @@
 package stuuupiiid.guncus.gui;
 
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -11,7 +10,7 @@ import org.lwjgl.opengl.GL11;
 import stuuupiiid.guncus.block.ContainerAmmoMan;
 import stuuupiiid.guncus.network.PacketHandler;
 
-public class GuiMagItem extends GuiContainer {
+public class GuiMagItem extends AbstractGuiContainer {
 	public GuiMagItem(InventoryPlayer inventory) {
 		super(new ContainerAmmoMan(inventory));
 	}
