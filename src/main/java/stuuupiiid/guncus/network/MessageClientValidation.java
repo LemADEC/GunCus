@@ -1,6 +1,10 @@
 package stuuupiiid.guncus.network;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.apache.commons.lang3.StringUtils;
 
 import stuuupiiid.guncus.GunCus;
 import stuuupiiid.guncus.item.ItemGun;
@@ -30,9 +34,9 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		shootType = itemGun.shootType;
 		delay = itemGun.delay;
 		if (itemGun.mag != null) {
-			bullets = "" + itemGun.mag.bulletId;
+			bullets = StringUtils.join(itemGun.mag.bulletId, " ");
 		} else {
-			bullets = "" + itemGun.bullets;
+			bullets = orderedToString(itemGun.bullets);
 		}
 		recoilModifier = itemGun.recoilModifier;
 	}
@@ -75,6 +79,15 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		}
 	}
 	
+	private static String orderedToString(final int[] ids) {
+		ArrayList<Integer> list = new ArrayList(ids.length);
+		for (int id : ids) {
+			list.add(id);
+		}
+		Collections.sort(list);
+		return StringUtils.join(list, " ");
+	}
+	
 	@SideOnly(Side.CLIENT)
 	private void handle(EntityClientPlayerMP player) {
 		ItemGun gun = GunCus.instance.guns.get(gunName);
@@ -82,9 +95,9 @@ public class MessageClientValidation implements IMessage, IMessageHandler<Messag
 		if (gun != null) {
 			String encoded_bullets;
 			if (gun.mag != null) {
-				encoded_bullets = "" + gun.mag.bulletId;
+				encoded_bullets = StringUtils.join(gun.mag.bulletId, " ");
 			} else {
-				encoded_bullets = "" + gun.bullets;
+				encoded_bullets = orderedToString(gun.bullets);
 			}
 			
 			if ( (!gunName.equals(gun.getUnlocalizedName()))
