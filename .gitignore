@@ -1,6 +1,22 @@
-.gradle/gradle.log
-.gradle
-/bin/
+!*.*
+/bin
 
-.classpath
-/.project
+*.classpath
+*.project
+.gradle/
+.settings/
+build/
+run/*
+output/*
+
+!run/mods-ref/
+
+*.iml
+*.iws
+*.ipr
+*.idea/
+
+dependencies
+
+*.DS_Store
+classes
