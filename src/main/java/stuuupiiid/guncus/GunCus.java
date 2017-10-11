@@ -802,9 +802,9 @@ public class GunCus {
 		initialSpeed /= 20.0D;	// converts to blocks per tick
 		
 		double frictionInAir = configBullet.get("general", "FrictionInAir", 0.01D, "Friction factor while in air. Factor is applied every tick. 0.00 means no friction, while 1.00 means instant stop.").getDouble();
-		if (frictionInAir <= 0.0D || frictionInAir > 1.0D) {
+		if (frictionInAir < 0.0D || frictionInAir > 1.0D) {
 			hasError = true;
-			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInAir. Expecting a strictly positive integer, up to 100, found " + frictionInAir + ".");
+			logger.error("[" + pack + "] Bullet " + file.getName() + " has invalid FrictionInAir. Expecting a positive integer, up to 1.0, found " + frictionInAir + ".");
 		}
 		
 		float playerInaccuracyMultiplier = (float) configBullet.get("general", "Player Inaccuracy Multiplier", 1.0D, "Effects player accuracy. 0.0 means perfect accuracy and only the effects of spray will move the bullet, while 1.0 means normal. You may get some weird effets.").getDouble();
@@ -876,11 +876,11 @@ public class GunCus {
 					}
 				}
 			}
+			
+			configBullet.save();
 		} else {
 			logger.error("[" + pack + "] Something went wrong while initializing the bullet \"" + name + "\"! Ignoring this bullet!");
 		}
-		
-		configBullet.save();
 	}
 	
 	private void loadGuns(final String packPath, final String pack) {
@@ -996,13 +996,15 @@ public class GunCus {
 			try {
 				intBullets[indexBullet] = Integer.parseInt(stringBullets[indexBullet]);
 			} catch (Exception exception) {
-				logger.info("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
+				logger.error("[" + pack + "] Something went wrong while initializing bullets of the gun \"" + name
 						+ "\"! Caused by: \"" + stringBullets[indexBullet] + "\"!");
 				errored = true;
 			}
 			
-			if (!pack.equalsIgnoreCase("template")) {
-				if (ItemBullet.bullets.get(pack) == null || ItemBullet.bullets.get(pack).get(intBullets[indexBullet]) == null) {
+			if (!errored && !pack.equalsIgnoreCase("template")) {
+				if ( ItemBullet.bullets.get(pack) == null
+				  || ItemBullet.bullets.get(pack).size() <= intBullets[indexBullet]
+				  || ItemBullet.bullets.get(pack).get(intBullets[indexBullet]) == null) {
 					logger.error("[" + pack + "] [" + name + "] Can't find a bullet with ID " + intBullets[indexBullet] + "");
 					errored = true;
 				}
@@ -1113,14 +1115,14 @@ public class GunCus {
 						gun.setSilencedSound("guncus:shoot_silenced");
 					}
 				}
+				configGun.save();
 			} catch (Exception exception) {
-				logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Pls check the attachments, barrels and scopes of it!");
+				logger.info("[" + pack + "] Error while trying to add the gun \"" + name + "\": ! Please check the attachments, barrels and scopes of it!");
 				exception.printStackTrace();
 			}
 		} else {
 			logger.info("[" + pack + "] Something went wrong while initializing the gun \"" + name + "\"! Ignoring this gun!");
 		}
-		configGun.save();
 	}
 	
 	public static void addChatMessage(final ICommandSender sender, final String message) {
